@@ -63,13 +63,18 @@ def load_partners():
     for i in range(len(values)):
         print(values[i])
         name = values[i][1].lower()+" "+values[i][2].lower()
-        if len(values[i]) == 8:
+        num_cols = len(values[i])
+        if  num_cols == 8:
             partner = values[i][6].lower() + " "+values[i][7].lower()
             # If user set partnered with self, un-partner
             if partner == name:
                 partner = ''
         else:
             partner = ''
+
+        for k in range(num_cols, 10):
+            values[i].append('')
+
         grade = values[i][3]
         vals = []
         vals.append(partner)
@@ -214,8 +219,8 @@ def remove_invalid_partners():
         del data[i]
 
 def set_values(index, name):
-    values[index].append(data[name][2])
-    values[index].append(data[name][3])
+    values[index][8] = data[name][2]
+    values[index][9] = data[name][3]
 
 create_lockers()
 print(locker_T_B)
