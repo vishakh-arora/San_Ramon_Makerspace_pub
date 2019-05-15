@@ -5,6 +5,9 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from google.oauth2 import service_account
+from operator import itemgetter
+import random
+import string
 import googleapiclient.discovery
 
 #<<<<<<< HEAD:discord_bot.py
@@ -55,13 +58,23 @@ locker_floor = {
 locker_T_B = {}
 
 data = {}
+locks =  {
+    "4T":[],
+    "4B":[],
+    "3B":["001","400"],
+    "3T":["401","740"],
+    "2T":[],
+    "2B":[],
+    "1T":[],
+    "1B":[]
+}
 
 unpartnered = {}
 
 def load_partners():
-    #store spreadsheet values in a dictionary
+    #store names in a dictionary
     for i in range(len(values)):
-        print(values[i])
+        #print(values[i])
         name = values[i][1].lower()+" "+values[i][2].lower()
         num_cols = len(values[i])
         if  num_cols == 8:
@@ -119,28 +132,81 @@ def validate_partners():
                 unpartner(name)
 
 def partner_unpartnered():
-    unpartnered_names = list(unpartnered.keys())
-    for i in range(0,len(unpartnered_names)-1,2):
-        name = unpartnered_names[i]
-        next_name = unpartnered_names[i+1]
-        unpartnered[name][0] = next_name
+    unpartnered_names = []
+
+    for i in unpartnered.keys():
+        unpartnered_names.append([i,int(unpartnered[i][1])])
+    unpartnered_names = sorted(unpartnered_names, key=itemgetter(1))
+
+    print_debug(unpartnered_names)
+
+    i = 0
+    while (i < len(unpartnered_names)-1):
+        name = unpartnered_names[i][0]
+        grade = unpartnered_names[i][1]
+        next_name = unpartnered_names[i+1][0]
+        next_grade = unpartnered_names[i+1][1]
+        if (grade == next_grade):
+            unpartnered[name][0] = next_name
+            i += 2
+        else:
+            unpartnered[name][0] = name
+            next_name = name
+            i += 1
         data[name] = unpartnered[name]
         set_combined(name, next_name)
+        print_debug(data)
+        #print()
+        print_debug(unpartnered)
+        #print()
+    if (i == len(unpartnered_names)-1):
+        name = unpartnered_names[i][0]
+        data[name] = unpartnered[name]
+        set_combined(name, name)
+
+def make_lockers(start, end):
+    lockers = []
+    for i in range(start,end,2):
+        lockers.append(str(i))
+    return lockers
+
+def append_lockers(top_bottom, start, end):
+    lockers = []
+    if (top_bottom == "T"):
+        lockers = make_lockers(start+1, end+1)
+    else:
+        lockers = make_lockers(start, end+1)
+    return lockers
 
 def create_lockers():
     #fill locker dictionary
-    NUM_LOCKERS = 3
+    NUM_LOCKERS = 4
     for i in locker_building.values():
         for j in locker_floor.values():
             locker_T_B[i+j+"T"] = None
             locker_T_B[i+j+"B"] = None
     for i in locker_T_B.keys():
         lockers = []
-        for j in range(NUM_LOCKERS):
-            if i[2] == "B":
-                lockers.append("0"+str(j))
+        if (i[0] == "3"):
+            if (i[1] == "1"):
+                lockers = append_lockers(i[2],3001,3400)
             else:
-                lockers.append("0"+str(j+5))
+                lockers = append_lockers(i[2],3501,3730)
+        elif (i[0] == "2"):
+            if (i[1] == "1"):
+                lockers = append_lockers(i[2],2001,2358)
+            else:
+                lockers = append_lockers(i[2],2501,2716)
+        elif (i[0] == "1"):
+            if (i[1] == "1"):
+                lockers = append_lockers(i[2],1001,1406)
+            else:
+                lockers = append_lockers(i[2],1501,1730)
+        elif (i[0] == "4"):
+            if (i[1] == "1"):
+                lockers = append_lockers(i[2],4001,4358)
+            else:
+                lockers = append_lockers(i[2],4501,4678)
         locker_T_B[i] = lockers
 
 def get_next_locker(locker, TB):
@@ -167,7 +233,7 @@ def get_next_top_bottom(TB):
 
 
 def print_debug(str):
-    if (True):
+    if (False):
         print(str)
 
 def load_locker(grade, name, floor, TB):
@@ -190,7 +256,7 @@ def load_locker(grade, name, floor, TB):
                 if (lock_num == None):
                     print_debug("Ran out of lockers")
                     return None
-    return bldg_floor + lock_num
+    return lock_num
 
 def assign_locker(grade, name, floor, TB):
     locker = load_locker(grade, name, floor, TB)
@@ -222,8 +288,42 @@ def set_values(index, name):
     values[index][8] = data[name][2]
     values[index][9] = data[name][3]
 
+def populate():
+    vals = []
+    for i in range(3300):
+        values = []
+        values.append("5/12/2019 3:31:5"+str(i))
+        if (i > 25):
+            values.append(string.ascii_uppercase[i%26]+str(i))
+        else:
+            values.append(string.ascii_uppercase[i%26])
+        if (i > 25):
+            values.append(string.ascii_uppercase[i%26]+str(i))
+        else:
+            values.append(string.ascii_uppercase[i%26])
+        integer = random.randint(0,3)
+        if (integer == 0):
+            values.append("9")
+        elif (integer == 1):
+            values.append("10")
+        elif (integer == 2):
+            values.append("11")
+        elif (integer == 3):
+            values.append("12")
+        if (random.randint(0,1) == 0):
+            values.append("Top floor")
+        else:
+            values.append("Bottom floor")
+        if (random.randint(0,1) == 0):
+            values.append("Top locker")
+        else:
+            values.append("Bottom locker")
+        values.append("")
+        vals.append(values)
+    return vals
+
 create_lockers()
-print(locker_T_B)
+
 if not values:
     print('No data found.')
 else:
@@ -231,19 +331,17 @@ else:
 
     validate_partners()
     partner_unpartnered()
-    #print(values)
-
+    #print_debug(values)
     remove_invalid_partners()
-    print(data)
+    #print_debug(data)
     assign_lockers()
-    print()
-    print(data)
-    print()
-    print(unpartnered)
-
+    #print()
+    #print_debug(data)
+    #print()
+    #print(unpartnered)
 
 body = {'values': values}
 result = service.spreadsheets().values().update(
 spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE,
 valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-                #print('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
+#print('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
