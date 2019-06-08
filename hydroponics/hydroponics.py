@@ -10,7 +10,7 @@ import RPi.GPIO as GPIO
 import time
 
 
-DELAY_BETWEEN_PUBLISH = 10
+DELAY_BETWEEN_PUBLISH = 120
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
 
