@@ -16,21 +16,21 @@ for i in range(len(orders_list)):
         orders[order[0]].append(order[j])
 
 # Generate
-#EAN = barcode.get_barcode_class('ean8')
-#for y in orders.keys():
-#    if len(y) > 0:
-#        orderID = str(y)
-#        ean = EAN(y, writer=ImageWriter())
-#        fullname = ean.save('order_' + str(y))
-
-# Send email with bar code
+EAN = barcode.get_barcode_class('ean8')
+for y in orders.keys():
+    if len(y) > 0:
+        orderID = str(y)
+        ean = EAN(y, writer=ImageWriter())
+        fullname = ean.save('order_' + str(y))
 #print("Enter email")
-#email = input()
-#mail.mail( email, "Thank you for your Lunch order", "Your lunch order ID " +orderID, "order_" + orderID + ".png")
+# Send email with bar code
+        email = "vishakh.arora29@gmail.com"
+        mail.mail( email, "Thank you for your Lunch order", "Your lunch order ID " +orderID+" has been placed.", "order_" + orderID + ".png")
+
 
 while (True):
     print("Enter order number")
-    order_num = input();
+    order_num = input()
     # Remove last digit
     order_num = order_num[0:len(order_num)-1]
 
