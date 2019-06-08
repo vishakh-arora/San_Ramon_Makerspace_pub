@@ -10,6 +10,7 @@ import RPi.GPIO as GPIO
 import time
 
 
+DELAY_BETWEEN_PUBLISH = 10
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
 
@@ -81,12 +82,13 @@ try:
 except Exception as err:
     print("Could not connect" + str(err))
     exit(2)
-print("Starting loop")
+#print("Starting loop")
 client.loop_start()
 
 while True:
     humidity, temperature = Adafruit_DHT.read_retry(11, 4)
-    temperature = (temperature*(9.0/5))+32
+    if temperature != None:
+    	temperature = (temperature*(9.0/5))+32
     dist = distance()
     print("Sending temp: " + str(temperature)+"  humidity: "+str(humidity)+"  distance: "+str(dist))
     time.sleep(2)
@@ -102,13 +104,13 @@ while True:
         try:
             print("Publishing temp")
             client.publish( 'dvhs_makerspace/feeds/hydro-temp',  payload=str(temperature))
-            time.sleep(12)
+            time.sleep(DELAY_BETWEEN_PUBLISH)
             print("Publishing humid")
             client.publish( 'dvhs_makerspace/feeds/hydro-humidity', payload=str(humidity))
-            time.sleep(12)
+            time.sleep(DELAY_BETWEEN_PUBLISH)
             print("Publishing water")
             client.publish( 'dvhs_makerspace/feeds/water-level-cm', payload=str(dist))
-            time.sleep(12)
+            time.sleep(DELAY_BETWEEN_PUBLISH)
         except Exception as e:
             print("Error publishing:" + str(e))
     else:
