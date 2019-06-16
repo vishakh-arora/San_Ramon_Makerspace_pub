@@ -8,17 +8,42 @@ from google.oauth2 import service_account
 from operator import itemgetter
 import random
 import string
+import sys
 import googleapiclient.discovery
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email import encoders
 
-#<<<<<<< HEAD:discord_bot.py
+pswd = open('pswd.txt','r')
+gmail_user = 'dvhs.makerspace@gmail.com'
+gmail_password = pswd.readline().strip()
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_ID = '1drq5UmjxV_9FHMBQf-tDtqlJ6ftOHRI0LEAbF33c9S4'
-SAMPLE_RANGE_NAME = 'Locker_Responses!A2:H'
-WRITING_RANGE = 'Locker_Responses!A2:J'
+SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
+WRITING_RANGE = 'Locker_Responses!A2:L'
+UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
 VALUE_INPUT_OPTION = "RAW"
+
+COL_TIMESTAMP=0
+COL_FIRST=1
+COL_LAST=2
+COL_GRADE=3
+COL_FLOOR=4
+COL_LOCKER_TB=5
+COL_PARTNER_FIRST=6
+COL_PARTNER_LAST=7
+COL_EMAIL_ADDRESS=8
+COL_PARTNERS=9
+COL_ASSIGNED_LOCKER=10
+COL_MATCH_STATUS=11
+
+NUM_STUDENTS = 3500
 
 SERVICE_ACCOUNT_FILE = 'service.json'
 #=======
@@ -58,18 +83,10 @@ locker_floor = {
 locker_T_B = {}
 
 data = {}
-locks =  {
-    "4T":[],
-    "4B":[],
-    "3B":["001","400"],
-    "3T":["401","740"],
-    "2T":[],
-    "2B":[],
-    "1T":[],
-    "1B":[]
-}
+broken_locks = []
 
 unpartnered = {}
+
 
 def load_partners():
     #store names in a dictionary
@@ -78,14 +95,14 @@ def load_partners():
         name = values[i][1].lower()+" "+values[i][2].lower()
         num_cols = len(values[i])
         if  num_cols == 8:
-            partner = values[i][6].lower() + " "+values[i][7].lower()
+            partner = values[i][COL_PARTNER_FIRST].lower() + " "+values[i][COL_PARTNER_LAST].lower()
             # If user set partnered with self, un-partner
             if partner == name:
                 partner = ''
         else:
             partner = ''
 
-        for k in range(num_cols, 10):
+        for k in range(num_cols, 12):
             values[i].append('')
 
         grade = values[i][3]
@@ -94,12 +111,13 @@ def load_partners():
         vals.append(grade)
         vals.append('')
         vals.append('')
+        vals.append('')
         data[name] = vals
         if partner == '':
             unpartnered[name] = vals
 
 def set_combined(name, partner):
-    partner_msg = name+"/"+partner
+    partner_msg = name.title()+"/"+partner.title()
     #store names in the dictionary
     data[name][2] = partner_msg
     data[partner][2] = partner_msg
@@ -124,9 +142,13 @@ def validate_partners():
             #if each person put the other as their partner
             elif (name == data[partner][0] and data[name][1] == data[partner][1]):
                 set_combined(name, partner)
+                data[name][4] = "MATCH"
+                data[partner][4] = "MATCH"
             #A chooses B but B doesn't choose anyone
             elif (data[partner][0] == '' and data[name][0] == partner and data[name][1] == data[partner][1]):
                 set_combined(name, partner)
+                data[name][4] = "MATCH"
+                data[partner][4] = "MATCH"
             else:
                 #if A chooses B but B chooses C
                 unpartner(name)
@@ -154,6 +176,8 @@ def partner_unpartnered():
             next_name = name
             i += 1
         data[name] = unpartnered[name]
+        data[name][4] = "ASSIGNED"
+        data[next_name][4] = "ASSIGNED"
         set_combined(name, next_name)
         print_debug(data)
         #print()
@@ -162,12 +186,14 @@ def partner_unpartnered():
     if (i == len(unpartnered_names)-1):
         name = unpartnered_names[i][0]
         data[name] = unpartnered[name]
+        data[name][4] = "ASSIGNED"
         set_combined(name, name)
 
 def make_lockers(start, end):
     lockers = []
     for i in range(start,end,2):
-        lockers.append(str(i))
+        if (str(i) not in broken_locks):
+            lockers.append(str(i))
     return lockers
 
 def append_lockers(top_bottom, start, end):
@@ -207,16 +233,39 @@ def create_lockers():
                 lockers = append_lockers(i[2],4001,4358)
             else:
                 lockers = append_lockers(i[2],4501,4678)
+        # if (i[0] == "3"):
+        #     if (i[1] == "1"):
+        #             lockers = append_lockers(i[2],1,3)
+        #     else:
+        #             lockers = append_lockers(i[2],5,6)
+        # elif (i[0] == "2"):
+        #     if (i[1] == "1"):
+        #         lockers = append_lockers(i[2],7,8)
+        #     else:
+        #         lockers = append_lockers(i[2],9,10)
+        # elif (i[0] == "1"):
+        #     if (i[1] == "1"):
+        #         lockers = append_lockers(i[2],11,13)
+        #     else:
+        #         lockers = append_lockers(i[2],15,16)
+        # elif (i[0] == "4"):
+        #     if (i[1] == "1"):
+        #         lockers = append_lockers(i[2],17,18)
+        #     else:
+        #         lockers = append_lockers(i[2],19,20)
+
         locker_T_B[i] = lockers
+    #print(locker_T_B)
 
 def get_next_locker(locker, TB):
-    print_debug("Len " + locker + TB + ": " + str(len(locker_T_B[locker + TB])))
+    #print("Len " + locker + TB + ": " + str(len(locker_T_B[locker + TB])))
     if (len(locker_T_B[locker + TB]) != 0):
         print_debug( locker_T_B[locker + TB])
         # + ": " + str(len(locker_T_B[locker + TB])))
         lock_num = locker_T_B[locker + TB][0]
-        print_debug(lock_num)
+        #print(lock_num)
         del locker_T_B[ locker +TB][0]
+        #print(locker_T_B)
         return lock_num
     return None
 
@@ -243,7 +292,7 @@ def load_locker(grade, name, floor, TB):
     if (lock_num == None):
         print_debug("Ran out: " + bldg_floor + TB)
         TB = get_next_top_bottom(TB)
-        print_debug("Checking: " + bldg_floor + TB)
+        #print("Checking: " + bldg_floor + TB)
         lock_num = get_next_locker(bldg_floor, TB)
         if (lock_num == None):
             print_debug("Changing floor: " + bldg_floor + TB)
@@ -254,19 +303,23 @@ def load_locker(grade, name, floor, TB):
                 TB = get_next_top_bottom(TB)
                 lock_num = get_next_locker(bldg_floor, TB)
                 if (lock_num == None):
-                    print_debug("Ran out of lockers")
+                    print("Ran out of lockers")
+                    sys.exit(2)
                     return None
     return lock_num
 
 def assign_locker(grade, name, floor, TB):
-    locker = load_locker(grade, name, floor, TB)
-    if name in data and data[name][3] == '':
-        print_debug( name + ':' + data[name][0])
-        data[name][3] = locker
-        data[data[name][0]][3] = locker
-    elif name in unpartnered:
-        unpartnered[name][3] = locker
-    print_debug( locker)
+    # Partnered student and unassigned locker
+    if data[name][3] == '':
+        locker = load_locker(grade, name, floor, TB)
+        if name in data:
+            print_debug( name + ':' + data[name][0])
+            data[name][3] = locker
+            # Assign partner the same locker
+            data[data[name][0]][3] = locker
+        elif name in unpartnered:
+            unpartnered[name][3] = locker
+    #print_debug( locker)
     #print(locker_T_B[locker[0:2]+TB])
 
 def assign_lockers():
@@ -285,12 +338,13 @@ def remove_invalid_partners():
         del data[i]
 
 def set_values(index, name):
-    values[index][8] = data[name][2]
-    values[index][9] = data[name][3]
+    values[index][COL_PARTNERS] = data[name][2]
+    values[index][COL_ASSIGNED_LOCKER] = data[name][3]
+    values[index][COL_MATCH_STATUS] = data[name][4]
 
 def populate():
     vals = []
-    for i in range(3300):
+    for i in range(NUM_STUDENTS):
         values = []
         values.append("5/12/2019 3:31:5"+str(i))
         if (i > 25):
@@ -319,29 +373,74 @@ def populate():
         else:
             values.append("Bottom locker")
         values.append("")
+        values.append("")
+        values.append(string.ascii_uppercase[i%26]+str(i)+"@gmail.com")
         vals.append(values)
     return vals
 
-create_lockers()
+def unassigned_lockers():
+    vals = []
+    for i in locker_T_B:
+        free_locker = []
+        if len(locker_T_B[i]) != 0:
+            for j in locker_T_B[i]:
+                free_locker.append(str(j))
+                vals.append(free_locker)
+                free_locker = []
+    return vals
 
+def createMessage(subject, text=None):
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    if text != None:
+        msg.attach(MIMEText(text))
+    return msg
+
+def send_email():
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+    except Exception as e:
+        print(e)
+
+    sent_from = gmail_user
+    for i in values:
+        to = str(i[8])
+        name = i[1]+" "+i[2]
+        subject = "Your Locker for the 2019-2020 School Year"
+        #print(data)
+        #print(data[name])
+        body = 'Dear '+name+',\n\n'+'Thank you for participating in locker registration. You have been assigned the following locker/partner:\n\n'+'Locker #: '+i[COL_ASSIGNED_LOCKER]+'\n'+'Partner: '+data[i[1].lower()+" "+i[2].lower()][0].title()+'\n\n'+'If you have any questions about the assignment process, please contact Mr. Spain (bspain@srvusd.net).\n\n'+'Thanks,\n'+'San Ramon Makerspace'
+
+        try:
+            msg = createMessage(subject, body)
+            server.sendmail(sent_from, to, msg.as_string())
+            #print('Email sent!')
+        except Exception as e:
+            print(e)
+    server.close()
+
+create_lockers()
 if not values:
     print('No data found.')
 else:
     load_partners()
-
     validate_partners()
     partner_unpartnered()
-    #print_debug(values)
+    print_debug(values)
     remove_invalid_partners()
-    #print_debug(data)
     assign_lockers()
-    #print()
-    #print_debug(data)
-    #print()
-    #print(unpartnered)
+    free_lockers = unassigned_lockers()
+    #send_email()
+
 
 body = {'values': values}
 result = service.spreadsheets().values().update(
 spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE,
 valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-#print('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
+
+body = {'values': free_lockers}
+result = service.spreadsheets().values().update(
+spreadsheetId=SAMPLE_SPREADSHEET_ID, range=UNASSIGNED_LOCKERS_RANGE,
+valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
