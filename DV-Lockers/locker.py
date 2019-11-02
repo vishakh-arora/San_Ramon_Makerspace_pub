@@ -24,8 +24,11 @@ gmail_password = pswd.readline().strip()
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = '1drq5UmjxV_9FHMBQf-tDtqlJ6ftOHRI0LEAbF33c9S4'
-SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
+
+SAMPLE_SPREADSHEET_ID ='184zbsKgft5utNUckuXt-p6QqHW1jt2E0f6m_ZOP6dCY'
+#SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
+SAMPLE_RANGE_NAME = 'Locker_Responses!A2:L'
+#SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
 WRITING_RANGE = 'Locker_Responses!A2:L'
 UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
 VALUE_INPUT_OPTION = "RAW"
@@ -83,19 +86,20 @@ locker_floor = {
 locker_T_B = {}
 
 data = {}
-broken_locks = []
+broken_locks = [3063,3217,3234,3357,3092,4122,4220,4527,4659,4665]
 
 unpartnered = {}
-
 
 def load_partners():
     #store names in a dictionary
     for i in range(len(values)):
-        #print(values[i])
-        name = values[i][1].lower()+" "+values[i][2].lower()
+
+        name = values[i][COL_FIRST].lower().strip()+" "+values[i][COL_LAST].lower().strip()
+        #print(name)
         num_cols = len(values[i])
-        if  num_cols == 8:
-            partner = values[i][COL_PARTNER_FIRST].lower() + " "+values[i][COL_PARTNER_LAST].lower()
+        if (num_cols == 9):
+            partner = values[i][COL_PARTNER_FIRST].lower().strip() + " "+values[i][COL_PARTNER_LAST].lower().strip()
+            #print(partner)
             # If user set partnered with self, un-partner
             if partner == name:
                 partner = ''
@@ -132,12 +136,15 @@ def unpartner(name):
     unpartnered[name] = data[name]
 
 def validate_partners():
+    print("DATAAAAAAAAAAAAAAAAAAA")
+    #print(data)
     for name in data.keys():
         partner = data[name][0]
         grade = data[name][1]
 
         if (partner != ''):
             if (not partner in data):
+                #print(partner)
                 unpartner(name)
             #if each person put the other as their partner
             elif (name == data[partner][0] and data[name][1] == data[partner][1]):
@@ -157,9 +164,11 @@ def partner_unpartnered():
     unpartnered_names = []
 
     for i in unpartnered.keys():
+        #print(i)
         unpartnered_names.append([i,int(unpartnered[i][1])])
     unpartnered_names = sorted(unpartnered_names, key=itemgetter(1))
-
+    print("UNPARTNERED DICTIONARYYYYY")
+    print()
     print_debug(unpartnered_names)
 
     i = 0
@@ -192,7 +201,7 @@ def partner_unpartnered():
 def make_lockers(start, end):
     lockers = []
     for i in range(start,end,2):
-        if (str(i) not in broken_locks):
+        if (i not in broken_locks):
             lockers.append(str(i))
     return lockers
 
@@ -211,27 +220,37 @@ def create_lockers():
         for j in locker_floor.values():
             locker_T_B[i+j+"T"] = None
             locker_T_B[i+j+"B"] = None
-    for i in locker_T_B.keys():
+    for i in locker_T_B:
         lockers = []
+        #triple_lockers = []
+        lockers.append(0)
         if (i[0] == "3"):
             if (i[1] == "1"):
                 lockers = append_lockers(i[2],3001,3400)
-            else:
+            elif (i[1] == "2"):
                 lockers = append_lockers(i[2],3501,3730)
         elif (i[0] == "2"):
             if (i[1] == "1"):
                 lockers = append_lockers(i[2],2001,2358)
-            else:
+            elif (i[1] == "2"):
                 lockers = append_lockers(i[2],2501,2716)
         elif (i[0] == "1"):
             if (i[1] == "1"):
                 lockers = append_lockers(i[2],1001,1406)
-            else:
+                # triple_lockers = append_lockers(i[2],1,600)
+                # for j in triple_lockers:
+                #     lockers.append(j)
+                # print(i+str(len(lockers)))
+            elif (i[1] == "2"):
                 lockers = append_lockers(i[2],1501,1730)
+                # triple_lockers = append_lockers(i[2],142,570)
+                # for k in triple_lockers:
+                #     lockers.append(k)
+                #print(i+str(len(lockers)))
         elif (i[0] == "4"):
             if (i[1] == "1"):
-                lockers = append_lockers(i[2],4001,4358)
-            else:
+                lockers = append_lockers(i[2],4001,4335)
+            elif (i[1] == "2"):
                 lockers = append_lockers(i[2],4501,4678)
         # if (i[0] == "3"):
         #     if (i[1] == "1"):
@@ -253,9 +272,27 @@ def create_lockers():
         #         lockers = append_lockers(i[2],17,18)
         #     else:
         #         lockers = append_lockers(i[2],19,20)
-
         locker_T_B[i] = lockers
+
+
+def triple_lockers():
+    triple_lower = open("triple_lower.txt","r").read().split("\n")
+    triple_upper = open("triple_upper.txt","r").read().split("\n")
+
+    for i in range(int(len(triple_lower)/2)):
+        locker_T_B["11B"].append(triple_lower[i])
+    for i in range(int(len(triple_lower)/2),len(triple_lower)):
+        locker_T_B["11T"].append(triple_lower[i])
+
+    for i in range(int(len(triple_upper)/2)):
+        locker_T_B["12B"].append(triple_upper[i])
+    for i in range(int(len(triple_upper)/2),len(triple_upper)):
+        locker_T_B["12T"].append(triple_upper[i])
     #print(locker_T_B)
+
+def del_zeros():
+    for i in locker_T_B:
+        del locker_T_B[i][0]
 
 def get_next_locker(locker, TB):
     #print("Len " + locker + TB + ": " + str(len(locker_T_B[locker + TB])))
@@ -326,7 +363,7 @@ def assign_lockers():
     #assign lockers
     for h in range(len(values)):
         grade = values[h][3]
-        name = values[h][1].lower()+" "+values[h][2].lower()
+        name = values[h][1].lower().strip()+" "+values[h][2].lower().strip()
         floor = values[h][4]
         TB = values[h][5][0]
         assign_locker(grade, name, floor, TB)
@@ -396,6 +433,53 @@ def createMessage(subject, text=None):
         msg.attach(MIMEText(text))
     return msg
 
+def print_bldg_totals():
+    b1 = 0
+    b2 = 0
+    b3 = 0
+    b4 = 0
+
+    for i in locker_T_B:
+        if (i[0] == "1"):
+            b1 += len(locker_T_B[i])
+        elif (i[0] == "2"):
+            b2 += len(locker_T_B[i])
+        elif (i[0] == "3"):
+            b3 += len(locker_T_B[i])
+        elif (i[0] == "4"):
+            b4 += len(locker_T_B[i])
+        #print(i+": "+str(len(locker_T_B[i])))
+        #print()
+        #print(locker_T_B[i])
+    print()
+    print(b1)
+    print(b2)
+    print(b3)
+    print(b4)
+
+def find_dupls():
+    num_dupls = 0
+    dupls = []
+    for i in range(len(values)):
+        for j in range(i+1,len(values)):
+            fname1 = values[i][1].lower()
+            lname1 = values[i][2].lower()
+            grade1 = values[i][3]
+            email1 = values[i][8]
+
+            fname2 = values[j][1].lower()
+            lname2 = values[j][2].lower()
+            grade2 = values[j][3]
+            email2 = values[j][8]
+
+            if (fname1 == fname2 and lname1 == lname2 and email1 != email2):#and (int(grade1) == 9 or int(grade2) == 9)
+                dupl = []
+                num_dupls += 1
+                #dupl.append()
+                print(fname1+" "+lname1+"  Grade: "+grade1+"  Email: "+email1)
+                print(fname2+" "+lname2+"  Grade: "+grade2+"  Email: "+email2)
+    print(num_dupls)
+
 def send_email():
     try:
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -405,42 +489,99 @@ def send_email():
         print(e)
 
     sent_from = gmail_user
-    for i in values:
+    index_read = int(open("email_index.txt","r").readline().strip())
+    for j in range(index_read,len(values)):
+        i = values[j]
         to = str(i[8])
+        if (len(to) == 0):
+            continue
         name = i[1]+" "+i[2]
         subject = "Your Locker for the 2019-2020 School Year"
         #print(data)
         #print(data[name])
-        body = 'Dear '+name+',\n\n'+'Thank you for participating in locker registration. You have been assigned the following locker/partner:\n\n'+'Locker #: '+i[COL_ASSIGNED_LOCKER]+'\n'+'Partner: '+data[i[1].lower()+" "+i[2].lower()][0].title()+'\n\n'+'If you have any questions about the assignment process, please contact Mr. Spain (bspain@srvusd.net).\n\n'+'Thanks,\n'+'San Ramon Makerspace'
+        #body = 'Dear '+name+',\n\n'+'Thank you for participating in locker registration. You have been assigned the following locker/partner:\n\n'+'Locker #: '+i[COL_ASSIGNED_LOCKER]+'\n'+'Partner: '+i[9]+'\n\n'+'If you have any questions about the assignment process, please contact Mr. Spain (bspain@srvusd.net).\n\n'+'Thanks,\n'+'San Ramon Makerspace'
+        #body = 'Dear '+name+',\n\n'+'Thank you for participating in locker registration. You have been assigned the following locker/partner:\n\n'+'Locker #: '+i[COL_ASSIGNED_LOCKER]+'\n'+'Partner: '+i[9]+'\n\n'+'If you have any questions about the assignment process, please contact Mr. Spain (bspain@srvusd.net).\n\n'+'Thanks,\n'+'San Ramon Makerspace'
+        body = 'Dear '+ name + ',\n' + \
+            '\n' + \
+            'Thank you for participating in locker registration. You have been assigned the following locker/partner:\n' + \
+            '\n' + \
+            'Locker #: ' + i[COL_ASSIGNED_LOCKER] + \
+            '\nPartner: '+ i[9] + \
+            '\n' + \
+            'If you weren\'t assigned the partner/locker as per your preferences, it was likely because of one of the following:\n' + \
+            '\n' + \
+            '    * Your partner didn\'t fill out the form\n' + \
+            '    * You misspelled your partner\'s name\n' + \
+            '    * You filled in your grade in the 2018-2019 school year instead of 2019-2020\n' + \
+            '    * You/your partner filled out the form multiple times with different partners\n' + \
+            '\n' + \
+            'If your situation is different from the ones mentioned above, please contact Mr. Spain (bspain@srvusd.net).\n' + \
+            '\n' + \
+            'Once all students are assigned, we will begin to appropriately resolve issues. There will be a Google form posted on the school website in the coming week to allow students to register their issues.\n' + \
+            '\n' + \
+            'Thanks,\n' + \
+            'San Ramon Makerspace'
 
         try:
             msg = createMessage(subject, body)
             server.sendmail(sent_from, to, msg.as_string())
-            #print('Email sent!')
+            # x = random.randint(1,100)
+            # if (x > 50):
+            #     raise Exception('Screwed')
+            print('Email sent to: '+to)
         except Exception as e:
-            print(e)
+            print("ERROR: Failed to send email to: "+to+": "+str(e))
+            index = open("email_index.txt","w")
+            index.write(str(j))
+            index.close()
+            break
+            #print(e)
+            # server.close()
+            # server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+            # server.ehlo()
+            # server.login(gmail_user, gmail_password)
+
     server.close()
 
 create_lockers()
+triple_lockers()
+#del_zeros()
+print_bldg_totals()
+length = 0
+for i in locker_T_B:
+    length += len(locker_T_B[i])
+    #for j in i:
+    #    if j in broken_locks:
+            #print(j)
+#print(broken_locks)
+#print(length)
+#print(data)
 if not values:
     print('No data found.')
 else:
-    load_partners()
-    validate_partners()
-    partner_unpartnered()
-    print_debug(values)
-    remove_invalid_partners()
-    assign_lockers()
-    free_lockers = unassigned_lockers()
-    #send_email()
+   load_partners()
+   # validate_partners()
+   # #print(data)
+   # partner_unpartnered()
+   # # #
+   # #
+   # #find_dupls()
+   # remove_invalid_partners()
+   # assign_lockers()
+   # #print(data)
+   # free_lockers = unassigned_lockers()
+   #print(data)
+   send_email()
+#lockers = populate()
 
 
-body = {'values': values}
-result = service.spreadsheets().values().update(
-spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE,
-valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-
-body = {'values': free_lockers}
-result = service.spreadsheets().values().update(
-spreadsheetId=SAMPLE_SPREADSHEET_ID, range=UNASSIGNED_LOCKERS_RANGE,
-valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+#
+# body = {'values': values}
+# result = service.spreadsheets().values().update(
+# spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE,
+# valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+#
+# body = {'values': free_lockers}
+# result = service.spreadsheets().values().update(
+# spreadsheetId=SAMPLE_SPREADSHEET_ID, range=UNASSIGNED_LOCKERS_RANGE,
+# valueInputOption=VALUE_INPUT_OPTION, body=body).execute()

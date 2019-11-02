@@ -17,44 +17,6 @@
 //#include <Adafruit_DotStar.h>
 #include "FastLED.h"
 
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-//
-
-
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-
-//// GUItool: begin automatically generated code
-//AudioPlaySdWav           playSdWav1;     //xy=1538.75,3058
-//AudioAnalyzePeak         peak2;          //xy=1676.75,3189
-//AudioOutputI2S           i2s1;           //xy=1700.75,2991
-//AudioAnalyzePeak         peak1;          //xy=1723.75,3079
-//AudioConnection          patchCord1(playSdWav1, 0, peak1, 0);
-//AudioConnection          patchCord2(playSdWav1, 0, i2s1, 0);
-//AudioConnection          patchCord3(playSdWav1, 1, peak2, 0);
-//AudioConnection          patchCord4(playSdWav1, 1, i2s1, 1);
-//AudioControlSGTL5000     sgtl5000_1;     //xy=1764.75,3282
-//// GUItool: end automatically generated code
-
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-
 // GUItool: begin automatically generated code
 AudioPlaySdWav           playSdWav1;     //xy=69,584
 AudioEffectDelay         delay2;         //xy=350.5,769
@@ -103,7 +65,7 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=775.5,774
 
 #define TOUCH_LIMIT 2000
 float vol = 0.3;
-const char* const songs[] = { "GODSPLAN.WAV", "NICE.WAV", "MINE.WAV", "DREAMS.WAV", "SATURDAY.WAV","BETTER.WAV","SICKO.WAV","WASTED.WAV"};
+const char* const songs[] = { "GODSPLAN.WAV","BAD_GUY.WAV", "LEAN_ON.WAV","DREAMS.WAV", "LONDON.WAV","PANINI.WAV","NICE.WAV", "BETTER.WAV","MINE.WAV", "RANSOM.WAV", "SATURDAY.WAV","SICKO.WAV", "RODEO.WAV", "WASTED.WAV"};
 int num_songs = sizeof(songs) / sizeof(songs[0]);
 int current_song;
 int cap_delay = 100;
@@ -111,7 +73,7 @@ int cap_delay = 100;
 //Adafruit_DotStar strip = Adafruit_DotStar(NUMPIXELS, DOTSTAR_RGB);
 
 // Use these with the Teensy SD Card
-#define SDCARD_CS_PIN    BUILTIN_SDCARD
+#define SDCARD_CS_PIN    BUILTIN_SDCARD //10
 #define SDCARD_MOSI_PIN  11
 #define SDCARD_SCK_PIN   13
 
@@ -136,12 +98,15 @@ void setupLed() {
 
 void setup() {
   delay(1000);
-  // Serial.begin(9600);
+  Serial.begin(9600);
   AudioMemory(8);
   sgtl5000_1.enable();
   sgtl5000_1.volume(vol);
   SPI.setMOSI(SDCARD_MOSI_PIN);
   SPI.setSCK(SDCARD_SCK_PIN);
+
+// Initialize at the highest speed supported by the board that is
+  // not over 50 MHz. Try a lower speed if SPI errors occur.
   if (!(SD.begin(SDCARD_CS_PIN))) {
     while (1) {
       Serial.println("Unable to access the SD card");
@@ -296,7 +261,7 @@ void checkPeak() {
 }
 
 void play_song() {
-
+  Serial.print("New Program Running");
   if (playSdWav1.isPlaying() == false) {
     int next_song;
       do {
@@ -361,6 +326,7 @@ void add_delay() {
 }
   
 void loop() {
+  
   play_song();
   change_song();
  // add_delay();

@@ -1,0 +1,4 @@
+Temp: 32.0 C  Humidity: 49.0 %
+Temp: 32.0 C  Humidity: 50.0 %
+Temp: 32.0 C  Humidity: 50.0 %
+Temp: 32.0 C  Humidity: 50.0 %

@@ -1,0 +1,14 @@
+[Unit]
+Description=Publish temp/humidity data to io.adafruit
+Requires=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/rm -f /var/run/temp_publish.pid
+ExecStart=/usr/bin/python /home/pi/temp_publish.py
+#ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/temp_publish.pid
+#Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
