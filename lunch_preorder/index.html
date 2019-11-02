@@ -1,0 +1,45 @@
+<html>
+    <head>
+      <title>DVHS Lunch Preoder</title>
+      <script language="javascript">
+      function hideBoth()
+      {
+         document.getElementById("cont1").style.visibility="hidden";
+      }
+      function hola() {
+        document.getElementById("cont1").style.visibility="visible";
+      }
+      </script>
+
+    </head>
+
+    <body onload='hideBoth()'>
+        <h1>DVHS Lunch Preordering System</h1>
+        <input id="preorder">
+
+        <script language="javascript">
+            var x = 1;
+            document.getElementById("preorder").onkeypress = function(e) {
+              if (!e) e = window.event;
+              if (e.keyCode == '13') {
+                hola();
+                return false;
+              }
+              else {
+                hideBoth();
+              }
+            }
+        </script>
+
+      <!--  <input type="button" onclick="hola(1)" value="hidefield2" id="boton1"> -->
+        <div id="cont1">
+            <h2>What's popping</h2>
+        </div>
+
+      <!--  <input type="button" onclick="hola(2)" value="hidefield1" id="boton2">
+
+        <div id="cont2">
+            <input type="text">
+        </div> -->
+    </body>
+<html>
