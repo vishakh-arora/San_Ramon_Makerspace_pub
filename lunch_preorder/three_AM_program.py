@@ -52,7 +52,7 @@ VALUE_INPUT_OPTION = "RAW"
 SERVICE_ACCOUNT_FILE = 'service.json'
 #=======
 
-COL_ORDER_DATE = -1
+COL_ORDER_DATE = 0
 COL_CARTE_OR_NO = 2
 COL_EMAIL_ADDRESS = 1
 COL_ORDERID = 16
@@ -81,11 +81,30 @@ result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
                             range=SAMPLE_RANGE_NAME).execute()
 values = result.get('values')
 
+
+
+copy_orders()
+
 result_RPi = sheet.values().get(spreadsheetId=RPI_SPREADSHEET_ID,
                             range=RPI_RANGE).execute()
 values_RPi = result_RPi.get('values')
-
-copy_orders()
+updated_values_RPi = []
+orderLogs = open("orderLogs.csv","a")
+orderLog = ""
+today = datetime.datetime(2019,10,29,3)
+today = today.strftime("%m")+"/"+today.strftime("%d")+"/"+today.strftime("%Y")
+print("TODAY = "+today)
+for i in values_RPi:
+    if (i[COL_ORDER_DATE] != today):
+        for j in range(len(i)-1):
+            orderLog += "\""+i[j]+"\","
+        orderLog = orderLog[:-1] + "\n"
+    elif (i[COL_ORDER_DATE] == today):
+        updated_values_RPi.append(i)
+print(orderLog)
+print(updated_values_RPi)
+orderLogs.write(orderLog)
+orderLogs.close()
 
 def clearResponses():
     valuesEmpty = []
@@ -100,6 +119,18 @@ def clearResponses():
     spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
+    valuesEmpty_RPi = []
+    for i in values_RPi:
+        vals = []
+        for j in i:
+            vals.append('')
+        valuesEmpty_RPi.append(vals)
+
+    body = {'values': valuesEmpty_RPi}
+    result = service.spreadsheets().values().update(
+    spreadsheetId=RPI_SPREADSHEET_ID, range=WRITING_RANGE,
+    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+
 print(values)
 clearResponses()
 rowsToRetain = []
@@ -109,17 +140,16 @@ for i in values:
 print("ROWS TO RETAIN")
 print(rowsToRetain)
 orderSummary = {}
-for i in values_RPi:
+for i in updated_values_RPi:
     orderSummary[i[COL_KEY]] = 0
-for i in values_RPi:
+for i in updated_values_RPi:
     orderSummary[i[COL_KEY]] += 1
 
-print(orderSummary)
 ordersCSV = "Order,Count"
 
 for i in orderSummary:
     ordersCSV += ",\n"+"\""+i+"\","+str(orderSummary[i])
-print(ordersCSV)
+
 
 today = datetime.datetime.now()
 date_formatted = today.strftime("%Y")+"-"+today.strftime("%m")+"-"+today.strftime("%d")
@@ -186,6 +216,10 @@ def generate_email():
         print("ERROR: Failed to send email to: "+to+": "+str(e))
 
 
+body = {'values': updated_values_RPi}
+result = service.spreadsheets().values().update(
+spreadsheetId=RPI_SPREADSHEET_ID, range=WRITING_RANGE,
+valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
 body = {'values': rowsToRetain}
 result = service.spreadsheets().values().update(
