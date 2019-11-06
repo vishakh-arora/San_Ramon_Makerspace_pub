@@ -1,13 +1,23 @@
 <html>
     <head>
-      <title>DVHS Lunch Preoder</title>
+      <title>DVHS Lunch Preorder</title>
       <script language="javascript">
       function hideBoth()
       {
          document.getElementById("cont1").style.visibility="hidden";
       }
-      function hola() {
+      function hola(orderID) {
         document.getElementById("cont1").style.visibility="visible";
+        const Http = new XMLHttpRequest();
+Http.open("GET", "/getorder/"+orderID);
+Http.send();
+
+
+Http.onreadystatechange = (e) => {
+  document.getElementById("cont1").innerHTML = "<h3>"+Http.responseText+"</h3>";
+  document.getElementById("preorder").value = '';
+}
+
       }
       </script>
 
@@ -22,7 +32,7 @@
             document.getElementById("preorder").onkeypress = function(e) {
               if (!e) e = window.event;
               if (e.keyCode == '13') {
-                hola();
+                hola(document.getElementById("preorder").value);
                 return false;
               }
               else {
@@ -33,7 +43,7 @@
 
       <!--  <input type="button" onclick="hola(1)" value="hidefield2" id="boton1"> -->
         <div id="cont1">
-            <h2>What's popping</h2>
+            <h3>Invalid order ID</h3>
         </div>
 
       <!--  <input type="button" onclick="hola(2)" value="hidefield1" id="boton2">

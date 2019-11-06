@@ -1,6 +1,6 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, jsonify
 import os, subprocess, time
-
+from fulfill_orders import getOrder
 app = Flask(__name__)
 
 # @app.route('/stop')
@@ -41,5 +41,9 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+@app.route('/getorder/<orderID>')
+def get_order(orderID):
+  return getOrder(orderID)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

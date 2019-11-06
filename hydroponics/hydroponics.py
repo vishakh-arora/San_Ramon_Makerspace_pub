@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 import time
 import ssl
 import logging
-from mail import mail
+#from common import mail
 import RPi.GPIO as GPIO
 import time
 
@@ -90,7 +90,7 @@ while True:
     if temperature != None:
     	temperature = (temperature*(9.0/5))+32
     dist = distance()
-    print("Sending temp: " + str(temperature)+"  humidity: "+str(humidity)+"  distance: "+str(dist))
+#    print("Sending temp: " + str(temperature)+"  humidity: "+str(humidity)+"  distance: "+str(dist))
     time.sleep(2)
 
 # Code for sending text if temp/humidity too low
@@ -102,17 +102,16 @@ while True:
 #       time.sleep(2)
     if (connected):
         try:
-            print("Publishing temp")
+            #print("Publishing temp")
             client.publish( 'dvhs_makerspace/feeds/hydro-temp',  payload=str(temperature))
             time.sleep(DELAY_BETWEEN_PUBLISH)
-            print("Publishing humid")
+            #print("Publishing humid")
             client.publish( 'dvhs_makerspace/feeds/hydro-humidity', payload=str(humidity))
             time.sleep(DELAY_BETWEEN_PUBLISH)
-            print("Publishing water")
+            #print("Publishing water")
             client.publish( 'dvhs_makerspace/feeds/water-level-cm', payload=str(dist))
             time.sleep(DELAY_BETWEEN_PUBLISH)
         except Exception as e:
             print("Error publishing:" + str(e))
     else:
         print("Not yet connected")
-
