@@ -2,31 +2,48 @@
     <head>
       <title>DVHS Lunch Preorder</title>
       <script language="javascript">
-      function hideBoth()
-      {
+      function hideBoth() {
          document.getElementById("cont1").style.visibility="hidden";
       }
+      function refresh() {
+        const Http = new XMLHttpRequest();
+        Http.open("GET", "/refresh")
+        Http.send();
+
+        Http.onreadystatechange = (e) => {
+          document.getElementById("data_date").value = Http.responseText;
+        }
+      }
+      function shutdown() {
+        const Http = new XMLHttpRequest();
+        Http.open("GET", "/shutdown")
+        Http.send();
+      }
+      
       function hola(orderID) {
         document.getElementById("cont1").style.visibility="visible";
         const Http = new XMLHttpRequest();
-Http.open("GET", "/getorder/"+orderID);
-Http.send();
+        Http.open("GET", "/getorder/"+orderID);
+        Http.send();
 
 
-Http.onreadystatechange = (e) => {
-  document.getElementById("cont1").innerHTML = "<h3>"+Http.responseText+"</h3>";
-  document.getElementById("preorder").value = '';
-}
+        Http.onreadystatechange = (e) => {
+          document.getElementById("cont1").innerHTML = "<h3 style='text-align:center'>"+Http.responseText+"</h3>";
+          document.getElementById("preorder").value = '';
+        }
 
       }
       </script>
-
+	
     </head>
 
-    <body onload='hideBoth()'>
-        <h1>DVHS Lunch Preordering System</h1>
-        <input id="preorder">
-
+    <body onload='hideBoth()' style="background-image:url('/img/vegetable_wallpaper.jpg');">
+        <h1 style="text-align:center">DVHS Lunch Preordering System</h1>
+        <div style="text-align:center"> <input id="preorder"> </div>
+        <br>
+        <input type="button" style="float:right;background-color:red" value="Power Off" onclick="shutdown()">
+        <input type="button" id="data_date" style="float:right" value="Refresh" onclick="refresh()">
+        <br>
         <script language="javascript">
             var x = 1;
             document.getElementById("preorder").onkeypress = function(e) {
@@ -41,15 +58,8 @@ Http.onreadystatechange = (e) => {
             }
         </script>
 
-      <!--  <input type="button" onclick="hola(1)" value="hidefield2" id="boton1"> -->
         <div id="cont1">
             <h3>Invalid order ID</h3>
         </div>
-
-      <!--  <input type="button" onclick="hola(2)" value="hidefield1" id="boton2">
-
-        <div id="cont2">
-            <input type="text">
-        </div> -->
     </body>
 <html>

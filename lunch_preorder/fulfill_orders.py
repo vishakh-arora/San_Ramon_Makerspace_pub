@@ -48,7 +48,7 @@ VALUE_INPUT_OPTION = "RAW"
 SERVICE_ACCOUNT_FILE = 'service.json'
 #=======
 
-COL_ORDER_DATE = -1
+COL_ORDER_DATE = 0
 COL_CARTE_OR_NO = 2
 COL_EMAIL_ADDRESS = 1
 COL_ORDERID = 3
@@ -65,24 +65,32 @@ Prints values from a sample spreadsheet.
 # created automatically when the authorization flow completes for the first
 # time.
 
-path = os.path.dirname(sys.argv[0])
-store = file.Storage('token.json')
-creds = store.get()
-if not creds or creds.invalid:
-    creds = service_account.Credentials.from_service_account_file( path + "/" +SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    service = build('sheets', 'v4', credentials=creds)
-
-# Call the Sheets API
-sheet = service.spreadsheets()
-result = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
-                            range=ORDER_READ_RANGE).execute()
-values = result.get('values')
-
 orderID_index = {}
+path = os.path.dirname(sys.argv[0])
+values = []
 
-for i in range(len(values)):
-  print(values[i][COL_ENTREE])
-  orderID_index[values[i][COL_ORDERID]] = i
+def reload():
+  global orderID_index
+  global values
+
+  store = file.Storage('token.json')
+  creds = store.get()
+  if not creds or creds.invalid:
+      creds = service_account.Credentials.from_service_account_file( path + "/" +SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+      service = build('sheets', 'v4', credentials=creds)
+
+  # Call the Sheets API
+  sheet = service.spreadsheets()
+  result = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
+            range=ORDER_READ_RANGE).execute()
+  new_values = result.get('values')
+  new_index = {}
+  for i in range(len(new_values)):
+    new_index[ new_values[i][COL_ORDERID]] = i
+  values = new_values 
+  orderID_index = new_index
+  # Return the date so that user knows date of the data
+  return values[0][COL_ORDER_DATE]
 
 def getOrder(orderID):
   rowIndex = orderID_index.get(str(orderID))

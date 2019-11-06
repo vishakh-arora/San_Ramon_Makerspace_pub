@@ -1,7 +1,9 @@
-from flask import Flask, request, render_template, redirect, jsonify
+from flask import Flask, request, render_template, redirect, jsonify, send_from_directory
+from subprocess import call
 import os, subprocess, time
-from fulfill_orders import getOrder
-app = Flask(__name__)
+import fulfill_orders
+
+app = Flask(__name__,static_url_path='')
 
 # @app.route('/stop')
 # def stop():
@@ -41,9 +43,22 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+@app.route('/refresh')
+def refresh():
+  return fulfill_orders.reload()
+
 @app.route('/getorder/<orderID>')
 def get_order(orderID):
-  return getOrder(orderID)
+  return fulfill_orders.getOrder(orderID)
+
+@app.route('/shutdown')
+def shutdown():
+  call("sudo shutdown -P now", shell=True)
+
+@app.route('/img/<path:path>')
+def showImage(path):
+    return send_from_directory('images', path)
 
 if __name__ == "__main__":
+    refresh()
     app.run(debug=False)
