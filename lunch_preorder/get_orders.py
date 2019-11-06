@@ -25,7 +25,6 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email import encoders
 import barcode
-import barcode
 import datetime
 from barcode.writer import ImageWriter
 import imghdr
@@ -103,11 +102,19 @@ def getEntreeSide(row):
             COL_SIDE = j + 1
             break
 
-counter = 1
-def create_orderID(i):
+def getMaxID():
+    maxID = 1
+    for i in values:
+        if (i[COL_ORDERID] != ''):
+            orderID = int(i[COL_ORDERID][:-4])
+            print(orderID)
+            if (orderID > maxID):
+                maxID = orderID
+    return maxID
+
+def create_orderID(i, counter):
     global orderid_fname
     global COL_ORDER_DATE
-    global counter
     global values
 
     if (i[3] != ''):
@@ -122,11 +129,10 @@ def create_orderID(i):
     year = orderDate[2]
     orderID = year + day + month + str(counter).zfill(4)
 
-
     foo = barcode.get('ean13', orderID, writer=ImageWriter())
     orderid_fname = orderID + '_' + str(values.index(i))
     filename = foo.save(orderid_fname)
-    counter += 1
+    orderid_fname  = orderid_fname + '.png'
 
     return orderID
 
@@ -156,6 +162,8 @@ def copy_orders():
     print(hours_from_epoch)
 
     print(date)
+    counter = getMaxID()
+
     for i in values:
         getEntreeSide(i)
         order_array = []
@@ -175,10 +183,12 @@ def copy_orders():
         if (abs(hours_from_epoch - hours_from_epoch_order) <= 24 and i[COL_DONE] == 'Placeholder'):
             print(abs(hours_from_epoch - hours_from_epoch_order))
             print("CONSTRUCTING ORDER")
-            orderID = create_orderID(i)
+            orderID = create_orderID(i,counter)
+            counter += 1
             i[COL_ORDERID] = orderID
 
             generate_email(i)
+            os.remove(orderid_fname)
             for x in range(COL_ORDER_DATE,len(i)-1):
                 order_array.append(i[x])
 
@@ -207,14 +217,17 @@ def mail(to, subject, text=None, attach=None):
    msg['To'] = to
 #','.split(to)
    msg['Subject'] = subject
-   if text != None:
-   	msg.attach(MIMEText(text))
+#   if text != None:
+#  	  msg.attach(MIMEText(text,'html'))
+
    if attach != None:
        msgAlternative = MIMEMultipart('alternative')
        msg.attach(msgAlternative)
 
-       msgText = MIMEText('<br><img src="cid:image1"><br>', 'html')
-       msgAlternative.attach(msgText)
+#       msgText = MIMEText('<br><img src="cid:image1"><br>', 'html')
+#       msgAlternative.attach(msgText)
+
+       msgAlternative.attach(MIMEText(text, 'html'))
 
        fp = open(attach, 'rb')
        msgImage = MIMEImage(fp.read())
@@ -259,21 +272,20 @@ def generate_email(vals):
     if (COL_SIDE != -1):
         meal = constructKey(i)
 
-    body = 'Dear student,\n' + \
-        '\n' + \
-        'Thank you for participating in the lunch preordering system. Here is the lunch that we got from you:\n' + \
-        '\n' + \
-        'Meal: '+ meal + \
-        '\n' + \
-        'Please find attached a file with a barcode. Show this barcode to the lunch worker serving you to receive your meal.\n' + \
-        '\n' + \
-        'PLEASE NOTE: If your meal was not one of the most commonly preordered items, your meal will need to be packaged on the spot (similar to the process before, except your order is already known).\n' + \
-        '\n' + \
-        'Thanks,\n' + \
+    body = 'Dear student,<br>' + \
+        '<br>' + \
+        'Thank you for participating in the lunch preordering system. Here is the lunch that we got from you:<br>' + \
+        '<b>Meal:</b> '+ meal + \
+        '<br>' + \
+        'Please find attached a file with a barcode. Show this barcode to the lunch worker serving you to receive your meal.<br>' + \
+        '<br><img src="cid:image1"><br>' + \
+        '<b>PLEASE NOTE</b>: If your meal was not one of the most commonly preordered items, your meal will need to be packaged on the spot (similar to the process before, except your order is already known).<br>' + \
+        '<br>' + \
+        'Thanks,<br>' + \
         'San Ramon Makerspace'
 
     try:
-        mail(to, subject, body, orderid_fname+'.png')
+        mail(to, subject, body, orderid_fname)
 
     except Exception as e:
         print("ERROR: Failed to send email to: "+to+": "+str(e))
