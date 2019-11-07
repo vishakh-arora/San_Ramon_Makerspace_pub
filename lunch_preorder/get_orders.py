@@ -52,7 +52,7 @@ VALUE_INPUT_OPTION = "RAW"
 
 #NUM_STUDENTS = 3500
 
-SERVICE_ACCOUNT_FILE = 'service.json'
+SERVICE_ACCOUNT_FILE = 'preorder_service.json'
 #=======
 
 COL_ORDER_DATE = -1
@@ -74,7 +74,9 @@ Prints values from a sample spreadsheet.
 store = file.Storage('token.json')
 creds = store.get()
 if not creds or creds.invalid:
+    print("Getting authorization")
     creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    print(str(creds))
     service = build('sheets', 'v4', credentials=creds)
 
 # Call the Sheets API
@@ -157,7 +159,7 @@ def copy_orders():
     global values
 
     #date = datetime.datetime.now()
-    date = datetime.datetime(2019,10,28,17)
+    date = datetime.datetime(2019,11,6,17)
     hours_from_epoch = (((date - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
     print(hours_from_epoch)
 
@@ -176,6 +178,13 @@ def copy_orders():
 
         formatted_date = i[COL_ORDER_DATE].split('/')
         orderDate = datetime.datetime(int(formatted_date[2]),int(formatted_date[0]),int(formatted_date[1]))
+
+        # Standardize order date so that date comparison works at 3 AM (10/9/19 --> 10/09/19)
+        for j in range(len(formatted_date)):
+            formatted_date[j] = formatted_date[j].zfill(2)
+        i[COL_ORDER_DATE] = "/".join(formatted_date)
+        print("ORDER DATEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+        print(i[COL_ORDER_DATE])
         orders_to_remove = []
 
         hours_from_epoch_order = (((orderDate - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600

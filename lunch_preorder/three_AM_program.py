@@ -91,7 +91,7 @@ values_RPi = result_RPi.get('values')
 updated_values_RPi = []
 orderLogs = open("orderLogs.csv","a")
 orderLog = ""
-today = datetime.datetime(2019,10,29,3)
+today = datetime.datetime(2019,11,7,3)
 today = today.strftime("%m")+"/"+today.strftime("%d")+"/"+today.strftime("%Y")
 print("TODAY = "+today)
 for i in values_RPi:
