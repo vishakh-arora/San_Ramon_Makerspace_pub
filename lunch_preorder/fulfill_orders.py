@@ -12,6 +12,7 @@ import string
 import sys, time, os.path
 import googleapiclient.discovery
 import html
+import threading
 #import smtplib
 #from email.mime.multipart import MIMEMultipart
 #from email.mime.base import MIMEBase
@@ -44,8 +45,10 @@ WRITING_RANGE_RESPONSES = 'Lunch_preorders!Q2:Z'
 WRITING_RANGE = 'Orders!A2:Z'
 #UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
 VALUE_INPUT_OPTION = "RAW"
+TIMESTAMP_ID = "18XaMtbkUeIPp5ROAxa4nHCGxpFh7n-rY3p07sUis6X0"
+TIMESTAMP_RANGE = "Timestamps!A2:Z"
 
-SERVICE_ACCOUNT_FILE = 'service.json'
+SERVICE_ACCOUNT_FILE = 'preorder_service.json'
 #=======
 
 COL_ORDER_DATE = 0
@@ -69,7 +72,11 @@ orderID_index = {}
 path = os.path.dirname(sys.argv[0])
 values = []
 
-def reload():
+result = service.spreadsheets().values().get(
+spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE).execute()
+vals_timestamp = result.get('values',[])
+
+def reload(): #write to the spreadsheet here with timestamps
   global orderID_index
   global values
 
@@ -87,16 +94,24 @@ def reload():
   new_index = {}
   for i in range(len(new_values)):
     new_index[ new_values[i][COL_ORDERID]] = i
-  values = new_values 
+  values = new_values
   orderID_index = new_index
   # Return the date so that user knows date of the data
   return values[0][COL_ORDER_DATE]
 
 def getOrder(orderID):
-  rowIndex = orderID_index.get(str(orderID))
+  global values
+
+  rowIndex = orderID_index.get(str(orderID)[:12])
   meal = ""
   if (rowIndex == None):
     return "Order ID "+str(orderID)+" not found"
+  elif (vals_timestamp.count([orderID]) != 0):
+    return "Order ID "+str(orderID)+" already served"
+  timstamp_arr = []
+  timestamp_arr.append(str(orderID))
+  timestamp_arr.append(datetime.datetime.now())
+  vals_timestamp.append(timestamp_arr)
   entree = html.escape(values[rowIndex][COL_ENTREE],quote=True)
   print(entree)
   side = html.escape(values[rowIndex][COL_SIDE],quote=True)
@@ -105,3 +120,17 @@ def getOrder(orderID):
   else:
     meal = "Entree: "+entree
   return meal
+
+def write_timestamp():
+  body = {'values': vals_timestamp}
+  result = service.spreadsheets().values().append(
+  spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE,
+  valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+  return ('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
+
+def cron_write_timestamps(onoff):
+  timer = threading.Timer(300.0,write_timestamp)
+  if (onoff = 'on'):
+    timer.start()
+  elif (onoff = 'off'):
+    timer.cancel()

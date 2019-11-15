@@ -53,7 +53,13 @@ def get_order(orderID):
 
 @app.route('/shutdown')
 def shutdown():
+  fulfill_orders.write_timestamp()
+  fulfill_orders.cron_write_timestamps('off')
   call("sudo shutdown -P now", shell=True)
+
+@app.route('/write-timestamp/<onoff>')
+def write_timestamps(onoff):
+  return fulfill_orders.cron_write_timestamps(onoff)
 
 @app.route('/img/<path:path>')
 def showImage(path):

@@ -3,7 +3,10 @@
       <title>DVHS Lunch Preorder</title>
       <script language="javascript">
       function hideBoth() {
-         document.getElementById("cont1").style.visibility="hidden";
+        const Http = new XMLHttpRequest();
+        Http.open("GET", "/write-timestamp/on")
+        Http.send();
+        document.getElementById("cont1").style.visibility="hidden";
       }
       function refresh() {
         const Http = new XMLHttpRequest();
@@ -19,7 +22,7 @@
         Http.open("GET", "/shutdown")
         Http.send();
       }
-      
+
       function hola(orderID) {
         document.getElementById("cont1").style.visibility="visible";
         const Http = new XMLHttpRequest();
@@ -34,7 +37,7 @@
 
       }
       </script>
-	
+
     </head>
 
     <body onload='hideBoth()' style="background-image:url('/img/vegetable_wallpaper.jpg');">
@@ -47,7 +50,8 @@
         <script language="javascript">
             var x = 1;
             document.getElementById("preorder").onkeypress = function(e) {
-              if (!e) e = window.event;
+              if (!e)
+                e = window.event;
               if (e.keyCode == '13') {
                 hola(document.getElementById("preorder").value);
                 return false;
