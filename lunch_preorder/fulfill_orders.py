@@ -12,7 +12,8 @@ import string
 import sys, time, os.path
 import googleapiclient.discovery
 import html
-import threading
+from timeloop import Timeloop
+import datetime
 #import smtplib
 #from email.mime.multipart import MIMEMultipart
 #from email.mime.base import MIMEBase
@@ -46,9 +47,9 @@ WRITING_RANGE = 'Orders!A2:Z'
 #UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
 VALUE_INPUT_OPTION = "RAW"
 TIMESTAMP_ID = "18XaMtbkUeIPp5ROAxa4nHCGxpFh7n-rY3p07sUis6X0"
-TIMESTAMP_RANGE = "Timestamps!A2:Z"
+TIMESTAMP_RANGE = "Timestamps!A2:B"
 
-SERVICE_ACCOUNT_FILE = 'preorder_service.json'
+SERVICE_ACCOUNT_FILE = '/home/pi/San_Ramon_Makerspace/lunch_preorder/preorder_service.json'
 #=======
 
 COL_ORDER_DATE = 0
@@ -67,24 +68,22 @@ Prints values from a sample spreadsheet.
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-
 orderID_index = {}
 path = os.path.dirname(sys.argv[0])
 values = []
+print(path + "/" +SERVICE_ACCOUNT_FILE)
 
-result = service.spreadsheets().values().get(
-spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE).execute()
-vals_timestamp = result.get('values',[])
+store = file.Storage('token.json')
+creds = store.get()
+if not creds or creds.invalid:
+    creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    service = build('sheets', 'v4', credentials=creds)
+
+dict_timestamp = {}
 
 def reload(): #write to the spreadsheet here with timestamps
   global orderID_index
   global values
-
-  store = file.Storage('token.json')
-  creds = store.get()
-  if not creds or creds.invalid:
-      creds = service_account.Credentials.from_service_account_file( path + "/" +SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-      service = build('sheets', 'v4', credentials=creds)
 
   # Call the Sheets API
   sheet = service.spreadsheets()
@@ -101,17 +100,17 @@ def reload(): #write to the spreadsheet here with timestamps
 
 def getOrder(orderID):
   global values
+  global dict_timestamp
 
-  rowIndex = orderID_index.get(str(orderID)[:12])
+  orderID = str(orderID)[:12]
+  rowIndex = orderID_index.get(orderID)
   meal = ""
   if (rowIndex == None):
-    return "Order ID "+str(orderID)+" not found"
-  elif (vals_timestamp.count([orderID]) != 0):
-    return "Order ID "+str(orderID)+" already served"
-  timstamp_arr = []
-  timestamp_arr.append(str(orderID))
-  timestamp_arr.append(datetime.datetime.now())
-  vals_timestamp.append(timestamp_arr)
+    return "Order ID "+orderID+" not found"
+  elif (dict_timestamp.get(orderID) != None):
+    return "Order ID "+orderID+" already served"
+  # Get the timestamp in milliseconds, convert to string to prepare for writing to the spreadsheet
+  dict_timestamp[orderID] = [str(int(datetime.datetime.now().timestamp()*1000))]
   entree = html.escape(values[rowIndex][COL_ENTREE],quote=True)
   print(entree)
   side = html.escape(values[rowIndex][COL_SIDE],quote=True)
@@ -121,16 +120,56 @@ def getOrder(orderID):
     meal = "Entree: "+entree
   return meal
 
+def construct_timestamps():
+
+  # 2D array containing orders not saved 
+  vals_timestamp = []
+  order_ts_snapshot = dict_timestamp
+  orders = list(order_ts_snapshot.keys())
+  print("ORDER_TS_SNAPSHOT SPREADSHEET")
+  print(order_ts_snapshot)  
+  print( "Orders: " + str(len(orders)))
+  for order in orders:
+    timestamp_arr = []
+    print("Checking marked:" + str(len(order_ts_snapshot[ order])))
+    # if the order has not been already saved
+    if (len(order_ts_snapshot[ order]) == 1):
+      # Create a row with order id and it's timestamp
+      timestamp_arr.append( order)
+      timestamp_arr.append(order_ts_snapshot[order][0])
+      # append the row
+      vals_timestamp.append(timestamp_arr)
+  print("TIMESTAMPS TO WRITE")
+  print(vals_timestamp)
+  #time.sleep(4)
+  return vals_timestamp
+
 def write_timestamp():
-  body = {'values': vals_timestamp}
+  print("WRITING TIMESTAMPPPPPPP")
+  timestamps = construct_timestamps()
+  body = {'values': timestamps}
   result = service.spreadsheets().values().append(
   spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE,
   valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+  mark_stamps(timestamps)
   return ('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
+  
+def mark_stamps(timestamp_vals):
+  global dict_timestamp
+  for order_ts_row in timestamp_vals:
+    dict_timestamp[ order_ts_row[0]].append("WRITTEN")
 
 def cron_write_timestamps(onoff):
-  timer = threading.Timer(300.0,write_timestamp)
-  if (onoff = 'on'):
-    timer.start()
-  elif (onoff = 'off'):
-    timer.cancel()
+#  timer = threading.Timer(300.0,write_timestamp)
+  tl = Timeloop()
+  @tl.job(interval=datetime.timedelta(seconds=20))
+  def write_times():
+    write_timestamp()
+  if (onoff == 'on'):
+    tl.start()
+    print ("Timer started")
+    return ("Timer started")
+  elif (onoff == 'off'):
+    tl.stop()
+    print ("Timer cancelled")
+    return ("Timer cancelled")

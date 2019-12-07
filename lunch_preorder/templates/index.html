@@ -3,11 +3,17 @@
       <title>DVHS Lunch Preorder</title>
       <script language="javascript">
       function hideBoth() {
-        const Http = new XMLHttpRequest();
-        Http.open("GET", "/write-timestamp/on")
-        Http.send();
         document.getElementById("cont1").style.visibility="hidden";
       }
+
+      function onLoad() {
+        hideBoth()
+        const Http = new XMLHttpRequest();
+        Http.open("GET", "/write-timestamp/on");
+        Http.send();
+        alert('On Load Completed');
+      }
+
       function refresh() {
         const Http = new XMLHttpRequest();
         Http.open("GET", "/refresh")
@@ -40,7 +46,7 @@
 
     </head>
 
-    <body onload='hideBoth()' style="background-image:url('/img/vegetable_wallpaper.jpg');">
+    <body onload='onLoad()' style="background-image:url('/img/vegetable_wallpaper.jpg');">
         <h1 style="text-align:center">DVHS Lunch Preordering System</h1>
         <div style="text-align:center"> <input id="preorder"> </div>
         <br>

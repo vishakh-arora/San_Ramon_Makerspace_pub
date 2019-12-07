@@ -54,6 +54,7 @@ def get_order(orderID):
 @app.route('/shutdown')
 def shutdown():
   fulfill_orders.write_timestamp()
+  time.sleep(4)
   fulfill_orders.cron_write_timestamps('off')
   call("sudo shutdown -P now", shell=True)
 
