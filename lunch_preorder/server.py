@@ -39,9 +39,10 @@ app = Flask(__name__,static_url_path='')
 #     return fin.read()
 
 
+data_date = None
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("index.html",data_date=data_date)
 
 @app.route('/refresh')
 def refresh():
@@ -67,5 +68,9 @@ def showImage(path):
     return send_from_directory('images', path)
 
 if __name__ == "__main__":
-    refresh()
+    try:
+      data_date = refresh()
+    except Exception as e:
+      print(e)
+    fulfill_orders.cron_write_timestamps('on')
     app.run(debug=False)

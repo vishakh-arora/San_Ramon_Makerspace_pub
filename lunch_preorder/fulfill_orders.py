@@ -81,9 +81,11 @@ if not creds or creds.invalid:
 
 dict_timestamp = {}
 
+counter = 0
 def reload(): #write to the spreadsheet here with timestamps
   global orderID_index
   global values
+  global counter
 
   # Call the Sheets API
   sheet = service.spreadsheets()
@@ -96,6 +98,10 @@ def reload(): #write to the spreadsheet here with timestamps
   values = new_values
   orderID_index = new_index
   # Return the date so that user knows date of the data
+  
+  if (counter == 0):
+    counter = 1
+    raise ValueError
   return values[0][COL_ORDER_DATE]
 
 def getOrder(orderID):

@@ -8,6 +8,9 @@
 
       function onLoad() {
         hideBoth()
+      }
+
+      function startTimingRecord() {
         const Http = new XMLHttpRequest();
         Http.open("GET", "/write-timestamp/on");
         Http.send();
@@ -20,7 +23,11 @@
         Http.send();
 
         Http.onreadystatechange = (e) => {
-          document.getElementById("data_date").value = Http.responseText;
+          if (Http.responseCode == 200) {
+            document.getElementById("data_date").value = Http.responseText;
+            document.getElementById("data_date").style="float:right;background-color:green";
+          }
+          
         }
       }
       function shutdown() {
@@ -51,7 +58,11 @@
         <div style="text-align:center"> <input id="preorder"> </div>
         <br>
         <input type="button" style="float:right;background-color:red" value="Power Off" onclick="shutdown()">
-        <input type="button" id="data_date" style="float:right" value="Refresh" onclick="refresh()">
+        {% if data_date is none %}
+        <input type="button" id="data_date" style="float:right;background-color:red" value="Unable to retrieve orders. Please tap here" onclick="refresh()">
+        {% else %}
+        <input type="button" id="data_date" style="float:right;background-color:green" value="{{data_date}}" onclick="refresh()">
+        {% endif %}
         <br>
         <script language="javascript">
             var x = 1;
