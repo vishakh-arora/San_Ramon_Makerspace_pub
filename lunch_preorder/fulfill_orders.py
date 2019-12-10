@@ -50,6 +50,7 @@ TIMESTAMP_ID = "18XaMtbkUeIPp5ROAxa4nHCGxpFh7n-rY3p07sUis6X0"
 TIMESTAMP_RANGE = "Timestamps!A2:B"
 
 SERVICE_ACCOUNT_FILE = '/home/pi/San_Ramon_Makerspace/lunch_preorder/preorder_service.json'
+#SERVICE_ACCOUNT_FILE = '/Users/vishakh/Documents/11th Grade/Lunch_preordering/preorder_service.json'
 #=======
 
 COL_ORDER_DATE = 0
@@ -81,11 +82,9 @@ if not creds or creds.invalid:
 
 dict_timestamp = {}
 
-counter = 0
 def reload(): #write to the spreadsheet here with timestamps
   global orderID_index
   global values
-  global counter
 
   # Call the Sheets API
   sheet = service.spreadsheets()
@@ -99,9 +98,6 @@ def reload(): #write to the spreadsheet here with timestamps
   orderID_index = new_index
   # Return the date so that user knows date of the data
   
-  if (counter == 0):
-    counter = 1
-    raise ValueError
   return values[0][COL_ORDER_DATE]
 
 def getOrder(orderID):
