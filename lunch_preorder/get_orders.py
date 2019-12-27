@@ -206,6 +206,7 @@ def copy_orders():
             if (i[COL_CARTE_OR_NO] == "Yes"):
                 order_array.insert(2,'')
             order_array.append(key)
+            order_array.append(i[COL_EMAIL_ADDRESS])
             print(order_array)
             order_copies.append(order_array)
             i[COL_DONE] = "Done"

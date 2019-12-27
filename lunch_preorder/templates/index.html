@@ -23,7 +23,7 @@
         Http.send();
 
         Http.onreadystatechange = (e) => {
-          if (Http.responseCode == 200) {
+          if (Http.status == 200) {
             document.getElementById("data_date").value = Http.responseText;
             document.getElementById("data_date").style="float:right;background-color:green";
           }
