@@ -44,11 +44,11 @@ from_user = "do-not-reply@srvusd-lunch.com"
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-SAMPLE_SPREADSHEET_ID ='1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
+SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
 #SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
 SAMPLE_RANGE_NAME = 'Lunch_preorders!A2:R'
 #SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
-ORDER_SPREADSHEET_ID = '1HBJ4ES21BtVONE_fXGlCRR7i_Jx2ezqluehfeaY1Rr4'
+ORDER_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
 WRITING_RANGE_RESPONSES = 'Lunch_preorders!Q2:Z'
 WRITING_RANGE = 'Orders!A2:Z'
 #UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
