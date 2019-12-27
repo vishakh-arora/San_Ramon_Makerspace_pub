@@ -25,7 +25,7 @@ from barcode.writer import ImageWriter
 import imghdr
 import os
 
-pswd = open('pswd.txt','r').read().split('\n')
+pswd = open('/home/vishakh/pswd.txt','r').read().split('\n')
 #print(pswd)
 gmail_user = pswd[0]
 gmail_password = pswd[1]
@@ -49,8 +49,7 @@ VALUE_INPUT_OPTION = "RAW"
 
 #NUM_STUDENTS = 3500
 
-SERVICE_ACCOUNT_FILE = 'preorder_service.json'
-#=======
+SERVICE_ACCOUNT_FILE = '/home/vishakh/preorder_service.json'
 
 COL_ORDER_DATE = 0
 COL_CARTE_OR_NO = 2

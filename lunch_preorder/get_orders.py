@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 ################################################################################################
 # runs every minute
 # collect all orders, for every order that's for tomorrow create barcodes/send emails,
@@ -28,13 +30,16 @@ import barcode
 import datetime
 from barcode.writer import ImageWriter
 import imghdr
+from io import BytesIO
 import os
+import re
+import base64
 
-pswd = open('pswd.txt','r').read().split('\n')
+#pswd = open('/home/vishakh/pswd.txt','r').read().split('\n')
 #print(pswd)
-gmail_user = pswd[0]
-gmail_password = pswd[1]
-
+#gmail_user = pswd[0]
+#gmail_password = pswd[1]
+from_user = "do-not-reply@srvusd-lunch.com"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -52,7 +57,7 @@ VALUE_INPUT_OPTION = "RAW"
 
 #NUM_STUDENTS = 3500
 
-SERVICE_ACCOUNT_FILE = 'preorder_service.json'
+SERVICE_ACCOUNT_FILE = '/home/vishakh/preorder_service.json'
 #=======
 
 COL_ORDER_DATE = -1
@@ -89,8 +94,6 @@ done_values = []
 # for i in values:
 #     i.append("ORDERID")
 
-orderid_fname = 0
-
 order_copies = []
 
 def getEntreeSide(row):
@@ -115,7 +118,6 @@ def getMaxID():
     return maxID
 
 def create_orderID(i, counter):
-    global orderid_fname
     global COL_ORDER_DATE
     global values
 
@@ -131,12 +133,12 @@ def create_orderID(i, counter):
     year = orderDate[2]
     orderID = year + day + month + str(counter).zfill(4)
 
-    foo = barcode.get('ean13', orderID, writer=ImageWriter())
-    orderid_fname = orderID + '_' + str(values.index(i))
-    filename = foo.save(orderid_fname)
-    orderid_fname  = orderid_fname + '.png'
-
     return orderID
+
+def get_barcode_image( orderID):
+    foo = barcode.get('ean13', orderID, writer=ImageWriter())
+    orderid_fname = foo.save(orderID)
+    return orderid_fname
 
 def remove_blanks(values):
     noBlanks = []
@@ -159,7 +161,7 @@ def copy_orders():
     global values
 
     #date = datetime.datetime.now()
-    date = datetime.datetime(2019,11,6,17)
+    date = datetime.datetime.now()
     hours_from_epoch = (((date - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
     print(hours_from_epoch)
 
@@ -183,13 +185,11 @@ def copy_orders():
         for j in range(len(formatted_date)):
             formatted_date[j] = formatted_date[j].zfill(2)
         i[COL_ORDER_DATE] = "/".join(formatted_date)
-        print("ORDER DATEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
-        print(i[COL_ORDER_DATE])
         orders_to_remove = []
 
         hours_from_epoch_order = (((orderDate - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
         print(hours_from_epoch_order)
-        if (abs(hours_from_epoch - hours_from_epoch_order) <= 24 and i[COL_DONE] == 'Placeholder'):
+        if (abs(hours_from_epoch - hours_from_epoch_order) <= 24 and i[COL_DONE] != 'Done'):
             print(abs(hours_from_epoch - hours_from_epoch_order))
             print("CONSTRUCTING ORDER")
             orderID = create_orderID(i,counter)
@@ -197,7 +197,6 @@ def copy_orders():
             i[COL_ORDERID] = orderID
 
             generate_email(i)
-            os.remove(orderid_fname)
             for x in range(COL_ORDER_DATE,len(i)-1):
                 order_array.append(i[x])
 
@@ -219,91 +218,90 @@ def copy_orders():
     #print(values)
 
 
-def mail(to, subject, text=None, attach=None):
-   msg = MIMEMultipart()
+def mail(to, subject, text=None, html=None, attach=None):
+   msg = MIMEMultipart('alternative')
 
-   msg['From'] = gmail_user
+   msg['From'] = from_user #gmail_user
    msg['To'] = to
 #','.split(to)
    msg['Subject'] = subject
-#   if text != None:
-#  	  msg.attach(MIMEText(text,'html'))
 
-   if attach != None:
-       msgAlternative = MIMEMultipart('alternative')
-       msg.attach(msgAlternative)
+   if html != None:
+       msg.attach(MIMEText(html, 'html'))
 
-#       msgText = MIMEText('<br><img src="cid:image1"><br>', 'html')
-#       msgAlternative.attach(msgText)
+   if text != None:
+       msg.attach(MIMEText(text))
 
-       msgAlternative.attach(MIMEText(text, 'html'))
+   fp = open(attach, 'rb')
+   msgImage = MIMEImage(fp.read())
+   fp.close()
 
-       fp = open(attach, 'rb')
-       msgImage = MIMEImage(fp.read())
-       fp.close()
-
-       msgImage.add_header('Content-ID', '<image1>')
-       msg.attach(msgImage)
+   msgImage.add_header('Content-ID', '<image1>')
+   msg.attach(msgImage)
 	   # part = MIMEBase('application', 'octet-stream')
 	   # part.set_payload(open(attach, 'rb').read())
 	   # encoders.encode_base64(part)
 	   # part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(attach))
 	   # msg.attach(part)
 
-#TODO: CHANGE TO LINODE SMTP CLIENT
-   mailServer = smtplib.SMTP("smtp.gmail.com", 587)
+   mailServer = smtplib.SMTP("localhost", 587)
    mailServer.ehlo()
    mailServer.starttls()
    #mailServer.ehlo()
-   mailServer.login(gmail_user, gmail_password)
-   mailServer.sendmail(gmail_user, to, msg.as_string())
+#   mailServer.login(gmail_user, gmail_password)
+   mailServer.sendmail(from_user, to, msg.as_string())
    # Should be mailServer.quit(), but that crashes...
    mailServer.close()
 
+# Takes html input and replaces all <br> with \n
+# removes all other html tags
+def strip_html(text):
+    text = text.replace("<br>","\n")
+    text = re.sub(r'<[a-z/=\" -:0-9A-Z+;]*>',"",text)
+    return text
 
 def generate_email(vals):
-    # try:
-    #     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    #     server.ehlo()
-    #     server.login(gmail_user, gmail_password)
-    # except Exception as e:
-    #     print(e)
-
-    sent_from = gmail_user
+    sent_from = from_user
 
     i = vals
     to = i[COL_EMAIL_ADDRESS]
+    orderID = i[COL_ORDERID]
 
-    subject = "Lunch Preorder Barcode"
+    subject = "Your Lunch Order for "+i[COL_ORDER_DATE]
 
     meal = i[COL_ENTREE]
 
     if (COL_SIDE != -1):
         meal = constructKey(i)
+    orderID_fname = get_barcode_image( orderID)
+    fp = open(orderID_fname, 'rb')
+    data_uri = base64.b64encode(fp.read()).decode()
+    fp.close()
 
-    body = 'Dear student,<br>' + \
+     # The embedded image doesn't show up in gmail so use inline attachment
+     # '<br>\n<img src="data:image/png;base64,{0}" alt="">'.format(data_uri) + \
+    htmlbody = '<html><body>Dear Student,<br>' + \
         '<br>' + \
-        'Thank you for participating in the lunch preordering system. Here is the lunch that we got from you:<br>' + \
-        '<b>Meal:</b> '+ meal + \
-        '<br>' + \
-        'Please find attached a file with a barcode. Show this barcode to the lunch worker serving you to receive your meal.<br>' + \
-        '<br><img src="cid:image1"><br>' + \
-        '<b>PLEASE NOTE</b>: If your meal was not one of the most commonly preordered items, your meal will need to be packaged on the spot (similar to the process before, except your order is already known).<br>' + \
-        '<br>' + \
-        'Thanks,<br>' + \
-        'San Ramon Makerspace'
+        'Thank you for ordering through the lunch preordering system. Below are the details of your order:' + \
+        '<br><b>Order ID:</b> '+ orderID + \
+        '<br><b>Meal:</b> '+ meal + \
+        '<br>Please find the barcode below that you can scan at the lunch station and pay using SchoolCafe to receive your meal.<br>' + \
+        '<br>\n<img src="cid:image1" alt="order: ' + orderID + '">' + \
+        '\n<br><b>PLEASE NOTE</b>: If your meal is not one of the most commonly preordered items, it will be packaged on the spot (similar to the process before, except your order is already known).<br>' + \
+        '\n<br>Thanks,' + \
+        '<br>San Ramon Makerspace</body></html>'
+    textbody=strip_html( htmlbody)
 
     try:
-        mail(to, subject, body, orderid_fname)
+        mail(to, subject, text=None, html=htmlbody, attach=orderID_fname)
+        os.remove(orderID_fname)
 
     except Exception as e:
         print("ERROR: Failed to send email to: "+to+": "+str(e))
 
 
-    #server.close()
 def createResponsesWrite():
     global done_values
-
 
     for i in values:
         vals = []
