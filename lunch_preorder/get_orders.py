@@ -229,25 +229,29 @@ def copy_orders(values,order_copies):
 
 
 def mail(to, subject, text=None, html=None, attach=None):
-   msg = MIMEMultipart('alternative')
-
+   msg = MIMEMultipart()
    msg['From'] = from_user #gmail_user
    msg['To'] = to
 #','.split(to)
    msg['Subject'] = subject
 
-   if html != None:
+   if (html != None and text != None):
+       msgAlternative = MIMEMultipart('alternative')
+       msg.attach(msgAlternative)
+       msgAlternative.attach(MIMEText(html, 'html'))
+       msgAlternative.attach(MIMEText(text, 'plain'))
+   elif (html != None):
        msg.attach(MIMEText(html, 'html'))
+   elif (text != None):
+       msg.attach(MIMEText(text, 'plain'))
 
-   if text != None:
-       msg.attach(MIMEText(text))
+   if (attach != None):
+       fp = open(attach, 'rb')
+       msgImage = MIMEImage(fp.read())
+       fp.close()
 
-   fp = open(attach, 'rb')
-   msgImage = MIMEImage(fp.read())
-   fp.close()
-
-   msgImage.add_header('Content-ID', '<image1>')
-   msg.attach(msgImage)
+       msgImage.add_header('Content-ID', '<image1>')
+       msg.attach(msgImage)
 	   # part = MIMEBase('application', 'octet-stream')
 	   # part.set_payload(open(attach, 'rb').read())
 	   # encoders.encode_base64(part)
