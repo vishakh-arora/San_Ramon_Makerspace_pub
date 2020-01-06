@@ -25,20 +25,20 @@ from barcode.writer import ImageWriter
 import imghdr
 import os
 
-pswd = open('/home/vishakh/pswd.txt','r').read().split('\n')
+#pswd = open('/home/vishakh/pswd.txt','r').read().split('\n')
 #print(pswd)
-gmail_user = pswd[0]
-gmail_password = pswd[1]
-
+#gmail_user = pswd[0]
+#gmail_password = pswd[1]
+from_user = "do-not-reply@srvusd-lunch.com"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-SAMPLE_SPREADSHEET_ID ='1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
-RPI_SPREADSHEET_ID = '1HBJ4ES21BtVONE_fXGlCRR7i_Jx2ezqluehfeaY1Rr4'
+SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+RPI_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
 #SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
 SAMPLE_RANGE_NAME = 'Lunch_preorders!A2:R'
-RPI_RANGE = 'Orders!A2:E'
+RPI_RANGE = 'Orders!A2:F'
 #SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
 ORDER_SPREADSHEET_ID = '1HBJ4ES21BtVONE_fXGlCRR7i_Jx2ezqluehfeaY1Rr4'
 WRITING_RANGE_RESPONSES = 'Lunch_preorders!A2:Z'
@@ -81,8 +81,8 @@ result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
 values = result.get('values')
 
 
-
-copy_orders()
+order_copies = []
+copy_orders(values,order_copies)
 
 result_RPi = sheet.values().get(spreadsheetId=RPI_SPREADSHEET_ID,
                             range=RPI_RANGE).execute()
@@ -90,7 +90,7 @@ values_RPi = result_RPi.get('values')
 updated_values_RPi = []
 orderLogs = open("orderLogs.csv","a")
 orderLog = ""
-today = datetime.datetime(2019,11,7,3)
+today = datetime.datetime.now()
 today = today.strftime("%m")+"/"+today.strftime("%d")+"/"+today.strftime("%Y")
 print("TODAY = "+today)
 for i in values_RPi:
@@ -160,7 +160,7 @@ fout.close()
 def mail(to, subject, text=None, attach=None):
    msg = MIMEMultipart()
 
-   msg['From'] = gmail_user
+   msg['From'] = from_user
    msg['To'] = to
 #','.split(to)
    msg['Subject'] = subject
@@ -178,13 +178,12 @@ def mail(to, subject, text=None, attach=None):
 	   # part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(attach))
 	   # msg.attach(part)
 
-#TODO: CHANGE TO LINODE SMTP CLIENT
-   mailServer = smtplib.SMTP("smtp.gmail.com", 587)
+   mailServer = smtplib.SMTP("localhost", 587)
    mailServer.ehlo()
    mailServer.starttls()
    #mailServer.ehlo()
-   mailServer.login(gmail_user, gmail_password)
-   mailServer.sendmail(gmail_user, to, msg.as_string())
+#   mailServer.login(gmail_user, gmail_password)
+   mailServer.sendmail(from_user, to, msg.as_string())
    # Should be mailServer.quit(), but that crashes...
    mailServer.close()
 
@@ -196,7 +195,7 @@ def generate_email():
     # except Exception as e:
     #     print(e)
 
-    sent_from = gmail_user
+    sent_from = from_user
     #to = "scurry@srvusd.net"
     to = "vishakh.arora29@gmail.com"
     subject = "Lunch Preorder Summary for "+date_formatted

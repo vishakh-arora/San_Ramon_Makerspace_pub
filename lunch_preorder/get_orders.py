@@ -157,8 +157,7 @@ def constructKey(row):
         key = row[COL_ENTREE]
     return key
 
-def copy_orders():
-    global values
+def copy_orders(values,order_copies):
 
     #date = datetime.datetime.now()
     date = datetime.datetime.now()
@@ -216,7 +215,17 @@ def copy_orders():
     print(orders_to_remove)
     # for h in orders_to_remove:
     #     values.remove(h)
+
+    body = {'values': createResponsesWrite()}
+    result = service.spreadsheets().values().update(
+    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
+    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
     #print(values)
+
+    body = {'values': order_copies}
+    result = service.spreadsheets().values().append(
+    spreadsheetId=ORDER_SPREADSHEET_ID, range=WRITING_RANGE,
+    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
 
 def mail(to, subject, text=None, html=None, attach=None):
@@ -313,18 +322,10 @@ def createResponsesWrite():
     return done_values
 
 def main():
-    copy_orders()
+    copy_orders(values,order_copies)
     #print(values)
-    body = {'values': createResponsesWrite()}
-    result = service.spreadsheets().values().update(
-    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
-    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
     print(order_copies)
-    body = {'values': order_copies}
-    result = service.spreadsheets().values().append(
-    spreadsheetId=ORDER_SPREADSHEET_ID, range=WRITING_RANGE,
-    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
 if (__name__=='__main__'):
     main()
