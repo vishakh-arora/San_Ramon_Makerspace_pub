@@ -127,12 +127,12 @@ def create_orderID(i, counter):
         COL_ORDER_DATE = 4
 
     orderDate = i[COL_ORDER_DATE].split('/')
-    #print(orderDate)
+    print(orderDate)
     month = orderDate[0].zfill(2)
     day = orderDate[1].zfill(2)
     year = orderDate[2]
     orderID = year + day + month + str(counter).zfill(4)
-
+#    print(orderID)
     return orderID
 
 def get_barcode_image( orderID):
