@@ -44,12 +44,13 @@ from_user = "do-not-reply@srvusd-lunch.com"
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+#SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
 #SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
-SAMPLE_RANGE_NAME = 'Lunch_preorders!A2:R'
+SAMPLE_SPREADSHEET_ID = '1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
 #SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
 ORDER_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
 WRITING_RANGE_RESPONSES = 'Lunch_preorders!Q2:Z'
+ROW_START_RANGE = 'Lunch_preorders!R2:R'
 WRITING_RANGE = 'Orders!A2:Z'
 #UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
 VALUE_INPUT_OPTION = "RAW"
@@ -81,20 +82,36 @@ creds = store.get()
 if not creds or creds.invalid:
     print("Getting authorization")
     creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    print(str(creds))
+#    print(str(creds))
     service = build('sheets', 'v4', credentials=creds)
 
 # Call the Sheets API
 sheet = service.spreadsheets()
+row_start = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                            range=ROW_START_RANGE).execute()
+start_index = int(row_start.get('values')[0][0])
+SAMPLE_RANGE_NAME = 'Lunch_preorders!A'+str(start_index+2)+':Q'
 result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
                             range=SAMPLE_RANGE_NAME).execute()
 values = result.get('values')
-print(values)
 done_values = []
 # for i in values:
 #     i.append("ORDERID")
-
+#counter = 1
+#vals_no_blanks = []
+#for i in values:
+#  if (len(i) != 0):
+#    vals_no_blanks.append(i)
+#    print(i)
+##  else:
+#    print(str(counter))
+#    print(i)
+#  counter += 1
+#values = vals_no_blanks
+#
 order_copies = []
+#print(str(counter))
+print(values)
 
 def getEntreeSide(row):
     global COL_SIDE
@@ -110,7 +127,8 @@ def getEntreeSide(row):
 def getMaxID():
     maxID = 1
     for i in values:
-        if (i[COL_ORDERID] != ''):
+        if (i[COL_ORDERID] != 'Placeholder'):
+            print(i)
             orderID = int(i[COL_ORDERID][:-4])
             print(orderID)
             if (orderID > maxID):
@@ -159,15 +177,17 @@ def constructKey(row):
 
 def copy_orders(values,order_copies):
 
-    #date = datetime.datetime.now()
+    #date = datetime.datetime(2020,1,26,8)
     date = datetime.datetime.now()
     hours_from_epoch = (((date - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
+    print("RN HOURS FROM EPOCH")
     print(hours_from_epoch)
 
     print(date)
     counter = getMaxID()
-
-    for i in values:
+    first_row = 0
+    for order_num in range(len(values)):
+        i = values[order_num]
         getEntreeSide(i)
         order_array = []
 
@@ -176,7 +196,8 @@ def copy_orders(values,order_copies):
             COL_ORDER_DATE = 3
         elif (i[4] != ''):
             COL_ORDER_DATE = 4
-
+#        print("DATEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+ #       print(i[COL_ORDER_DATE])
         formatted_date = i[COL_ORDER_DATE].split('/')
         orderDate = datetime.datetime(int(formatted_date[2]),int(formatted_date[0]),int(formatted_date[1]))
 
@@ -184,12 +205,16 @@ def copy_orders(values,order_copies):
         for j in range(len(formatted_date)):
             formatted_date[j] = formatted_date[j].zfill(2)
         i[COL_ORDER_DATE] = "/".join(formatted_date)
-        orders_to_remove = []
+   #     orders_to_remove = []
 
         hours_from_epoch_order = (((orderDate - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
-        print(hours_from_epoch_order)
-        if (abs(hours_from_epoch - hours_from_epoch_order) <= 24 and i[COL_DONE] != 'Done'):
-            print(abs(hours_from_epoch - hours_from_epoch_order))
+#        print("ORDER HOURS FROM EPOCH")
+#        print(orderDate)
+#        print(abs(hours_from_epoch - hours_from_epoch_order))
+        diff_hrs = hours_from_epoch - hours_from_epoch_order
+
+        if (abs(diff_hrs) <= 24): # and i[COL_DONE] != 'Done'):
+#            print(abs(hours_from_epoch - hours_from_epoch_order))
             print("CONSTRUCTING ORDER")
             orderID = create_orderID(i,counter)
             counter += 1
@@ -201,24 +226,25 @@ def copy_orders(values,order_copies):
 
             order_array = remove_blanks(order_array)
             key = constructKey(i)
-            #order_array.insert(1,i[COL_ORDERID])
             if (i[COL_CARTE_OR_NO] == "Yes"):
                 order_array.insert(2,'')
             order_array.append(key)
             order_array.append(i[COL_EMAIL_ADDRESS])
+            order_array.insert(3,i[COL_ORDERID])
             print(order_array)
             order_copies.append(order_array)
-            i[COL_DONE] = "Done"
+#            i[COL_DONE] = "Done"
             print(i)
-            orders_to_remove.append(i)
-    print("ORDERS TO REMOVE")
-    print(orders_to_remove)
+        elif (first_row == 0 and diff_hrs < 0):
+            first_row = order_num + start_index
+#            orders_to_remove.append(i)
+ #   print("ORDERS TO REMOVE")
+  #  print(orders_to_remove)
     # for h in orders_to_remove:
     #     values.remove(h)
-
-    body = {'values': createResponsesWrite()}
+    body = {'values': [[str(first_row)]]}
     result = service.spreadsheets().values().update(
-    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
+    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=ROW_START_RANGE,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
     #print(values)
 
@@ -296,6 +322,7 @@ def generate_email(vals):
      # '<br>\n<img src="data:image/png;base64,{0}" alt="">'.format(data_uri) + \
     htmlbody = '<html><body>Dear Student,<br>' + \
         '<br>' + \
+        '<b>This is a test of the lunch preordering system. You will not be scanning the barcdoe below to receive your meal at this stage.</b><br><br>' + \
         'Thank you for ordering through the lunch preordering system. Below are the details of your order:' + \
         '<br><b>Order ID:</b> '+ orderID + \
         '<br><b>Meal:</b> '+ meal + \

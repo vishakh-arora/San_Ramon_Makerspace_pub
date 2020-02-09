@@ -34,11 +34,11 @@ from_user = "do-not-reply@srvusd-lunch.com"
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+#SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+SAMPLE_SPREADSHEET_ID ='1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
 RPI_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
-#SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
-SAMPLE_RANGE_NAME = 'Lunch_preorders!A2:R'
 RPI_RANGE = 'Orders!A2:F'
+ROW_START_RANGE = 'Lunch_preorders!R2:R'
 #SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
 ORDER_SPREADSHEET_ID = '1HBJ4ES21BtVONE_fXGlCRR7i_Jx2ezqluehfeaY1Rr4'
 WRITING_RANGE_RESPONSES = 'Lunch_preorders!A2:Z'
@@ -76,10 +76,13 @@ if not creds or creds.invalid:
 
 # Call the Sheets API
 sheet = service.spreadsheets()
+start_index = int(sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                            range=ROW_START_RANGE).execute().get('values')[0][0])
+SAMPLE_RANGE_NAME = 'Lunch_preorders!A'+str(start_index+2)+':Q'
+
 result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
                             range=SAMPLE_RANGE_NAME).execute()
 values = result.get('values')
-
 
 order_copies = []
 copy_orders(values,order_copies)
@@ -100,7 +103,8 @@ for i in values_RPi:
         orderLog = orderLog[:-1] + "\n"
     elif (i[COL_ORDER_DATE] == today):
         updated_values_RPi.append(i)
-print(orderLog)
+#print(orderLog)
+print("UPDATED RPI STUFFFFFF")
 print(updated_values_RPi)
 orderLogs.write(orderLog)
 orderLogs.close()
@@ -113,10 +117,10 @@ def clearResponses():
             vals.append('')
         valuesEmpty.append(vals)
 
-    body = {'values': valuesEmpty}
-    result = service.spreadsheets().values().update(
-    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
-    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+#    body = {'values': valuesEmpty}
+#    result = service.spreadsheets().values().update(
+#    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
+#    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
     valuesEmpty_RPi = []
     for i in values_RPi:
@@ -130,14 +134,14 @@ def clearResponses():
     spreadsheetId=RPI_SPREADSHEET_ID, range=WRITING_RANGE,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
-print(values)
+#print(values)
 clearResponses()
-rowsToRetain = []
-for i in values:
-    if (i[COL_DONE] != "Done"):
-        rowsToRetain.append(i)
-print("ROWS TO RETAIN")
-print(rowsToRetain)
+#rowsToRetain = []
+#for i in values:
+#    if (i[COL_DONE] != "Done"):
+#        rowsToRetain.append(i)
+#print("ROWS TO RETAIN")
+#print(rowsToRetain)
 orderSummary = {}
 for i in updated_values_RPi:
     orderSummary[i[COL_KEY]] = 0
@@ -219,9 +223,9 @@ result = service.spreadsheets().values().update(
 spreadsheetId=RPI_SPREADSHEET_ID, range=WRITING_RANGE,
 valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
-body = {'values': rowsToRetain}
-result = service.spreadsheets().values().update(
-spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
-valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+#body = {'values': rowsToRetain}
+#result = service.spreadsheets().values().update(
+#spreadsheetId=SAMPLE_SPREADSHEET_ID, range=WRITING_RANGE_RESPONSES,
+#valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
 generate_email()
