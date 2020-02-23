@@ -6,8 +6,6 @@
 # copy over to RPi spreadsheet, delete from order spreadsheet
 ################################################################################################
 
-
-
 # Work with Python 3.6
 from __future__ import print_function
 from PIL import Image
@@ -35,31 +33,21 @@ import os
 import re
 import base64
 
-#pswd = open('/home/vishakh/pswd.txt','r').read().split('\n')
-#print(pswd)
-#gmail_user = pswd[0]
-#gmail_password = pswd[1]
 from_user = "do-not-reply@srvusd-lunch.com"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-#SAMPLE_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
-#SAMPLE_SPREADSHEET_ID ='1wVxCCt75JyoL8N6wDT2YDNbK9411esNolWUWyHJ9T5g'
-SAMPLE_SPREADSHEET_ID = '1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
-#SAMPLE_RANGE_NAME = 'Locker_Responses!A2:I'
+#FORM_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+FORM_SPREADSHEET_ID = '1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
+
 ORDER_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
-WRITING_RANGE_RESPONSES = 'Lunch_preorders!Q2:Z'
-ROW_START_RANGE = 'Lunch_preorders!R2:R'
+ROW_STORE_RANGE = 'Lunch_preorders!R1:T1'
 WRITING_RANGE = 'Orders!A2:Z'
-#UNASSIGNED_LOCKERS_RANGE = 'Unassigned_Lockers!A2:B'
+
 VALUE_INPUT_OPTION = "RAW"
 
-
-#NUM_STUDENTS = 3500
-
 SERVICE_ACCOUNT_FILE = '/home/vishakh/preorder_service.json'
-#=======
 
 COL_ORDER_DATE = -1
 COL_CARTE_OR_NO = 2
@@ -71,52 +59,43 @@ COL_SIDE = -1
 COL_ENTREE = -1
 COL_DONE = 17
 
-"""Shows basic usage of the Sheets API.
-Prints values from a sample spreadsheet.
-"""
-# The file token.json stores the user's access and refresh tokens, and is
-# created automatically when the authorization flow completes for the first
-# time.
-store = file.Storage('token.json')
-creds = store.get()
-if not creds or creds.invalid:
-    print("Getting authorization")
-    creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-#    print(str(creds))
-    service = build('sheets', 'v4', credentials=creds)
+def getSpreadsheetService():
+    store = file.Storage('token.json')
+    creds = store.get()
+    if not creds or creds.invalid:
+        print("Getting authorization")
+        creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    #    print(str(creds))
+        service = build('sheets', 'v4', credentials=creds)
+    return service
 
-# Call the Sheets API
-sheet = service.spreadsheets()
-row_start = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                            range=ROW_START_RANGE).execute()
-start_index = int(row_start.get('values')[0][0])
-SAMPLE_RANGE_NAME = 'Lunch_preorders!A'+str(start_index+2)+':Q'
-result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                            range=SAMPLE_RANGE_NAME).execute()
-values = result.get('values')
-done_values = []
-# for i in values:
-#     i.append("ORDERID")
-#counter = 1
-#vals_no_blanks = []
-#for i in values:
-#  if (len(i) != 0):
-#    vals_no_blanks.append(i)
-#    print(i)
-##  else:
-#    print(str(counter))
-#    print(i)
-#  counter += 1
-#values = vals_no_blanks
-#
-order_copies = []
-#print(str(counter))
-print(values)
+def readData(service):
+    sheet = service.spreadsheets()
+    # Read any stored values of row values for start range and completed order row
+    row_indices = sheet.values().get(spreadsheetId=FORM_SPREADSHEET_ID,
+                                range=ROW_STORE_RANGE).execute()
+    search_row = int(row_indices.get('values')[0][0])
+
+    # Read data from the form spreadsheet
+    readRange = 'Lunch_preorders!A'+str(search_row+2)+':Q'
+    result = sheet.values().get(spreadsheetId=FORM_SPREADSHEET_ID,
+                                range=readRange).execute()
+    values = result.get('values')
+    return (values, search_row)
+
+
+def readState(service):
+    sheet = service.spreadsheets()
+    # Read any stored values of row values for start range and completed order row
+    row_indices = sheet.values().get(spreadsheetId=FORM_SPREADSHEET_ID,
+                                range=ROW_STORE_RANGE).execute()
+    processed_row = int(row_indices.get('values')[0][1])
+    order_ID = int(row_indices.get('values')[0][2])
+    return (processed_row, order_ID)
 
 def getEntreeSide(row):
     global COL_SIDE
     global COL_ENTREE
-    global values
 
     for j in range(BEGIN_ENTREE,END_ENTREE+1):
         if (row[j] != ""):
@@ -124,32 +103,14 @@ def getEntreeSide(row):
             COL_SIDE = j + 1
             break
 
-def getMaxID():
-    maxID = 1
-    for i in values:
-        if (i[COL_ORDERID] != 'Placeholder'):
-            print(i)
-            orderID = int(i[COL_ORDERID][:-4])
-            print(orderID)
-            if (orderID > maxID):
-                maxID = orderID
-    return maxID
-
-def create_orderID(i, counter):
-    global COL_ORDER_DATE
-    global values
-
-    if (i[3] != ''):
-        COL_ORDER_DATE = 3
-    elif (i[4] != ''):
-        COL_ORDER_DATE = 4
-
-    orderDate = i[COL_ORDER_DATE].split('/')
-    print(orderDate)
+def create_orderID(row, counter, COL_ORDER_DATE):
+    orderDate = row[COL_ORDER_DATE].split('/')
+    #print(orderDate)
     month = orderDate[0].zfill(2)
     day = orderDate[1].zfill(2)
     year = orderDate[2]
     orderID = year + day + month + str(counter).zfill(4)
+    row[COL_ORDERID] = orderID
 #    print(orderID)
     return orderID
 
@@ -166,7 +127,7 @@ def remove_blanks(values):
     print(noBlanks)
     return noBlanks
 
-def constructKey(row):
+def constructMeal(row):
     getEntreeSide(row)
 
     if (row[COL_CARTE_OR_NO] == "No"):
@@ -175,90 +136,120 @@ def constructKey(row):
         key = row[COL_ENTREE]
     return key
 
-def copy_orders(values,order_copies):
+def setCOL_ORDER_DATE(row):
+    COL_ORDER_DATE = -1
+    if (row[3] != ''):
+        COL_ORDER_DATE = 3
+    elif (row[4] != ''):
+        COL_ORDER_DATE = 4
+    return COL_ORDER_DATE
 
-    #date = datetime.datetime(2020,1,26,8)
-    date = datetime.datetime.now()
-    hours_from_epoch = (((date - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
-    print("RN HOURS FROM EPOCH")
-    print(hours_from_epoch)
+def formatDate(date_arr):
+    for j in range(len(date_arr)):
+        date_arr[j] = date_arr[j].zfill(2)
+    return "/".join(date_arr)
 
-    print(date)
-    counter = getMaxID()
-    first_row = 0
-    for order_num in range(len(values)):
-        i = values[order_num]
-        getEntreeSide(i)
-        order_array = []
+def constructOrderArray(row, COL_ORDER_DATE):
+    order_array = []
 
-        if (i[3] != ''):
-            print(i[3])
-            COL_ORDER_DATE = 3
-        elif (i[4] != ''):
-            COL_ORDER_DATE = 4
-#        print("DATEEEEEEEEEEEEEEEEEEEEEEEEEEE")
- #       print(i[COL_ORDER_DATE])
-        formatted_date = i[COL_ORDER_DATE].split('/')
-        orderDate = datetime.datetime(int(formatted_date[2]),int(formatted_date[0]),int(formatted_date[1]))
+    for x in range(COL_ORDER_DATE,len(row)-1):
+        order_array.append(row[x])
 
-        # Standardize order date so that date comparison works at 3 AM (10/9/19 --> 10/09/19)
-        for j in range(len(formatted_date)):
-            formatted_date[j] = formatted_date[j].zfill(2)
-        i[COL_ORDER_DATE] = "/".join(formatted_date)
-   #     orders_to_remove = []
+    order_array = remove_blanks(order_array)
+    meal = constructMeal(row)
+    if (row[COL_CARTE_OR_NO] == "Yes"):
+        order_array.insert(2,'')
+    order_array.append(meal)
+    order_array.append(row[COL_EMAIL_ADDRESS])
+    order_array.insert(3,row[COL_ORDERID])
 
-        hours_from_epoch_order = (((orderDate - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)))/3600
-#        print("ORDER HOURS FROM EPOCH")
-#        print(orderDate)
-#        print(abs(hours_from_epoch - hours_from_epoch_order))
-        diff_hrs = hours_from_epoch - hours_from_epoch_order
+    return order_array
+    #print(order_array)
 
-        if (abs(diff_hrs) <= 24): # and i[COL_DONE] != 'Done'):
-#            print(abs(hours_from_epoch - hours_from_epoch_order))
-            print("CONSTRUCTING ORDER")
-            orderID = create_orderID(i,counter)
-            counter += 1
-            i[COL_ORDERID] = orderID
+def convertToDate(strDate):
+    parts = strDate.split('/')
+    date = datetime.datetime(int(parts[2]),int(parts[0]),int(parts[1]))
+    return (date, parts)
 
-            generate_email(i)
-            for x in range(COL_ORDER_DATE,len(i)-1):
-                order_array.append(i[x])
+def compareOrderDate(row, COL_ORDER_DATE, processing_date):
+    orderDate, dateParts = convertToDate( row[COL_ORDER_DATE])
+    # Standardize order date so that date comparison works at 3 AM (10/9/19 --> 10/09/19)
+    row[COL_ORDER_DATE] = formatDate(dateParts)
+    diff_days = (orderDate - processing_date)/ datetime.timedelta(seconds=1)/3600/24
+    return int(diff_days)
 
-            order_array = remove_blanks(order_array)
-            key = constructKey(i)
-            if (i[COL_CARTE_OR_NO] == "Yes"):
-                order_array.insert(2,'')
-            order_array.append(key)
-            order_array.append(i[COL_EMAIL_ADDRESS])
-            order_array.insert(3,i[COL_ORDERID])
-            print(order_array)
-            order_copies.append(order_array)
-#            i[COL_DONE] = "Done"
-            print(i)
-        elif (first_row == 0 and diff_hrs < 0):
-            first_row = order_num + start_index
-#            orders_to_remove.append(i)
- #   print("ORDERS TO REMOVE")
-  #  print(orders_to_remove)
-    # for h in orders_to_remove:
-    #     values.remove(h)
-    body = {'values': [[str(first_row)]]}
+
+def saveState( service, first_row, completed_row, order_ID):
+    body = {'values': [[str(first_row), str(completed_row), str(order_ID)]]}
     result = service.spreadsheets().values().update(
-    spreadsheetId=SAMPLE_SPREADSHEET_ID, range=ROW_START_RANGE,
+    spreadsheetId=FORM_SPREADSHEET_ID, range=ROW_STORE_RANGE,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-    #print(values)
 
-    body = {'values': order_copies}
+def saveOrders( service, orders):
+
+    body = {'values': orders}
     result = service.spreadsheets().values().append(
     spreadsheetId=ORDER_SPREADSHEET_ID, range=WRITING_RANGE,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
+def rowOfHistoricalData( values, pdate):
+    for row_num in range(len(values)):
+        row = values[row_num]
+        COL_ORDER_DATE = setCOL_ORDER_DATE(row)
+        diff_days = compareOrderDate( row, COL_ORDER_DATE, pdate)
+        if (diff_days >= 0):
+            return row_num
+    return row_num
+
+
+def processOrders( processing_date):
+    service = getSpreadsheetService()
+    (processed_row, counter) = readState( service)
+    print('Number orders processed so far: ' + str(counter))
+    (values, start_index) = readData( service)
+
+    (pdate, x) = convertToDate( processing_date)
+
+    # If we have never collected orders for this day, let's narrow down the top
+    if (counter == 0):
+        earliest_row = rowOfHistoricalData( values, pdate)
+        if (earliest_row > 0):
+            print('Narrowed top row to: ' + str(start_index + earliest_row))
+            saveState(service, start_index + earliest_row, -1, 0)
+            return
+
+    print('Will ignore orders till: ' + str(processed_row))
+
+    for row_num in range(len(values)):
+        row = values[row_num]
+        COL_ORDER_DATE = setCOL_ORDER_DATE(row)
+        diff_days = compareOrderDate( row, COL_ORDER_DATE, pdate)
+        save_orders = []
+        # If the order is for the processing date, send the email to the student and copy the order to RPi spreadsheet
+        if (diff_days == 0 and row_num > processed_row):
+            print("Adding order")
+            orderID = create_orderID( row,counter,COL_ORDER_DATE)
+            order_array = constructOrderArray( row, COL_ORDER_DATE)
+            save_orders.append(order_array)
+            try:
+                generate_email(order_array)
+            except:
+                print("Unable to send mail for ")
+                print(order_array)
+                return
+            counter += 1
+            processed_row = row_num
+            # Save the state after each successful order
+            # The start_index should NOT be changed intra-day & the processed_row and counter are reset at beginning of each day
+            saveState(service, start_index, processed_row, counter)
+            saveOrders( service, save_orders)
+    # print(order_copies)
+    return
 
 def mail(to, subject, text=None, html=None, attach=None):
    msg = MIMEMultipart()
-   msg['From'] = from_user #gmail_user
+   msg['From'] = from_user
    msg['To'] = to
-#','.split(to)
    msg['Subject'] = subject
 
    if (html != None and text != None):
@@ -287,8 +278,6 @@ def mail(to, subject, text=None, html=None, attach=None):
    mailServer = smtplib.SMTP("localhost", 587)
    mailServer.ehlo()
    mailServer.starttls()
-   #mailServer.ehlo()
-#   mailServer.login(gmail_user, gmail_password)
    mailServer.sendmail(from_user, to, msg.as_string())
    # Should be mailServer.quit(), but that crashes...
    mailServer.close()
@@ -300,20 +289,21 @@ def strip_html(text):
     text = re.sub(r'<[a-z/=\" -:0-9A-Z+;]*>',"",text)
     return text
 
-def generate_email(vals):
+COL_ORDER_DET_EMAIL = 5
+COL_ORDER_DET_ID = 3
+COL_ORDER_DET_DATE = 0
+COL_ORDER_DET_MEAL = 4
+def generate_email(order_array):
     sent_from = from_user
 
-    i = vals
-    to = i[COL_EMAIL_ADDRESS]
-    orderID = i[COL_ORDERID]
+    to = order_array[COL_ORDER_DET_EMAIL]
+    orderID = order_array[COL_ORDER_DET_ID]
 
-    subject = "Your Lunch Order for "+i[COL_ORDER_DATE]
+    subject = "Your Lunch Order for "+order_array[COL_ORDER_DET_DATE]
 
-    meal = i[COL_ENTREE]
+    meal = order_array[COL_ORDER_DET_MEAL]
 
-    if (COL_SIDE != -1):
-        meal = constructKey(i)
-    orderID_fname = get_barcode_image( orderID)
+    orderID_fname = get_barcode_image(orderID)
     fp = open(orderID_fname, 'rb')
     data_uri = base64.b64encode(fp.read()).decode()
     fp.close()
@@ -340,23 +330,13 @@ def generate_email(vals):
     except Exception as e:
         print("ERROR: Failed to send email to: "+to+": "+str(e))
 
+def start( date):
+    orders = processOrders( date)
 
-def createResponsesWrite():
-    global done_values
 
-    for i in values:
-        vals = []
-        vals.append(i[COL_ORDERID])
-        vals.append(i[COL_DONE])
-        done_values.append(vals)
-    print(done_values)
-    return done_values
-
-def main():
-    copy_orders(values,order_copies)
-    #print(values)
-
-    print(order_copies)
 
 if (__name__=='__main__'):
-    main()
+    if (len(sys.argv) < 2):
+        print('Requires a date in format mm/dd/yyyy')
+        exit(2)
+    start( sys.argv[1])
