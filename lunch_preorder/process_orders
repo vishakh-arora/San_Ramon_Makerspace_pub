@@ -1,0 +1,28 @@
+#!/bin/bash
+exec 9>/var/tmp/order-process.lock
+if ! flock -n 9  ; then
+   echo "Aborting as the previous $0 job is still running"
+   exit 1
+fi
+# this now runs under the lock until 9 is closed (it will be closed automatically when the script ends)
+# The students specify their lunch menu items in Google Form for the week. The get_orders.py filters out tomorrow's items and creates orders and sends email.
+# The goal of this script is to figure out "tomorrow" and perform this only during a 12 hour window 2300 (3pm Pacific/ 2pm DST) and 1100 (3am Pacific)
+# This script can be invoked frequently during the window
+
+cd /home/vishakh/San_Ramon_Makerspace/lunch_preorder/
+# Take the latest orderSummary report date as the completed date
+last_completed_date=$( ls -t orderSummary* | head -1 | cut -f2 -d_ )
+# The next day is + 1 day of above
+run_date=$( date -d "${last_completed_date} 1 days" +%m/%d/%Y )
+
+utc_hour=$( date +%H)
+echo $utc_hour
+if test ${utc_hour} == 23 -o ${utc_hour} -lt 11 ; then
+  first_run_check=$( echo $run_date.lock | sed -e 's|/|-|g')
+  mkdir $first_run_check
+  if [ $? == 0 ] ; then
+    /usr/bin/python3 /home/vishakh/San_Ramon_Makerspace/lunch_preorder/get_orders.py ${run_date} first_run
+  fi
+  echo "Running order processsing for $run_date"
+  # /usr/bin/python3 /home/vishakh/San_Ramon_Makerspace/lunch_preorder/get_orders.py ${run_date}
+fi
