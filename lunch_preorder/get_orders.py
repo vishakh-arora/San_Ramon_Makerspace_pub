@@ -32,6 +32,8 @@ from io import BytesIO
 import os
 import re
 import base64
+import urllib
+import requests
 
 from_user = "do-not-reply@srvusd-lunch.com"
 
@@ -59,15 +61,13 @@ COL_SIDE = -1
 COL_ENTREE = -1
 COL_DONE = 17
 
-def getSpreadsheetService():
-    store = file.Storage('token.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        print("Getting authorization")
-        creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    #    print(str(creds))
-        service = build('sheets', 'v4', credentials=creds)
-    return service
+store = file.Storage('token.json')
+creds = store.get()
+if not creds or creds.invalid:
+    print("Getting authorization")
+    creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    # print(str(creds))
+    service = build('sheets', 'v4', credentials=creds)
 
 def readData(service):
     sheet = service.spreadsheets()
@@ -186,7 +186,6 @@ def saveState( service, first_row, completed_row, order_ID):
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
 
 def saveOrders( service, orders):
-
     body = {'values': orders}
     result = service.spreadsheets().values().append(
     spreadsheetId=ORDER_SPREADSHEET_ID, range=WRITING_RANGE,
@@ -201,23 +200,53 @@ def rowOfHistoricalData( values, pdate):
             return row_num
     return row_num
 
+def archive_orders( ):
+    sheet = service.spreadsheets()
+    result_RPi = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
+                              range=WRITING_RANGE).execute()
+    values_RPi = result_RPi.get('values')
+    orderLogs = open("orderLogs.csv","a")
+    for row in values_RPi:
+          logline = ""
+          for j in range(len(row)-1):
+              logline += "\""+row[j]+"\","
+          logline = logline[:-1] + "\n"
+          orderLogs.write(logline.encode('utf-8'))
+    orderLogs.close()
+
+def delete_orders():
+    requests = []
+    requests.append( {
+      "deleteDimension": {
+        "range": {
+          "sheetId": 0,
+          "dimension": "ROWS",
+          "startIndex": 1
+        }
+      }
+    })
+    body = {
+      'requests': requests
+    }
+    response = service.spreadsheets().batchUpdate( spreadsheetId=ORDER_SPREADSHEET_ID, body=body).execute()
+
+def startDay( processing_date):
+    (values, start_index) = readData( service)
+    # If we have never collected orders for this day, let's narrow down the top
+    (pdate, x) = convertToDate( processing_date)
+    earliest_row = rowOfHistoricalData( values, pdate)
+    if (earliest_row > 0):
+       print('Narrowed top row to: ' + str(start_index + earliest_row))
+       saveState(service, start_index + earliest_row, -1, 0)
+    archive_orders()
+    delete_orders()
 
 def processOrders( processing_date):
-    service = getSpreadsheetService()
     (processed_row, counter) = readState( service)
     print('Number orders processed so far: ' + str(counter))
     (values, start_index) = readData( service)
 
     (pdate, x) = convertToDate( processing_date)
-
-    # If we have never collected orders for this day, let's narrow down the top
-    if (counter == 0):
-        earliest_row = rowOfHistoricalData( values, pdate)
-        if (earliest_row > 0):
-            print('Narrowed top row to: ' + str(start_index + earliest_row))
-            saveState(service, start_index + earliest_row, -1, 0)
-            return
-
     print('Will ignore orders till: ' + str(processed_row))
 
     for row_num in range(len(values)):
@@ -241,8 +270,8 @@ def processOrders( processing_date):
             processed_row = row_num
             # Save the state after each successful order
             # The start_index should NOT be changed intra-day & the processed_row and counter are reset at beginning of each day
-            saveState(service, start_index, processed_row, counter)
-            saveOrders( service, save_orders)
+    saveState(service, start_index, processed_row, counter)
+    saveOrders( service, save_orders)
     # print(order_copies)
     return
 
@@ -333,10 +362,12 @@ def generate_email(order_array):
 def start( date):
     orders = processOrders( date)
 
-
-
 if (__name__=='__main__'):
     if (len(sys.argv) < 2):
         print('Requires a date in format mm/dd/yyyy')
         exit(2)
-    start( sys.argv[1])
+    date = sys.argv[1]
+    if ( sys.argv < 3)
+        processOrders( date)
+    else if (sys.argv[2] == 'first_run')
+        startDay( date)
