@@ -17,12 +17,12 @@ run_date=$( date -d "${last_completed_date} 1 days" +%m/%d/%Y )
 
 utc_hour=$( date +%H)
 echo $utc_hour
-if test ${utc_hour} == 23 -o ${utc_hour} -lt 11 ; then
+if test ${utc_hour} == 23 -o ${utc_hour} -lt 03 ; then
   first_run_check=$( echo $run_date.lock | sed -e 's|/|-|g')
   mkdir $first_run_check
   if [ $? == 0 ] ; then
     /usr/bin/python3 /home/vishakh/San_Ramon_Makerspace/lunch_preorder/get_orders.py ${run_date} first_run
   fi
   echo "Running order processsing for $run_date"
-  # /usr/bin/python3 /home/vishakh/San_Ramon_Makerspace/lunch_preorder/get_orders.py ${run_date}
+  /usr/bin/python3 /home/vishakh/San_Ramon_Makerspace/lunch_preorder/get_orders.py ${run_date}
 fi

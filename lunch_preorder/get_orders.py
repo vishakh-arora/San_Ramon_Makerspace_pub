@@ -40,8 +40,8 @@ from_user = "do-not-reply@srvusd-lunch.com"
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-#FORM_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
-FORM_SPREADSHEET_ID = '1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
+FORM_SPREADSHEET_ID ='1aD6FpWSCD7yD0RlpSDh0qdP4oaCPPDYpT48AfaVl6QY'
+#FORM_SPREADSHEET_ID = '1VYPZ9BLC4IN0wXlMcDLKpsoZC5o7GlcFy3Y0f_XkQAs'
 
 ORDER_SPREADSHEET_ID = '1NgjQHMw1JGcOpHOTW4rdviKrCOEslBRfz-KZ3KfJcaQ'
 ROW_STORE_RANGE = 'Lunch_preorders!R1:T1'
@@ -211,7 +211,7 @@ def archive_orders( ):
           for j in range(len(row)-1):
               logline += "\""+row[j]+"\","
           logline = logline[:-1] + "\n"
-          orderLogs.write(logline.encode('utf-8'))
+          orderLogs.write(logline)
     orderLogs.close()
 
 def delete_orders():
@@ -248,12 +248,12 @@ def processOrders( processing_date):
 
     (pdate, x) = convertToDate( processing_date)
     print('Will ignore orders till: ' + str(processed_row))
+    save_orders = []
 
     for row_num in range(len(values)):
         row = values[row_num]
         COL_ORDER_DATE = setCOL_ORDER_DATE(row)
         diff_days = compareOrderDate( row, COL_ORDER_DATE, pdate)
-        save_orders = []
         # If the order is for the processing date, send the email to the student and copy the order to RPi spreadsheet
         if (diff_days == 0 and row_num > processed_row):
             print("Adding order")
@@ -262,8 +262,8 @@ def processOrders( processing_date):
             save_orders.append(order_array)
             try:
                 generate_email(order_array)
-            except:
-                print("Unable to send mail for ")
+            except Exception as e:
+                print("Unable to send mail for because " + str(e))
                 print(order_array)
                 return
             counter += 1
@@ -322,6 +322,7 @@ COL_ORDER_DET_EMAIL = 5
 COL_ORDER_DET_ID = 3
 COL_ORDER_DET_DATE = 0
 COL_ORDER_DET_MEAL = 4
+
 def generate_email(order_array):
     sent_from = from_user
 
@@ -341,16 +342,17 @@ def generate_email(order_array):
      # '<br>\n<img src="data:image/png;base64,{0}" alt="">'.format(data_uri) + \
     htmlbody = '<html><body>Dear Student,<br>' + \
         '<br>' + \
-        '<b>This is a test of the lunch preordering system. You will not be scanning the barcdoe below to receive your meal at this stage.</b><br><br>' + \
         'Thank you for ordering through the lunch preordering system. Below are the details of your order:' + \
         '<br><b>Order ID:</b> '+ orderID + \
         '<br><b>Meal:</b> '+ meal + \
         '<br>Please find the barcode below that you can scan at the lunch station and pay using SchoolCafe to receive your meal.<br>' + \
         '<br>\n<img src="cid:image1" alt="order: ' + orderID + '">' + \
-        '\n<br><b>PLEASE NOTE</b>: If your meal is not one of the most commonly preordered items, it will be packaged on the spot (similar to the process before, except your order is already known).<br>' + \
+        '\n<br><b>PLEASE NOTE</b>: All meals will be packaged on the spot, this system is just removing verbal communication from the ordering process.<br>' + \
         '\n<br>Thanks,' + \
         '<br>San Ramon Makerspace</body></html>'
     textbody=strip_html( htmlbody)
+# If your meal is not one of the most commonly preordered items, it will be packaged on the spot (similar to the process before, except your order is already known).<br>' + \ #
+# '<b>If you are not one of the 30 students who has been emailed regarding the 2/26 launch, you will not be able to scan orders YET (please consider this email as a test). Otherwise, please follow the instructions given to you via email. </b><br><br>' + \
 
     try:
         mail(to, subject, text=None, html=htmlbody, attach=orderID_fname)
@@ -367,7 +369,7 @@ if (__name__=='__main__'):
         print('Requires a date in format mm/dd/yyyy')
         exit(2)
     date = sys.argv[1]
-    if ( sys.argv < 3)
+    if (len(sys.argv) < 3):
         processOrders( date)
-    else if (sys.argv[2] == 'first_run')
+    elif (sys.argv[2] == 'first_run'):
         startDay( date)
