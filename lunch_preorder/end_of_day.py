@@ -113,8 +113,8 @@ def mail(to, subject, text=None, attach=None, attach1=None):
 
 def generate_email():
     sent_from = from_user
-    #to = ["scurry@srvusd.net","lwhite@srvusd.net"]
-    to = ["vishakh.arora29@gmail.com"] #,"parora12@gmail.com"]
+    to = ["scurry@srvusd.net","lwhite@srvusd.net","vishakh.arora29@gmail.com"]
+    #to = ["vishakh.arora29@gmail.com"] #,"parora12@gmail.com"]
     subject = "Lunch Preorder Summary for "+date_formatted
 
     body = 'Dear Ms. Curry and Ms. White,\n' + \
