@@ -89,7 +89,7 @@ def reload(): #write to the spreadsheet here with timestamps
   values = new_values
   orderID_index = new_index
   # Return the date so that user knows date of the data
-
+  save_file()
   return values[0][COL_ORDER_DATE]
 
 def getOrderDate():
@@ -97,13 +97,10 @@ def getOrderDate():
   return date.strftime("%Y-%m-%d")
 
 def refreshFile():
-  try:
-    values = open("orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
-  except Exception as e:
-    return "Data not loaded"
+  values = open("orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
 
   if (len(values) == 0):
-    return "Data not loaded"
+    raise ValueError('No orders for today')
 
   for i in range(len(values)):
     values[i] = values[i].split(",")
@@ -111,7 +108,6 @@ def refreshFile():
   return values[0][COL_ORDER_DATE]
 
 def save_file():
-  reload()
   # The file will not be written if reload is unable to contact
   fout = open("orders_"+getOrderDate()+".csv", "w")
   orders = ""
@@ -198,4 +194,4 @@ def cron_write_timestamps(onoff):
     return ("Timer cancelled")
 
 if len(argv) > 1 and argv[1] == "save":
-   save_file()
+   reload()

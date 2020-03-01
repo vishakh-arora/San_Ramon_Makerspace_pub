@@ -46,7 +46,12 @@ def index():
 
 @app.route('/refresh')
 def refresh():
-  return fulfill_orders.refreshFile()
+  try:
+    #try loading from Google API (requires internet)
+    return fulfill_orders.reload()
+  except:
+    #if there's no internet, read the CSV file for today
+    return fulfill_orders.refreshFile()
 
 @app.route('/getorder/<orderID>')
 def get_order(orderID):
