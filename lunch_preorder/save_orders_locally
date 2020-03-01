@@ -1,0 +1,14 @@
+#!/bin/bash
+exec 9>/var/tmp/order-save-process.lock
+if ! flock -n 9  ; then
+   echo "Aborting as the previous $0 job is still running"
+   exit 1
+fi
+
+INSTALL_DIR=/home/vishakh/San_Ramon_Makerspace/lunch_preorder/
+cd ${INSTALL_DIR}
+# The next day is + 1 day of above
+run_date=$( date +%Y-%m-%d )
+if [ ! -f orders_${run_date}.csv ] ; then
+   python3 fulfill_orders.py save
+fi

@@ -11,7 +11,7 @@ import random
 import string
 import sys, time, os.path
 import googleapiclient.discovery
-import html
+import html, datetime
 from timeloop import Timeloop
 import datetime
 #import smtplib
@@ -78,9 +78,6 @@ if not creds or creds.invalid:
 dict_timestamp = {}
 
 def reload(): #write to the spreadsheet here with timestamps
-  global orderID_index
-  global values
-
   # Call the Sheets API
   sheet = service.spreadsheets()
   result = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
@@ -92,13 +89,42 @@ def reload(): #write to the spreadsheet here with timestamps
   values = new_values
   orderID_index = new_index
   # Return the date so that user knows date of the data
-  
+
   return values[0][COL_ORDER_DATE]
 
-def getOrder(orderID):
-  global values
-  global dict_timestamp
+def getOrderDate():
+  date = datetime.datetime.now()
+  return date.strftime("%Y-%m-%d")
 
+def refreshFile():
+  try:
+    values = open("orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
+  except Exception as e:
+    return "Data not loaded"
+
+  if (len(values) == 0):
+    return "Data not loaded"
+
+  for i in range(len(values)):
+    values[i] = values[i].split(",")
+
+  return values[0][COL_ORDER_DATE]
+
+def save_file():
+  reload()
+  # The file will not be written if reload is unable to contact
+  fout = open("orders_"+getOrderDate()+".csv", "w")
+  orders = ""
+  for i in values:
+    for j in i:
+      orders += j
+      if (i.index(j) != len(i) - 1):
+        orders += ","
+  orders += "\n"
+  fout.write(orders)
+  fout.close()
+
+def getOrder(orderID):
   orderID = str(orderID)[:12]
   rowIndex = orderID_index.get(orderID)
   meal = ""
@@ -114,7 +140,7 @@ def getOrder(orderID):
   if (side != ''):
     meal = "Entree: "+entree+"<br>Side: "+side
   else:
-    meal = "Entree: "+entree
+    meal = "A la Carte Entree: "+entree
   return meal
 
 def construct_timestamps():
@@ -150,7 +176,7 @@ def write_timestamp():
   valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
   mark_stamps(timestamps)
   return ('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
-  
+
 def mark_stamps(timestamp_vals):
   global dict_timestamp
   for order_ts_row in timestamp_vals:
@@ -170,3 +196,6 @@ def cron_write_timestamps(onoff):
     tl.stop()
     print ("Timer cancelled")
     return ("Timer cancelled")
+
+if len(argv) > 1 and argv[1] == "save":
+   save_file()

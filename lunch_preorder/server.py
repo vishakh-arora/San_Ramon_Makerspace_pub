@@ -46,7 +46,7 @@ def index():
 
 @app.route('/refresh')
 def refresh():
-  return fulfill_orders.reload()
+  return fulfill_orders.refreshFile()
 
 @app.route('/getorder/<orderID>')
 def get_order(orderID):
