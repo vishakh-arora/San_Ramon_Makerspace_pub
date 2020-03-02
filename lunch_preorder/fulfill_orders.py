@@ -64,6 +64,16 @@ def getService():
 
 dict_timestamp = {}
 
+def indexOrders( new_values):
+  global orderID_index
+  global values
+
+  new_index = {}
+  for i in range(len(new_values)):
+    new_index[ new_values[i][COL_ORDERID]] = i
+  values = new_values
+  orderID_index = new_index
+
 def reload(): #write to the spreadsheet here with timestamps
   # Call the Sheets API
   service = getService()
@@ -71,32 +81,29 @@ def reload(): #write to the spreadsheet here with timestamps
   result = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
             range=ORDER_READ_RANGE).execute()
   new_values = result.get('values')
-  new_index = {}
-  for i in range(len(new_values)):
-    new_index[ new_values[i][COL_ORDERID]] = i
-  values = new_values
-  orderID_index = new_index
-  # Return the date so that user knows date of the data
+  indexOrders( new_values)
   print( "Orders read from sheet")
-  save_file( values, getOrdersFilename(), "w")
-  return values[0][COL_ORDER_DATE]
+  save_file( new_values, getOrdersFilename(), "w")
+  # Return the date so that user knows date of the data
+  return new_values[0][COL_ORDER_DATE]
 
 def getOrdersFilename():
   date = datetime.datetime.now()
   return INSTALL_PATH + date.strftime("orders_%Y-%m-%d.csv")
 
 def refreshFile():
-  values = open( getOrdersFilename(), "r").read().strip().split("\n")
+  print('Loading from local file')
+  new_values = open( getOrdersFilename(), "r").read().strip().split("\n")
 
   print( "Orders read from local file")
-  print( values)
-  if (len(values) == 0):
+  if (len(new_values) == 0):
     raise ValueError('No orders for today')
 
-  for i in range(len(values)):
-    values[i] = values[i].split("|")
+  for i in range(len(new_values)):
+    new_values[i] = new_values[i].split("|")
 
-  return values[0][COL_ORDER_DATE]
+  indexOrders( new_values)
+  return new_values[0][COL_ORDER_DATE]
 
 def save_file( data, fname, mode = "w"):
   # The file will not be written if reload is unable to contact
@@ -121,6 +128,7 @@ def getOrder(orderID):
   elif (dict_timestamp.get(orderID) == None):
 #    return "Order ID "+orderID+" already served"
       # Get the timestamp in milliseconds, convert to string to prepare for writing to the spreadsheet
+      print('Writing timestamp for ' + orderID)
       dict_timestamp[orderID] = [str(int(datetime.datetime.now().timestamp()*1000))]
   entree = html.escape(values[rowIndex][COL_ENTREE],quote=True)
   print(entree)
@@ -161,7 +169,7 @@ def getTimestampsFilename():
 def write_timestamp():
   print("WRITING TIMESTAMPS")
   timestamps = construct_timestamps()
-  numUpdates = len( timestamps)
+  numUpdated = len( timestamps)
   save_file( timestamps, getTimestampsFilename(), "a")
   try:
     body = {'values': timestamps}
@@ -170,7 +178,7 @@ def write_timestamp():
     spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE,
     valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
     numUpdated = result.get('updates').get('updatedCells')
-  except e:
+  except Exception as e:
     print('Unable to write to Google sheet')
   mark_stamps(timestamps)
   return numUpdated
@@ -197,4 +205,9 @@ def cron_write_timestamps(onoff):
     return ("Timer cancelled")
 
 if len(sys.argv) > 1 and sys.argv[1] == "save":
-   reload()
+    try:
+        reload()
+    except:
+        refreshFile()
+if len(sys.argv) > 1 and sys.argv[1] == "time":
+   write_timestamp()
