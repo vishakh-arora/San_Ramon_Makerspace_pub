@@ -150,13 +150,24 @@ def construct_summary( header, data, column, fname):
     fout.close()
 
 today = datetime.datetime.now()
-date_formatted = today.strftime("%Y")+"-"+today.strftime("%m")+"-"+today.strftime("%d")
-process_date = today.strftime("%m")+"/"+today.strftime("%d")+"/"+today.strftime("%Y")
+date_formatted = today.strftime("%Y-%m-%d")
+process_date = today.strftime("%m/%d/%Y")
+
+if len(sys.argv) > 2:
+    date_formatted = sys.argv[1]
+    process_date = sys.argv[2]
+
 print(process_date)
 
-(updated_values_RPi, numRows) = read_orders(process_date)
+try:
+  (updated_values_RPi, numRows) = read_orders(process_date)
+except:
+  updated_values_RPi = []
+  numRows = 0
+
+print('Number of rows was: ' + str(numRows))
+print('Valid orders for:' + process_date)
 print(updated_values_RPi)
-print(numRows)
 
 fname_entree = "orderSummary_"+date_formatted+"_ENTREES.csv"
 construct_summary( "Entree,Count", updated_values_RPi, COL_ENTREE, fname_entree)
@@ -165,4 +176,5 @@ construct_summary( "Entree,Count", updated_values_RPi, COL_ENTREE, fname_entree)
 fname_side = "orderSummary_"+date_formatted+"_SIDES.csv"
 construct_summary( "Side,Count", updated_values_RPi, COL_SIDE, fname_side)
 
-generate_email()
+if (len(updated_values_RPi) > 0):
+  generate_email()
