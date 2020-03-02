@@ -14,23 +14,6 @@ import googleapiclient.discovery
 import html, datetime
 from timeloop import Timeloop
 import datetime
-#import smtplib
-#from email.mime.multipart import MIMEMultipart
-#from email.mime.base import MIMEBase
-#from email.mime.text import MIMEText
-#from email.mime.image import MIMEImage
-#from email import encoders
-#import barcode
-#import barcode
-#import datetime
-#from barcode.writer import ImageWriter
-#import imghdr
-#import os
-
-#pswd = open('pswd.txt','r').read().split('\n')
-#print(pswd)
-#gmail_user = pswd[0]
-#gmail_password = pswd[1]
 
 
 # If modifying these scopes, delete the file token.json.
@@ -89,7 +72,8 @@ def reload(): #write to the spreadsheet here with timestamps
   values = new_values
   orderID_index = new_index
   # Return the date so that user knows date of the data
-  save_file()
+  print( "Orders read from sheet")
+  save_file( values)
   return values[0][COL_ORDER_DATE]
 
 def getOrderDate():
@@ -97,26 +81,29 @@ def getOrderDate():
   return date.strftime("%Y-%m-%d")
 
 def refreshFile():
-  values = open("orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
+  values = open("/home/pi/San_Ramon_Makerspace/lunch_preorder/orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
 
+  print( "Orders read from local file")
+  print( values)
   if (len(values) == 0):
     raise ValueError('No orders for today')
 
   for i in range(len(values)):
-    values[i] = values[i].split(",")
+    values[i] = values[i].split("|")
 
   return values[0][COL_ORDER_DATE]
 
-def save_file():
+def save_file( data):
   # The file will not be written if reload is unable to contact
-  fout = open("orders_"+getOrderDate()+".csv", "w")
+  print("Saving locally")
+  fout = open("/home/pi/San_Ramon_Makerspace/lunch_preorder/orders_"+getOrderDate()+".csv", "w")
   orders = ""
-  for i in values:
-    for j in i:
-      orders += j
-      if (i.index(j) != len(i) - 1):
-        orders += ","
-  orders += "\n"
+  for row in data:
+    for col in range(len(row)):
+      orders += row[col]
+      if ( col != len(row) - 1):
+        orders += "|"
+    orders += "\n"
   fout.write(orders)
   fout.close()
 
@@ -126,10 +113,10 @@ def getOrder(orderID):
   meal = ""
   if (rowIndex == None):
     return "Order ID "+orderID+" not found"
-  elif (dict_timestamp.get(orderID) != None):
-    return "Order ID "+orderID+" already served"
-  # Get the timestamp in milliseconds, convert to string to prepare for writing to the spreadsheet
-  dict_timestamp[orderID] = [str(int(datetime.datetime.now().timestamp()*1000))]
+  elif (dict_timestamp.get(orderID) == None):
+#    return "Order ID "+orderID+" already served"
+      # Get the timestamp in milliseconds, convert to string to prepare for writing to the spreadsheet
+      dict_timestamp[orderID] = [str(int(datetime.datetime.now().timestamp()*1000))]
   entree = html.escape(values[rowIndex][COL_ENTREE],quote=True)
   print(entree)
   side = html.escape(values[rowIndex][COL_SIDE],quote=True)
@@ -193,5 +180,5 @@ def cron_write_timestamps(onoff):
     print ("Timer cancelled")
     return ("Timer cancelled")
 
-if len(argv) > 1 and argv[1] == "save":
+if len(sys.argv) > 1 and sys.argv[1] == "save":
    reload()
