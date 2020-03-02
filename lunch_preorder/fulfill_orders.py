@@ -27,7 +27,6 @@ VALUE_INPUT_OPTION = "RAW"
 TIMESTAMP_ID = "1PLY2nDpAr1OLdWsPRGfqiJMt9FcOt5eviH1B3jVUlSs"
 TIMESTAMP_RANGE = "Timestamps!A2:B"
 
-SERVICE_ACCOUNT_FILE = '/home/pi/San_Ramon_Makerspace/lunch_preorder/preorder_service.json'
 #SERVICE_ACCOUNT_FILE = '/Users/vishakh/Documents/11th Grade/Lunch_preordering/preorder_service.json'
 #=======
 
@@ -48,20 +47,26 @@ Prints values from a sample spreadsheet.
 # created automatically when the authorization flow completes for the first
 # time.
 orderID_index = {}
-path = os.path.dirname(sys.argv[0])
-values = []
-print(path + "/" +SERVICE_ACCOUNT_FILE)
+INSTALL_PATH = '/home/pi/San_Ramon_Makerspace/lunch_preorder/'
 
-store = file.Storage('token.json')
-creds = store.get()
-if not creds or creds.invalid:
+# os.path.dirname(sys.argv[0])
+values = []
+SERVICE_ACCOUNT_FILE = INSTALL_PATH + '/preorder_service.json'
+
+def getService():
+  print(SERVICE_ACCOUNT_FILE)
+  store = file.Storage('token.json')
+  creds = store.get()
+  if not creds or creds.invalid:
     creds = service_account.Credentials.from_service_account_file( SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     service = build('sheets', 'v4', credentials=creds)
+  return service
 
 dict_timestamp = {}
 
 def reload(): #write to the spreadsheet here with timestamps
   # Call the Sheets API
+  service = getService()
   sheet = service.spreadsheets()
   result = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
             range=ORDER_READ_RANGE).execute()
@@ -73,15 +78,15 @@ def reload(): #write to the spreadsheet here with timestamps
   orderID_index = new_index
   # Return the date so that user knows date of the data
   print( "Orders read from sheet")
-  save_file( values)
+  save_file( values, getOrdersFilename(), "w")
   return values[0][COL_ORDER_DATE]
 
-def getOrderDate():
+def getOrdersFilename():
   date = datetime.datetime.now()
-  return date.strftime("%Y-%m-%d")
+  return INSTALL_PATH + date.strftime("orders_%Y-%m-%d.csv")
 
 def refreshFile():
-  values = open("/home/pi/San_Ramon_Makerspace/lunch_preorder/orders_"+getOrderDate()+".csv", "r").read().strip().split("\n")
+  values = open( getOrdersFilename(), "r").read().strip().split("\n")
 
   print( "Orders read from local file")
   print( values)
@@ -93,10 +98,10 @@ def refreshFile():
 
   return values[0][COL_ORDER_DATE]
 
-def save_file( data):
+def save_file( data, fname, mode = "w"):
   # The file will not be written if reload is unable to contact
   print("Saving locally")
-  fout = open("/home/pi/San_Ramon_Makerspace/lunch_preorder/orders_"+getOrderDate()+".csv", "w")
+  fout = open( fname, mode)
   orders = ""
   for row in data:
     for col in range(len(row)):
@@ -150,15 +155,26 @@ def construct_timestamps():
   #time.sleep(4)
   return vals_timestamp
 
+def getTimestampsFilename():
+  return INSTALL_PATH + "order_timestamps.csv"
+
 def write_timestamp():
-  print("WRITING TIMESTAMPPPPPPP")
+  print("WRITING TIMESTAMPS")
   timestamps = construct_timestamps()
-  body = {'values': timestamps}
-  result = service.spreadsheets().values().append(
-  spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE,
-  valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+  numUpdates = len( timestamps)
+  save_file( timestamps, getTimestampsFilename(), "a")
+  try:
+    body = {'values': timestamps}
+    service = getService()  
+    result = service.spreadsheets().values().append(
+    spreadsheetId=TIMESTAMP_ID, range=TIMESTAMP_RANGE,
+    valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
+    numUpdated = result.get('updates').get('updatedCells')
+  except e:
+    print('Unable to write to Google sheet')
   mark_stamps(timestamps)
-  return ('{0} cells appended.'.format(result.get('updates').get('updatedCells')))
+  return numUpdated
+
 
 def mark_stamps(timestamp_vals):
   global dict_timestamp
