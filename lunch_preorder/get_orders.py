@@ -201,10 +201,14 @@ def rowOfHistoricalData( values, pdate):
     return row_num
 
 def archive_orders( ):
-    sheet = service.spreadsheets()
-    result_RPi = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
+    values_RPi = []
+    try:
+        sheet = service.spreadsheets()
+        result_RPi = sheet.values().get(spreadsheetId=ORDER_SPREADSHEET_ID,
                               range=WRITING_RANGE).execute()
-    values_RPi = result_RPi.get('values')
+        values_RPi = result_RPi.get('values')
+    except Exception as e:
+        pass
     orderLogs = open("orderLogs.csv","a")
     for row in values_RPi:
           logline = ""
