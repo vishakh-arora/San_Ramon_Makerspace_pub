@@ -50,6 +50,7 @@ def refresh():
     #try loading from Google API (requires internet)
     return fulfill_orders.reload()
   except:
+    print('Unable to get from Googlesheet')
     #if there's no internet, read the CSV file for today
     return fulfill_orders.refreshFile()
 
