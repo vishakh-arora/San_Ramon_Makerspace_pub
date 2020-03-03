@@ -134,9 +134,11 @@ def generate_email():
 
 def summarize( data, column, summary_dict):
     for row in data:
-        summary_dict[row[column]] = 0
+        for r in row[column].split(","):
+            summary_dict[r] = 0
     for row in data:
-        summary_dict[row[column]] += 1
+        for r in row[column].split(","):
+            summary_dict[r] += 1
 
 def construct_summary( header, data, column, fname):
     counts_dict = {}
