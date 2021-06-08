@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials
 # reading google sheets data
 # FOR MAKERSPACE UPDATE SPREADSHEET_ID AND CREDENTIALS FILE ONLY
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-SPREADSHEET_ID = '1JNeb5SJ7S4g5BelXSqBcI0Irjx9rjLahyLKsD_oL2jc'
+SPREADSHEET_ID = '1JBGnKyjKqAYLGnDp-U0YU3ORfuCJ8AFZplH51NoiSTU'
 RANGE = 'LockerTests!A2:D'
 
 creds = None
