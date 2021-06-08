@@ -1,3 +1,4 @@
+import config
 from copy import deepcopy
 
 class Lockers:
@@ -7,6 +8,8 @@ class Lockers:
     #     ['1', '2'], (level)
     #     ['T', 'B'] (row)
     # ]
+
+    # we can add lockers if spreadsheet columns are provided
     def __init__(self, spreadsheet, attributes):
         self.attributes = attributes
         self.s = spreadsheet
@@ -22,3 +25,19 @@ class Lockers:
             d_last = f(attributes[i], d_last)
 
         self.d = deepcopy(d_last)
+
+    # adds a locker with given attributes
+    def add_locker(self, attributes, locker_id):
+        x = self.d
+        for i in attributes:
+            x = x[i]
+        x.append(locker_id)
+
+    # returns a locker based on attribute preference
+    def get_locker(self, attributes):
+        x = self.d
+        for i in attributes:
+            x = x[i]
+        if len(x) != 0:
+            return x.pop()
+        return None

@@ -51,10 +51,10 @@ class Match:
         ans = []
 
         # printing partnerships, these are double counted so cost is divided by 2
+        cost = 0
         for a, b in idxs:
-          cost = 0
           # # DEBUG
-          # print(self.num2name[a], self.num2name[b], 'COST: ', m[a][b])
+          # print(a, b, self.num2name[a], self.num2name[b], 'COST: ', m[a][b])
           cost += m[a][b]
           if [b, a] not in ans:
               ans.append([a, b])
