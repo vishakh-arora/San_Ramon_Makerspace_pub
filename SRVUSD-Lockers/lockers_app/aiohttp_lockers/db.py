@@ -1,10 +1,12 @@
 import aiopg.sa
 from sqlalchemy import (
     MetaData, Table, Column, ForeignKey,
-    Integer, String, Date
+    Integer, String, DateTime
 )
+from sqlalchemy_json import mutable_json_type
+from sqlalchemy.dialects.postgresql import JSONB
 
-__all__ = ['question', 'choice']
+__all__ = ['students', 'admin']
 
 meta = MetaData()
 
@@ -33,19 +35,22 @@ students = Table(
 
     Column('email', String(100), primary_key=True),
     Column('first_name', String(100), nullable=False),
-    Column('last_name', String(100), nullable=False)
+    Column('last_name', String(100), nullable=False),
+    Column('school', String(100), nullable=False),
+    Column('grade', String(2), nullable=False),
+    Column('submit_time', DateTime(timezone='UTC')),
+    Column('responses', mutable_json_type(dbtype=JSONB, nested=True)),
+    Column('assignment', mutable_json_type(dbtype=JSONB, nested=True))
 )
+#students.c.submit_time.alter(nullable=True)
+admin = Table(
+    'admin', meta,
 
-choice = Table(
-    'choice', meta,
-
-    Column('id', Integer, primary_key=True),
-    Column('choice_text', String(200), nullable=False),
-    Column('votes', Integer, server_default="0", nullable=False),
-
-    Column('question_id',
-           Integer,
-           ForeignKey('question.id', ondelete='CASCADE'))
+    Column('email', String(100), primary_key=True),
+    Column('prefix', String(7), nullable=False),
+    Column('last_name', String(100), nullable=False),
+    Column('school', String(100), nullable=False),
+    Column('responses', mutable_json_type(dbtype=JSONB, nested=True))
 )
 
 

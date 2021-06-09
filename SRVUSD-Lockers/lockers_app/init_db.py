@@ -1,25 +1,36 @@
 from sqlalchemy import create_engine, MetaData
-
 from aiohttp_lockers.settings import config
-from aiohttp_lockers.db import question, choice
+from aiohttp_lockers.db import students, admin
+import datetime, pytz
 
 DSN = "postgresql://{user}:{password}@{host}:{port}/{database}"
 
 def create_tables(engine):
     meta = MetaData()
-    meta.create_all(bind=engine, tables=[question, choice])
-
+    meta.create_all(bind=engine, tables=[students, admin])
 
 def sample_data(engine):
     conn = engine.connect()
-    conn.execute(question.insert(), [
-        {'question_text': 'What\'s new?',
-         'pub_date': '2015-12-15 17:17:49.629+02'}
+    # use students.insert() when adding new students for the first time, use .update() when changing submit_time, responses, and assignment
+    conn.execute(students.update(), [
+        {'email': 'dh.varora@students.srvusd.net',
+         'first_name': 'Vishakh',
+         'last_name': 'Arora',
+         'school': 'Dougherty Valley High School',
+         'grade': '12',
+         'submit_time': datetime.datetime.now().replace(tzinfo=pytz.UTC),
+         'responses': {'floor': '1',
+                       'level': 'Bottom',
+                       'bay': 'A'},
+         'assignment': {'locker': '1234',
+                        'partner': 'Shubham Kumar'}
+        }
     ])
-    conn.execute(choice.insert(), [
-        {'choice_text': 'Not much', 'votes': 0, 'question_id': 1},
-        {'choice_text': 'The sky', 'votes': 0, 'question_id': 1},
-        {'choice_text': 'Just hacking again', 'votes': 0, 'question_id': 1},
+    conn.execute(admin.update(), [
+        {'email': 'bspain@srvusd.net',
+         'prefix': 'Mr. ',
+         'last_name': 'Spain',
+         'school': 'Dougherty Valley High School'}
     ])
     conn.close()
 
