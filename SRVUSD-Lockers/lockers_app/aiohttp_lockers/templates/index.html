@@ -1,0 +1,128 @@
+{% extends "nav_base.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+
+{% block style %}
+<link rel="stylesheet" href="../static/css/product.css">
+{% endblock %}
+
+{% block body %}
+<!-- <div class="jumbotron bg-gradient-light">
+<div class="container">
+<h1 class="display-4">Run your errands safely.</h1>
+<p class="lead">Schedule your tasks and shopping sessions using our intelligent engine.</p>
+<hr class="my-4">
+<p>We analyze environmental conditions and COVID-19 case data to ensure you can get stuff done without worry.</p>
+<a class="btn btn-primary btn-lg" href="" role="button">Sign Up</a>
+</div>
+</div> -->
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center rounded" style="background-color: #e3f2fd;">
+  <div class="rounded col-md-6 p-lg-5 mx-auto my-5">
+    <h1 class="font-weight-normal display-4">We Assign Lockers.</h1>
+    <p class="lead font-weight-normal">Receive your preferred locker and partner using our intelligent engine.</p>
+    <!-- <p>We analyze environmental conditions and COVID-19 case data to ensure you can get stuff done without worry.</p> -->
+    <!-- <a class="btn btn-lg btn-primary" href="">Sign Up</a> -->
+    <div class="btn btn-lg g-signin2" data-longtitle="true" data-onsuccess="onSignIn"></div>
+  </div>
+  <div class="product-device shadow-sm d-none d-lg-block"></div>
+  <div class="product-device product-device-2 shadow-sm d-none d-lg-block"></div>
+</div>
+
+<div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 rounded">
+  <div class="bg-white mr-md-3 pt-3 px-3 pt-md-5 px-md-5 pb-5 text-center overflow-hidden">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/agreement.svg" alt="...">
+  </div>
+  <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+    <div class="my-3 py-3">
+      <h2 class="display-5">Simple User Experience.</h2>
+      <p class="lead">Fill out our form; we'll do the rest.</p>
+      <p class="text-muted">Students, list your partnership and locker location preferences. Administrators, submit spreadsheets of your lockers & student details.</p>
+      <a class="btn btn-outline-primary" href="">Try It Out</a>
+    </div>
+    <!-- <div class="bg-light shadow-sm mx-auto">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/data.svg" alt="...">
+  </div> -->
+</div>
+</div>
+
+<div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 rounded">
+  <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+    <div class="my-3 py-3">
+      <h2 class="display-5">Intelligent Algorithm.</h2>
+      <p class="lead">Our system finds the most cost-effective partnerships.</p>
+      <p class="text-muted">We guarantee you will receive a satisfactory partnership and locker using our services.</p>
+      <a class="btn btn-outline-primary" href="">Try It Out</a>
+    </div>
+    <!-- <div class="bg-light shadow-sm mx-auto">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/data.svg" alt="...">
+  </div> -->
+</div>
+<div class="bg-white mr-md-3 pt-3 px-3 pt-md-5 px-md-5 pb-5 text-center overflow-hidden">
+  <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/weather.svg" alt="...">
+</div>
+</div>
+
+<div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 rounded">
+  <div class="bg-white mr-md-3 pt-3 px-3 pt-md-5 px-md-5 pb-5 text-center overflow-hidden">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/location.svg" alt="...">
+  </div>
+  <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+    <div class="my-auto py-3">
+      <h2 class="display-5">Communication System.</h2>
+      <p class="lead">Let's stay in touch.</p>
+      <p class="text-muted">When assignments are finalized, we will contact you and your partner with your locker information. If you don't like your pairing, reach out to us. We'll make things right.</p>
+      <a class="btn btn-outline-primary" href="">Try It Out</a>
+    </div>
+    <!-- <div class="bg-light shadow-sm mx-auto">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/data.svg" alt="...">
+  </div> -->
+</div>
+</div>
+
+<div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 rounded">
+  <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 pb-5 text-center overflow-hidden">
+    <div class="my-auto py-3">
+      <h2 class="display-5">Intuitive Dashboard.</h2>
+      <p class="lead">Administrators, visualize the results.</p>
+      <p class="text-muted">When everything is finalized, you can view statistics such as match rate, successful pairings and more.</p>
+      <a class="btn btn-outline-primary" href="">Try It Out</a>
+    </div>
+  </div>
+  <div class="bg-white mr-md-3 pt-3 px-3 pt-md-5 px-md-5 pb-5 text-center overflow-hidden">
+    <img style="width: 80%; height: 300px; border-radius: 21px;" src="static/img/dashboard.svg" alt="...">
+  </div>
+</div>
+
+<footer class="container py-5">
+  <div class="row">
+    <div class="col-12 col-md">
+      <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="d-block mb-2"><circle cx="12" cy="12" r="10"></circle><line x1="14.31" y1="8" x2="20.05" y2="17.94"></line><line x1="9.69" y1="8" x2="21.17" y2="8"></line><line x1="7.38" y1="12" x2="13.12" y2="2.06"></line><line x1="9.69" y1="16" x2="3.95" y2="6.06"></line><line x1="14.31" y1="16" x2="2.83" y2="16"></line><line x1="16.62" y1="12" x2="10.88" y2="21.94"></line></svg> -->
+      <!-- add logo here -->
+      <!-- <img src="static/img/dark-logo.png" height="50px"> -->
+      <small class="d-block my-3 text-muted">© 2021-2022</small>
+    </div>
+    <div class="col-6 col-md">
+      <h5>Authorization</h5>
+      <ul class="list-unstyled text-small">
+        <li><a class="text-muted" href="" style="text-decoration:none;">Log In</a></li>
+        <li><a class="text-muted" href="" style="text-decoration:none;">Log Out</a></li>
+      </ul>
+    </div>
+    <div class="col-6 col-md">
+      <h5>Dashboards</h5>
+      <ul class="list-unstyled text-small">
+        <li><a class="text-muted" href="" style="text-decoration:none;">Administrators</a></li>
+        <li><a class="text-muted" href="" style="text-decoration:none;">Students</a></li>
+      </ul>
+    </div>
+    <!-- <div class="col-6 col-md">
+    </div>
+    <div class="col-6 col-md">
+    </div> -->
+  </div>
+</footer>
+
+{% endblock %}
