@@ -1,0 +1,8 @@
+postgres:
+  database: locker_assignment
+  user: locker_assign
+  password: a$$ign!357
+  host: localhost
+  port: 5432
+  minsize: 1
+  maxsize: 5
