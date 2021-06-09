@@ -42,7 +42,7 @@ students = Table(
     Column('responses', mutable_json_type(dbtype=JSONB, nested=True)),
     Column('assignment', mutable_json_type(dbtype=JSONB, nested=True))
 )
-#students.c.submit_time.alter(nullable=True)
+
 admin = Table(
     'admin', meta,
 
