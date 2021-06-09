@@ -11,7 +11,7 @@ class Match:
         # are their preferences.
         self.x = {}
         for i in self.values:
-            self.x[i[0]] = i[1:]
+            self.x[i[0]] = [j for j in i[1:] if j != '']
         # numerical ID for each person
         self.name2num = {i:j for i,j in zip([i[0] for i in self.values], range(len(self.x)))}
         self.num2name = {j:i for i,j in self.name2num.items()}
@@ -50,14 +50,20 @@ class Match:
         idxs = o.compute(m)
         ans = []
 
-        # printing partnerships, these are double counted so cost is divided by 2
+        # listing partnerships
         cost = 0
+        partnered = [False for i in range(len(self.x))]
+
         for a, b in idxs:
           # # DEBUG
           # print(a, b, self.num2name[a], self.num2name[b], 'COST: ', m[a][b])
           cost += m[a][b]
-          if [b, a] not in ans:
+          # neither person has been partnered
+          if [b, a] not in ans and not partnered[a] and not partnered[b]:
+              partnered[a] = True
+              partnered[b] = True
               ans.append([a, b])
+              continue
 
         # # DEBUG
         # print('TOTAL COST: ', cost//2)
