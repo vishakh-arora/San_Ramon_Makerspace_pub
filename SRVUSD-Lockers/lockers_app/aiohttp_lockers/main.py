@@ -1,6 +1,6 @@
 from aiohttp import web
 from settings import config
-from routes import setup_routes
+from routes import setup_routes, student
 import aiohttp_jinja2
 import jinja2
 from db import close_pg, init_pg
