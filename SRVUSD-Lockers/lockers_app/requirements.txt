@@ -1,1 +1,4 @@
 aiohttp==3.7.4
+pyyaml
+aiopg
+sqlalchemy
