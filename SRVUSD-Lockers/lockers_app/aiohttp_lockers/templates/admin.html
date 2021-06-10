@@ -1,0 +1,105 @@
+{% extends "two_column.html" %}
+
+{% block page_title %}
+Welcome {Admin Name}.
+{% endblock %}
+
+{% block page_description %}
+Enter locker & student details.
+{% endblock %}
+
+{% block column_one %}
+<div class="card border-white text-dark rounded shadow">
+  <div class="card-body p-5">
+    <h2 class="card-title">Administrator Form.</h2>
+    <h6 class="card-subtitle mb-5 text-muted">Submit the specified spreadsheets.</h6>
+    <div class="mb-5 bg-light shadow rounded p-3">
+      <h5 class="card-subtitletext-muted">Students Spreadsheet.</h5>
+      <label for="formFile" class="form-label">Please use the following format</label>
+      <table class="table table-primary table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Last Name</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Grade</th>
+            <th scope="col">District E-Mail</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr>
+           <td scope="row">John</td>
+           <td>Doe</td>
+           <td>12</td>
+           <td>dh.jdoe@students.srvusd.net</td>
+         </tr>
+         <tr>
+           <td scope="row">...</td>
+           <td>...</td>
+           <td>...</td>
+           <td>...</td>
+         </tr>
+       </tbody>
+      </table>
+      <input class="form-control" type="file" id="formFile">
+    </div>
+    <div class="mb-5 bg-light shadow rounded p-3">
+      <h5 class="card-subtitletext-muted">Lockers Spreadsheet.</h5>
+      <label for="formFile" class="form-label">Please use the following format</label>
+      <table class="table table-primary table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Locker Number</th>
+            <th scope="col">Locker Combo</th>
+            <th scope="col">Location (Bldg, Floor, Etc.)</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr>
+           <td scope="row">John</td>
+           <td>Doe</td>
+           <td>12</td>
+         </tr>
+         <tr>
+           <td scope="row">...</td>
+           <td>...</td>
+           <td>...</td>
+         </tr>
+       </tbody>
+      </table>
+      <input class="form-control" type="file" id="formFile">
+    </div>
+    <div class="bg-light shadow rounded p-3">
+      <h5 class="card-subtitletext-muted">Pre-Assigned Spreadsheet.</h5>
+      <label for="formFile" class="form-label">Please use the following format</label>
+      <table class="table table-primary table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Last Name</th>
+            <th scope="col">First Name</th>
+            <th scope="col">District E-Mail</th>
+            <th scope="col">Locker Number</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr>
+           <td scope="row">John</td>
+           <td>Doe</td>
+           <td>12</td>
+           <td>dh.jdoe@students.srvusd.net</td>
+         </tr>
+         <tr>
+           <td scope="row">...</td>
+           <td>...</td>
+           <td>...</td>
+           <td>...</td>
+         </tr>
+       </tbody>
+      </table>
+      <input class="form-control" type="file" id="formFile">
+    </div>
+  </div>
+  <div class="d-grid gap-2 col-6 mb-4 mx-auto">
+    <button class="btn btn-primary" type="button">Update</button>
+  </div>
+</div>
+{% endblock %}

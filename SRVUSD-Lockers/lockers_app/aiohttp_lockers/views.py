@@ -14,3 +14,7 @@ async def index(request):
 @aiohttp_jinja2.template('student.html')
 async def student(request):
     return {}
+
+@aiohttp_jinja2.template('admin.html')
+async def admin(request):
+    return {}
