@@ -25,6 +25,11 @@ async def index(request):
 
 @aiohttp_jinja2.template('student.html')
 async def student(request):
+    if request.method == 'GET':
+        # render with filled preferences from database
+        return {}
+    data = await request.post()
+    # preference1, preference2, preference3, building, floor, row
     return {}
 
 @aiohttp_jinja2.template('admin.html')
