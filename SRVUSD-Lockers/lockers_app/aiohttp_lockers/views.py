@@ -11,7 +11,8 @@ from multidict import MultiDict
 import pandas as pd
 
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
-conn = connect(engine)
+
+conn = initialize_db()
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
