@@ -4,3 +4,4 @@ aiopg
 sqlalchemy
 sqlalchemy_json
 aiohttp_jinja2==1.4.2
+google-api-python-client

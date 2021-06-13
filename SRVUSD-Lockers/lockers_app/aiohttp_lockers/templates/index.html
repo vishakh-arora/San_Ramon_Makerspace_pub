@@ -25,6 +25,24 @@ Home
     <!-- <p>We analyze environmental conditions and COVID-19 case data to ensure you can get stuff done without worry.</p> -->
     <!-- <a class="btn btn-lg btn-primary" href="">Sign Up</a> -->
     <div class="btn btn-lg g-signin2" data-longtitle="true" data-onsuccess="onSignIn"></div>
+    <script>
+      function onSignIn(googleUser) {
+          var id_token = googleUser.getAuthResponse().id_token;
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', 'https://lockermatch.com/tokensignin');
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          xhr.onload = function() {
+            console.log('Signed in as: ' + xhr.responseText);
+          };
+          xhr.send('idtoken=' + id_token);
+          // var profile = googleUser.getBasicProfile();
+          // console.log('oren major');
+          // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+          // console.log('Name: ' + profile.getName());
+          // console.log('Image URL: ' + profile.getImageUrl());
+          // console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+      }
+    </script>
   </div>
   <div class="product-device shadow-sm d-none d-lg-block"></div>
   <div class="product-device product-device-2 shadow-sm d-none d-lg-block"></div>
