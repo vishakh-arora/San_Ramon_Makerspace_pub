@@ -6,7 +6,7 @@ from sqlalchemy import (
 from sqlalchemy_json import mutable_json_type
 from sqlalchemy.dialects.postgresql import JSONB
 
-__all__ = ['students', 'admin']
+__all__ = ['student', 'admin', 'school', 'partner', 'locker', 'organization']
 
 meta = MetaData()
 
@@ -30,30 +30,77 @@ meta = MetaData()
 #            ForeignKey('question.id', ondelete='CASCADE'))
 # )
 
-students = Table(
-    'students', meta,
+student = Table(
+    'student', meta,
 
-    Column('email', String(100), primary_key=True),
+    Column('id', Integer, primary_key=True),
+    Column('email', String(100), nullable=False),
     Column('first_name', String(100), nullable=False),
     Column('last_name', String(100), nullable=False),
-    Column('school', String(100), nullable=False),
-    Column('grade', String(2), nullable=False),
+    Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False),
+    Column('grade', Integer, nullable=False),
     Column('submit_time', DateTime(timezone='UTC')),
-    Column('responses', mutable_json_type(dbtype=JSONB, nested=True)),
-    Column('assignment', mutable_json_type(dbtype=JSONB, nested=True))
+    #Column('assignment', mutable_json_type(dbtype=JSONB, nested=True))
 )
 
 admin = Table(
     'admin', meta,
 
-    Column('email', String(100), primary_key=True),
+    Column('id', Integer, primary_key=True),
+    Column('email', String(100), nullable=False),
     Column('prefix', String(7), nullable=False),
     Column('last_name', String(100), nullable=False),
-    Column('school', String(100), nullable=False),
-    Column('responses', mutable_json_type(dbtype=JSONB, nested=True))
+    Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False),
+    #Column('responses', mutable_json_type(dbtype=JSONB, nested=True))
 )
 
+school = Table(
+    'school', meta,
 
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), nullable=False),
+)
+
+partner = Table(
+    'partner', meta,
+    Column('student_id', Integer, ForeignKey('student.id', ondelete='CASCADE'), primary_key=True, nullable=False),
+    Column('partner_id', Integer, ForeignKey('student.id', ondelete='CASCADE'), primary_key=True, nullable=False),
+    Column('preference', Integer, nullable=False),
+)
+# Vishakh | Shubham 0
+# Vishakh | Chaitu 1
+# Vishakh | Shlok 2
+
+locker = Table(
+    'locker', meta,
+
+    Column('id', Integer, primary_key=True),
+    Column('number', String(32), nullable=False), #1234
+    Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False), #DVHS
+    Column('combination', String(10)),
+    Column('organization', Integer, ForeignKey('organization.id', ondelete='CASCADE'), nullable=False), #id
+    #1000 | 2 | 2 | 1
+)
+#
+organization = Table(
+    'organization', meta,
+
+    Column('id', Integer, primary_key=True),
+    Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False),
+    Column('hierarchy_1', String(32)), #1000, 2000, 3000, 4000
+    Column('hierarchy_2', String(32)), # Floor
+    Column('hierarchy_3', String(32)), # Level
+    Column('hierarchy_4', String(32)),
+    Column('hierarchy_5', String(32)),
+    Column('hierarchy_6', String(32)),
+    Column('hierarchy_7', String(32)),
+    Column('hierarchy_8', String(32)),
+    Column('hierarchy_9', String(32)),
+    Column('hierarchy_10', String(32))
+)
+# locker # | combination (optional) | hierarchy (largest --> smallest level)
+# 1 | 23 | building | floor | bay | level | row
+# building | level | row
 async def init_pg(app):
     conf = app['config']['postgres']
     engine = await aiopg.sa.create_engine(
@@ -66,7 +113,6 @@ async def init_pg(app):
         maxsize=conf['maxsize'],
     )
     app['db'] = engine
-
 
 async def close_pg(app):
     app['db'].close()

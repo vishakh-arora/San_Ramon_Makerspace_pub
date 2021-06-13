@@ -1,14 +1,17 @@
 from aiohttp import web
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_db import *
 import aiohttp_jinja2
-import db, asyncio
+import db
+import asyncio
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from multidict import MultiDict
+import pandas as pd
 
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
-
-async def dashboard(request):
-    location = request.app.router['admin'].url_for()
-    raise web.HTTPFound(location=location)
+conn = connect(engine)
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
@@ -53,3 +56,32 @@ def tokensignin(request):
     except ValueError:
         # Invalid token
         pass
+
+def store_sheets(request):
+    sheets = {'students':[],
+              'lockers':[],
+              'preassign':[]}
+    data = yield from request.post()
+
+    print(data)
+
+    for sheet_id in sheets:
+        try:
+            sheet = data[sheet_id]
+            # filename contains the name of the file in string format.
+            sheets[sheet_id].append(sheet.filename)
+
+            # input_file contains the actual file data which needs to be
+            # stored somewhere.
+            sheets[sheet_id].append(sheet.file)
+            df = pd.read_excel(sheet.file, engine="openpyxl")
+            #*** add sheet validation here ***
+            # print()
+            # print(df.head())
+            sheets[sheet_id].append(df)
+        except Exception as e:
+            print(e)
+
+    # print(sheets)
+    return web.Response(body=sheets['students'][2],
+                        headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
