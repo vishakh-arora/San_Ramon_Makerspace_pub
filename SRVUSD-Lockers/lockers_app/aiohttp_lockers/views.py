@@ -31,6 +31,7 @@ async def student(request):
         return {}
     data = await request.post()
     # preference1, preference2, preference3, building, floor, row
+    # check if the preferences are valid and are in the database
     return {}
 
 @aiohttp_jinja2.template('admin.html')
@@ -48,6 +49,7 @@ async def admin(request):
     # if response is GET, pull render variables from database
     if request.method == 'GET':
         # add database data retrieval code here and update
+        # if a spreadsheet hasn't been successfully uploaded, add in a default error message.
         return {'sheets': sheets}
 
     # if response is POST, verify submission
