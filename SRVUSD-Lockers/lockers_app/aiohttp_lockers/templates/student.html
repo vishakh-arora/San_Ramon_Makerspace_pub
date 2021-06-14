@@ -13,10 +13,11 @@ Record your preferences.
   <form action="/student" method="post" accept-charset="utf-8" enctype="multipart/form-data">
     <div class="card-body">
       <h2 class="card-title">Student Form.</h2>
-      <h6 class="card-subtitle mb-2 text-muted">You can change your preferences until the deadline.</h6>
+      <p class="card-subtitle mb-2 text-muted">You can change your preferences until the deadline.<p>
+      <p class="text-danger">*Mandatory Fields</p>
       <div class="my-3">
-        <label for="exampleDataList" class="form-label">First Preference Student</label>
-        <input class="form-control" list="datalistOptions1" id="preference1" name="preference1" placeholder="Type to search...">
+        <label for="preference1" class="form-label">First Preference Student</label><label class="text-danger" for="exampleDataList">*</label>
+        <input class="form-control" list="datalistOptions1" id="preference1" name="preference1" placeholder="Type to search..." required>
           <datalist id="datalistOptions1">
             <option value="San Francisco">
             <option value="New York">
@@ -26,7 +27,7 @@ Record your preferences.
           </datalist>
       </div>
       <div class="my-3">
-        <label for="exampleDataList" class="form-label">Second Preference Student</label>
+        <label for="preference2" class="form-label">Second Preference Student</label>
         <input class="form-control" list="datalistOptions2" id="preference2" name="preference2" placeholder="Type to search...">
           <datalist id="datalistOptions2">
             <option value="San Francisco">
@@ -37,7 +38,7 @@ Record your preferences.
           </datalist>
       </div>
       <div class="my-3">
-        <label for="exampleDataList" class="form-label">Third Preference Student</label>
+        <label for="preference3" class="form-label">Third Preference Student</label>
         <input class="form-control" list="datalistOptions3" id="preference3" name="preference3" placeholder="Type to search...">
           <datalist id="datalistOptions3">
             <option value="San Francisco">
@@ -54,8 +55,8 @@ Record your preferences.
       </div>
       <div class="row my-3">
         <div class="col">
-          <label for="building" class="form-label">Building</label>
-          <select id="building" name="building" class="form-select" aria-label="Default select example">
+          <label for="building" class="form-label">Building</label><label class="text-danger" for="building">*</label>
+          <select id="building" name="building" class="form-select" aria-label="Default select example" required>
             <option selected value="1000">1000s</option>
             <option value="2000">2000s</option>
             <option value="3000">3000s</option>
@@ -63,15 +64,15 @@ Record your preferences.
           </select>
         </div>
         <div class="col">
-          <label for="floor" class="form-label">Floor</label>
-          <select id="floor" name="floor" class="form-select" aria-label="Default select example">
+          <label for="floor" class="form-label">Floor</label><label class="text-danger" for="floor">*</label>
+          <select id="floor" name="floor" class="form-select" aria-label="Default select example" required>
             <option selected value="1">1</option>
             <option value="2">2</option>
           </select>
         </div>
         <div class="col">
-          <label for="row" class="form-label">Row</label>
-          <select id="row" name="row" class="form-select" aria-label="Default select example">
+          <label for="row" class="form-label">Row</label><label class="text-danger" for="row">*</label>
+          <select id="row" name="row" class="form-select" aria-label="Default select example" required>
             <option selected value="T">Top</option>
             <option value="B">Bottom</option>
           </select>

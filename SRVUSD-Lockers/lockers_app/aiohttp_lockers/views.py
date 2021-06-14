@@ -34,7 +34,37 @@ async def student(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
+    if request.method == 'GET':
+        return {}
+
+    # sheets = {'students':[],
+    #           'lockers':[],
+    #           'preassign':[]}
+
+    data = await request.post()
     return {}
+
+    # for sheet_id in sheets:
+    #     try:
+    #         sheet = data[sheet_id]
+    #         # filename contains the name of the file in string format.
+    #         sheets[sheet_id].append(sheet.filename)
+    #
+    #         # input_file contains the actual file data which needs to be
+    #         # stored somewhere.
+    #         sheets[sheet_id].append(sheet.file)
+    #         df = pd.read_excel(sheet.file, engine="openpyxl")
+    #         #*** add sheet validation here ***
+    #         # print()
+    #         # print(df.head())
+    #         sheets[sheet_id].append(df)
+    #     except Exception as e:
+    #         print(e)
+    #
+    # # print(sheets)
+    # return web.Response(body=sheets['students'][2],
+    #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
+
 
 @asyncio.coroutine
 def tokensignin(request):
@@ -62,32 +92,3 @@ def tokensignin(request):
     except ValueError:
         # Invalid token
         pass
-
-def store_sheets(request):
-    sheets = {'students':[],
-              'lockers':[],
-              'preassign':[]}
-    data = yield from request.post()
-
-    print(data)
-
-    for sheet_id in sheets:
-        try:
-            sheet = data[sheet_id]
-            # filename contains the name of the file in string format.
-            sheets[sheet_id].append(sheet.filename)
-
-            # input_file contains the actual file data which needs to be
-            # stored somewhere.
-            sheets[sheet_id].append(sheet.file)
-            df = pd.read_excel(sheet.file, engine="openpyxl")
-            #*** add sheet validation here ***
-            # print()
-            # print(df.head())
-            sheets[sheet_id].append(df)
-        except Exception as e:
-            print(e)
-
-    # print(sheets)
-    return web.Response(body=sheets['students'][2],
-                        headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
