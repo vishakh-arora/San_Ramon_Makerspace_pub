@@ -92,9 +92,9 @@ async def admin(request):
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
 
-@asyncio.coroutine
-def tokensignin(request):
-    data = yield from request.post()
+# @asyncio.coroutine
+async def tokensignin(request):
+    data = await request.post()
     token = data['idtoken']
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
