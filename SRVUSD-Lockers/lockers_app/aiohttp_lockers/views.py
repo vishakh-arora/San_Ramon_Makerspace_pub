@@ -9,6 +9,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from multidict import MultiDict
 import pandas as pd
+import numpy as np
 
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
 
@@ -34,34 +35,57 @@ async def student(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
+    # initializing render variables
+    fields = ['students', 'lockers', 'preassign']
+    sheets = {i:{
+        'error':None,
+        'filename':None,
+        'data':None,
+        # 'df':None
+    }
+    for i in fields}
+
+    # if response is GET, pull render variables from database
     if request.method == 'GET':
-        return {}
+        # add database data retrieval code here and update
+        return {'sheets': sheets}
 
-    # sheets = {'students':[],
-    #           'lockers':[],
-    #           'preassign':[]}
-
+    # if response is POST, verify submission
     data = await request.post()
-    return {}
+    print('RAW RESPONSE:', data, '\n')
+    print('KEYS', data.keys(), '\n')
 
-    # for sheet_id in sheets:
-    #     try:
-    #         sheet = data[sheet_id]
-    #         # filename contains the name of the file in string format.
-    #         sheets[sheet_id].append(sheet.filename)
-    #
-    #         # input_file contains the actual file data which needs to be
-    #         # stored somewhere.
-    #         sheets[sheet_id].append(sheet.file)
-    #         df = pd.read_excel(sheet.file, engine="openpyxl")
-    #         #*** add sheet validation here ***
-    #         # print()
-    #         # print(df.head())
-    #         sheets[sheet_id].append(df)
-    #     except Exception as e:
-    #         print(e)
-    #
-    # # print(sheets)
+    for sheet_id in fields:
+        # empty submission and not existing in database
+        if type(data[sheet_id]) == bytearray:
+            # add check to see if the spreadsheet already exists in database
+            sheets[sheet_id]['error'] = f'Missing {sheet_id.capitalize()} Spreadsheet.'
+            continue
+        else:
+            try:
+                sheet = data[sheet_id]
+
+                # filename contains the name of the file in string format.
+                sheets[sheet_id]['filename'] = sheet.filename
+
+                # input_file contains the actual file data which needs to be
+                # stored somewhere.
+                sheets[sheet_id]['data'] = sheet.file
+                df = pd.read_excel(sheet.file, engine="openpyxl").to_numpy()
+
+                # length validation
+
+                # print()
+                # print(df.columns)
+                # sheets[sheet_id]['df'] = df
+
+            except Exception as e:
+                print('EXCEPTIONS:', e)
+
+    print('FINAL DICT', sheets)
+    return {'sheets':sheets}
+
+    # print(sheets)
     # return web.Response(body=sheets['students'][2],
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
