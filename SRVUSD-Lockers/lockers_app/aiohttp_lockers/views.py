@@ -114,13 +114,20 @@ async def admin(request):
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
 async def login(request):
+    print('\n\n\n\n buddy ya i got called et hello \n\n\n\n')
     data = await request.post()
     session = await new_session(request)
+    # token = data['idtoken']
+    # idinfo =  id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
     session['authorized'] = True
-    session['username'] = data['username']
-    session['role'] = data['role']
+    # session['name'] = 'John Dyr'
+    # session['email'] = 'dh.jdyr@students.srvusd.net'
+    session['role'] = 'student'
+    # session['authorized'] = True
+    # session['username'] = data['username']
+    # session['role'] = data['role']
     print('SESSION CREATED:', session)
-    return web.HTTPFound(location=request.app.router[data['role']].url_for())
+    return web.HTTPFound(location=request.app.router[session['role']].url_for())
 
 # async def login(request):
 #     if request.method == 'GET':
@@ -192,7 +199,7 @@ async def login(request):
 async def logout(request):
     session = await get_session(request)
     session.invalidate()
-    return await index(request)
+    return web.HTTPFound(location=request.app.router['index'].url_for())
 
 # @aiohttp_jinja2.template('login_test.html')
 # async def login_test(request):

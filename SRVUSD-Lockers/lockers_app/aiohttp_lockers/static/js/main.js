@@ -2,11 +2,11 @@
 function onSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://lockermatch.com/login');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-      console.log('Signed in as: ' + xhr.responseText);
-    };
+    xhr.open('POST', 'https://lockermatch.com/login', true);
+    xhr.setRequestHeader('Content-Type', 'multipart/form-data');
+    // xhr.onload = function() {
+    //   console.log('Signed in as: ' + xhr.responseText);
+    // };
     xhr.send('idtoken=' + id_token);
     // var profile = googleUser.getBasicProfile();
     // console.log('oren major');
