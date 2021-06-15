@@ -79,35 +79,36 @@ async def admin(request):
     print('RAW RESPONSE:', data, '\n')
     print('KEYS', data.keys(), '\n')
 
-    for sheet_id in fields:
-        # empty submission and not existing in database
-        if type(data[sheet_id]) == bytearray:
-            # add check to see if the spreadsheet already exists in database
-            sheets[sheet_id]['error'] = f'Missing {sheet_id.capitalize()} Spreadsheet.'
-            continue
-        else:
-            try:
-                sheet = data[sheet_id]
+    # for sheet_id in fields:
+    #     # empty submission and not existing in database
+    #     if type(data[sheet_id]) == bytearray:
+    #         # add check to see if the spreadsheet already exists in database
+    #         sheets[sheet_id]['error'] = f'Missing {sheet_id.capitalize()} Spreadsheet.'
+    #         continue
+    #     else:
+    #         try:
+    #             sheet = data[sheet_id]
 
-                # filename contains the name of the file in string format.
-                sheets[sheet_id]['filename'] = sheet.filename
+    #             # filename contains the name of the file in string format.
+    #             sheets[sheet_id]['filename'] = sheet.filename
 
-                # input_file contains the actual file data which needs to be
-                # stored somewhere.
-                sheets[sheet_id]['data'] = sheet.file
-                df = pd.read_excel(sheet.file, engine="openpyxl").to_numpy()
+    #             # input_file contains the actual file data which needs to be
+    #             # stored somewhere.
+    #             sheets[sheet_id]['data'] = sheet.file
+    #             df = pd.read_excel(sheet.file, engine="openpyxl").to_numpy()
 
-                # length validation
+    #             # length validation
 
-                # print()
-                # print(df.columns)
-                # sheets[sheet_id]['df'] = df
+    #             # print()
+    #             # print(df.columns)
+    #             # sheets[sheet_id]['df'] = df
 
-            except Exception as e:
-                print('EXCEPTIONS:', e)
+    #         except Exception as e:
+    #             print('EXCEPTIONS:', e)
 
-    print('FINAL DICT', sheets)
-    return {'sheets':sheets}
+    # print('FINAL DICT', sheets)
+    # return {'sheets':sheets}
+    return {}
 
     # print(sheets)
     # return web.Response(body=sheets['students'][2],
@@ -122,9 +123,16 @@ async def admin(request):
 #     return await admin(request)
 
 async def login(request):
+    if request.method == 'GET':
+       session = await new_session(request)
+       session['authorized'] = True
+       session['role'] = 'student'
+       return await student(request)
+
+    print('RECEIVED LOGIN REQUEST')
     data = await request.post()
     token = data['idtoken']
-
+    print('RECEIVED TOKEN')
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
@@ -170,7 +178,7 @@ async def login(request):
             return await admin(request)
         elif session.get('role') == 'student':
             print('redirecting to student')
-            raise await student(request)
+            return await student(request)
         else:
             raise web.HTTPFound(location=request.app.router['index'].url_for())
         # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
