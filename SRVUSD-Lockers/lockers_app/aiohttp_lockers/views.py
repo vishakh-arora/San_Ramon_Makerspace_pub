@@ -30,14 +30,14 @@ async def check_login(request, handler, role):
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
-    session = await aiohttp_session.get_session(request)
-    print(session) 
+    # session = await aiohttp_session.get_session(request)
+    # print(session) 
     # async with request.app['db'].acquire() as conn:
     #     cursor = await conn.execute(db.question.select())
     #     records = await cursor.fetchall()
     #     questions = [dict(q) for q in records]
         # return web.Response(text=str(questions))
-    session = await aiohttp_session.get_session(request)
+    # session = await aiohttp_session.get_session(request)
     return {}
 
 @aiohttp_jinja2.template('student.html')
@@ -53,7 +53,9 @@ async def student(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
-    await check_login(request, admin, 'admin')
+    # await check_login(request, admin, 'admin')
+    session = aiohttp_session.get_session(request)
+    print(session)
     # initializing render variables
     fields = ['students', 'lockers', 'preassign']
     sheets = {i:{
@@ -144,14 +146,14 @@ async def login(request):
         print('NAME: ', session['name'])
 
         # change to check database to assign role
-        if random.randint(0, 1) == 0:
-            session['role'] = 'admin'
-            print('RANDOMLY ASSIGNED ADMIN')
-        else:
-            session['role'] = 'student'
-            print('RANDOMLY ASSIGNED STUDENT')
+        # if random.randint(0, 1) == 0:
+        session['role'] = 'admin'
+        # print('RANDOMLY ASSIGNED ADMIN')
+        # else:
+        #     session['role'] = 'student'
+        #     print('RANDOMLY ASSIGNED STUDENT')
 
-        print(session['role'], session)
+        # print(session['role'], session)
 
         # redirect to the correct page based on role
         if session.get('role') == 'admin':
