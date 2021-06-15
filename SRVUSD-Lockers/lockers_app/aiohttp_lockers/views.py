@@ -17,21 +17,22 @@ CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleuserconten
 
 conn = initialize_db()
 
-@web.middleware
-async def check_login(request, handler, role):
-    # print('REQUEST:', request)
-    require_login = getattr(handler, '__require_login__', False)
-    session = await aiohttp_session.get_session(request)
-    authorized = session.get('authorized')
-    if authorized == None or session.get('role') != role:
-        print(f'CHECKING LOGIN FOR {handler.__name__}', authorized, session.get('role'), session)
-        raise web.HTTPFound(location=request.app.router['index'].url_for())
-    return await handler(request)
+# problems with get_session
+# @web.middleware
+# async def check_login(request, handler, role):
+#     # print('REQUEST:', request)
+#     require_login = getattr(handler, '__require_login__', False)
+#     session = await aiohttp_session.get_session(request)
+#     authorized = session.get('authorized')
+#     if authorized == None or session.get('role') != role:
+#         print(f'CHECKING LOGIN FOR {handler.__name__}', authorized, session.get('role'), session)
+#         raise web.HTTPFound(location=request.app.router['index'].url_for())
+#     return await handler(request)
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
     # session = await aiohttp_session.get_session(request)
-    # print(session) 
+    # print(session)
     # async with request.app['db'].acquire() as conn:
     #     cursor = await conn.execute(db.question.select())
     #     records = await cursor.fetchall()
@@ -42,7 +43,10 @@ async def index(request):
 
 @aiohttp_jinja2.template('student.html')
 async def student(request):
-    await check_login(request, student, 'student')
+    # await check_login(request, student, 'student')
+    session = await aiohttp_session.get_session(request)
+    if session.get('authorized') == None or session.get('role') != 'student':
+        raise web.HTTPFound(location=request.app.router['index'].url_for())
     if request.method == 'GET':
         # render with filled preferences from database
         return {}
@@ -54,8 +58,9 @@ async def student(request):
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
     # await check_login(request, admin, 'admin')
-    session = aiohttp_session.get_session(request)
-    print(session)
+    session = await aiohttp_session.get_session(request)
+    if session.get('authorized') == None or session.get('role') != 'admin':
+        raise web.HTTPFound(location=request.app.router['index'].url_for())
     # initializing render variables
     fields = ['students', 'lockers', 'preassign']
     sheets = {i:{
@@ -146,12 +151,12 @@ async def login(request):
         print('NAME: ', session['name'])
 
         # change to check database to assign role
-        # if random.randint(0, 1) == 0:
-        session['role'] = 'admin'
-        # print('RANDOMLY ASSIGNED ADMIN')
-        # else:
-        #     session['role'] = 'student'
-        #     print('RANDOMLY ASSIGNED STUDENT')
+        if random.randint(0, 1) == 0:
+            session['role'] = 'admin'
+            print('RANDOMLY ASSIGNED ADMIN')
+        else:
+            session['role'] = 'student'
+            print('RANDOMLY ASSIGNED STUDENT')
 
         # print(session['role'], session)
 
