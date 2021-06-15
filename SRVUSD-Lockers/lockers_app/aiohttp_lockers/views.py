@@ -3,7 +3,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_db import *
 import aiohttp_jinja2
-import aiohttp_session
+from aiohttp_session import get_session, new_session
 import db
 import asyncio
 from google.oauth2 import id_token
@@ -17,22 +17,10 @@ CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleuserconten
 
 conn = initialize_db()
 
-# problems with get_session
-# @web.middleware
-# async def check_login(request, handler, role):
-#     # print('REQUEST:', request)
-#     require_login = getattr(handler, '__require_login__', False)
-#     session = await aiohttp_session.get_session(request)
-#     authorized = session.get('authorized')
-#     if authorized == None or session.get('role') != role:
-#         print(f'CHECKING LOGIN FOR {handler.__name__}', authorized, session.get('role'), session)
-#         raise web.HTTPFound(location=request.app.router['index'].url_for())
-#     return await handler(request)
-
 @aiohttp_jinja2.template('index.html')
 async def index(request):
-    # session = await aiohttp_session.get_session(request)
-    # print(session)
+    session = await get_session(request)
+    print('INDEX SESSION:', session)
     # async with request.app['db'].acquire() as conn:
     #     cursor = await conn.execute(db.question.select())
     #     records = await cursor.fetchall()
@@ -43,13 +31,18 @@ async def index(request):
 
 @aiohttp_jinja2.template('student.html')
 async def student(request):
-    # await check_login(request, student, 'student')
-    session = await aiohttp_session.get_session(request)
+    # checking that the logged in user is a student
+    session = await get_session(request)
+    print('STUDENT SESSION:', session)
     if session.get('authorized') == None or session.get('role') != 'student':
         raise web.HTTPFound(location=request.app.router['index'].url_for())
+
+    # get request
     if request.method == 'GET':
         # render with filled preferences from database
         return {}
+
+    # post request
     data = await request.post()
     # preference1, preference2, preference3, building, floor, row
     # check if the preferences are valid and are in the database
@@ -57,10 +50,12 @@ async def student(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
-    # await check_login(request, admin, 'admin')
-    session = await aiohttp_session.get_session(request)
+    # checking that the logged in user is an administrator
+    session = await get_session(request)
+    print('ADMIN SESSION:', session)
     if session.get('authorized') == None or session.get('role') != 'admin':
         raise web.HTTPFound(location=request.app.router['index'].url_for())
+
     # initializing render variables
     fields = ['students', 'lockers', 'preassign']
     sheets = {i:{
@@ -71,12 +66,14 @@ async def admin(request):
     }
     for i in fields}
 
+    # get request
     # if response is GET, pull render variables from database
     if request.method == 'GET':
         # add database data retrieval code here and update
         # if a spreadsheet hasn't been successfully uploaded, add in a default error message.
         return {'sheets': sheets}
 
+    # post request
     # if response is POST, verify submission
     data = await request.post()
     print('RAW RESPONSE:', data, '\n')
@@ -116,11 +113,18 @@ async def admin(request):
     # return web.Response(body=sheets['students'][2],
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
-# @asyncio.coroutine
+# async def login(request):
+#     if request.method == 'GET':
+#         session = await new_session(request)
+#         session['username'] = 'default'
+#         session['role'] = 'admin'
+#         print('SESSION CREATED:', session)
+#     return await admin(request)
+
 async def login(request):
-    print('login called')
     data = await request.post()
     token = data['idtoken']
+
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
@@ -141,14 +145,14 @@ async def login(request):
         # ID token is valid. Get the user's Google Account ID from the decoded token.
         userid = idinfo['sub']
 
-        # creating new session variables
-        session = await aiohttp_session.new_session(request)
+        # # creating new session variables
+        session = await get_session(request)
         session['authorized'] = True
         session['email'] = idinfo['email']
         session['name'] = idinfo['name']
 
-        print('EMAIL:', session['email'])
-        print('NAME: ', session['name'])
+        # print('EMAIL:', session['email'])
+        # print('NAME: ', session['name'])
 
         # change to check database to assign role
         if random.randint(0, 1) == 0:
@@ -158,16 +162,17 @@ async def login(request):
             session['role'] = 'student'
             print('RANDOMLY ASSIGNED STUDENT')
 
-        # print(session['role'], session)
+        # print('session created', session)
 
         # redirect to the correct page based on role
         if session.get('role') == 'admin':
             print('redirecting to admin')
-            raise web.HTTPFound(location=request.app.router['admin'].url_for())
+            return await admin(request)
         elif session.get('role') == 'student':
             print('redirecting to student')
-            raise web.HTTPFound(location=request.app.router['student'].url_for())
-
+            raise await student(request)
+        else:
+            raise web.HTTPFound(location=request.app.router['index'].url_for())
         # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
         # maybe we set authorized to false and make the user sign in again
 
@@ -177,25 +182,35 @@ async def login(request):
         raise web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
-    session = await aiohttp_session.get_session(request)
+    session = await get_session(request)
     session.invalidate()
-    raise web.HTTPFound(location=request.app.router['index'].url_for())
+    return await index(request)
 
-@aiohttp_jinja2.template('login_test.html')
-async def login_test(request):
-    if request.method == 'GET':
-        session = await aiohttp_session.get_session(request)
-        if 'username' in session:
-            return {'username':session['username']}
-        return {'username':None}
-    data = await request.post()
-    session = await aiohttp_session.new_session(request)
-    session['username'] = data['username']
-    return {'username':session.get('username')}
+# @aiohttp_jinja2.template('login_test.html')
+# async def login_test(request):
+#     if request.method == 'GET':
+#         session = await new_session(request)
+#         session['username'] = 'defaultert'
+#         print('LOGIN_TEST SESSION:', session)
+#     return await index(request)
+    # raise web.HTTPFound(location=request.app.router['index'].url_for())
+    # return {'username':session.get('username')}
+    # raise web.HTTPFound(location=request.app.router['index'].url_for())
+    # if request.method == 'GET':
+    #     session = await get_session(request)
+    #     print('LOGIN_TEST SESSION:', session)
+    #     if 'username' in session:
+    #         return {'username':session['username']}
+    #     return {'username':None}
+    # data = await request.post()
+    # session = await new_session(request)
+    # session['username'] = data['username']
+    # return {'username':session.get('username')}
 
-@aiohttp_jinja2.template('login_test.html')
-async def logout_test(request):
-    # await check_login(request, logout_test)
-    session = await aiohttp_session.get_session(request)
-    session.invalidate()
-    return {'username':session.get('username')}
+
+# @aiohttp_jinja2.template('login_test.html')
+# async def logout_test(request):
+#     # await check_login(request, logout_test)
+#     session = await get_session(request)
+#     session.invalidate()
+#     return {'username':session.get('username')}
