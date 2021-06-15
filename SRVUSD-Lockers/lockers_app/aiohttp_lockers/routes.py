@@ -14,5 +14,11 @@ def setup_routes(app):
     app.router.add_post('/admin', admin, name='admin')
 
     # authentication
-    app.router.add_post('/tokensignin', tokensignin, name='tokensignin')
+    app.router.add_post('/login', login, name='login')
+
+    # login tests
+    app.router.add_get('/login_test', login_test, name='login_test')
+    app.router.add_post('/login_test', login_test, name='login_test')
+    app.router.add_get('/logout_test', logout_test, name='logout_test')
+
     # app.router.add_post('/store_sheets', store_sheets, name='store_sheets')
