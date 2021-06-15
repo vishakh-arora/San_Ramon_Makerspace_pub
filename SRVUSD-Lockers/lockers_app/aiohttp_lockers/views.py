@@ -35,7 +35,7 @@ async def student(request):
     session = await get_session(request)
     print('STUDENT SESSION:', session)
     if session.get('authorized') == None or session.get('role') != 'student':
-        raise web.HTTPFound(location=request.app.router['index'].url_for())
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # get request
     if request.method == 'GET':
@@ -54,7 +54,7 @@ async def admin(request):
     session = await get_session(request)
     print('ADMIN SESSION:', session)
     if session.get('authorized') == None or session.get('role') != 'admin':
-        raise web.HTTPFound(location=request.app.router['index'].url_for())
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # initializing render variables
     fields = ['students', 'lockers', 'preassign']
@@ -126,7 +126,7 @@ async def login(request):
        session = await new_session(request)
        session['authorized'] = True
        session['role'] = 'student'
-       return await student(request)
+       return web.HTTPFound(location=request.app.router['student'].url_for())
 
     print('RECEIVED LOGIN REQUEST')
     data = await request.post()
@@ -174,19 +174,19 @@ async def login(request):
         # redirect to the correct page based on role
         if session.get('role') == 'admin':
             print('redirecting to admin')
-            return await admin(request)
+            return web.HTTPFound(location=request.app.router['admin'].url_for())
         elif session.get('role') == 'student':
             print('redirecting to student')
-            return await student(request)
+            return web.HTTPFound(location=request.app.router['student'].url_for())
         else:
-            raise web.HTTPFound(location=request.app.router['index'].url_for())
+            return web.HTTPFound(location=request.app.router['index'].url_for())
         # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
         # maybe we set authorized to false and make the user sign in again
 
     except ValueError:
         # Invalid token
         # pass
-        raise web.HTTPFound(location=request.app.router['index'].url_for())
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
     session = await get_session(request)
