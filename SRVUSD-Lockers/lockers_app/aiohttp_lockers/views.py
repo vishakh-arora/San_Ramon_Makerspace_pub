@@ -11,15 +11,20 @@ from google.auth.transport import requests
 from multidict import MultiDict
 import pandas as pd
 import numpy as np
+import random
 
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
 
 conn = initialize_db()
 
-# bruh idek what this does
-def require_login(f):
-    f.__require_login__ = True
-    return f
+@web.middleware
+async def check_login(request, handler, role):
+    require_login = getattr(handler, '__require_login__', False)
+    session = await aiohttp_session.get_session(request)
+    authorized = session.get('authorized')
+    if authorized == None or session.get('role') != role:
+        raise web.HTTPFound(location=request.app.router['index'].url_for())
+    return await handler(request)
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
@@ -28,10 +33,12 @@ async def index(request):
     #     records = await cursor.fetchall()
     #     questions = [dict(q) for q in records]
         # return web.Response(text=str(questions))
+    session = await aiohttp_session.get_session(request)
     return {}
 
 @aiohttp_jinja2.template('student.html')
 async def student(request):
+    await check_login(request, student, 'student')
     if request.method == 'GET':
         # render with filled preferences from database
         return {}
@@ -42,6 +49,7 @@ async def student(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
+    await check_login(request, admin, 'admin')
     # initializing render variables
     fields = ['students', 'lockers', 'preassign']
     sheets = {i:{
@@ -97,39 +105,65 @@ async def admin(request):
     # return web.Response(body=sheets['students'][2],
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
-
 # @asyncio.coroutine
-async def tokensignin(request):
+async def login(request):
     data = await request.post()
     token = data['idtoken']
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-        print(idinfo)
+        # print(idinfo)
 
         # If auth request is from a G Suite domain:
         domain = idinfo.get('hd')
         #print(idinfo['hd'])
-        if domain != None:
+        if domain != None and 'srvusd' not in domain:
         # ****Change validation to db lookup****
-            if 'srvusd' not in domain:
-                raise ValueError('Wrong hosted domain.')
+            raise ValueError('Wrong hosted domain.')
+            # return '/' index template with bootstrap alert "Please use district email address."
         else:
             raise ValueError('Wrong hosted domain.')
+            # return '/' index template with bootstrap alert "Please use district email address."
 
         # ID token is valid. Get the user's Google Account ID from the decoded token.
         userid = idinfo['sub']
 
-        # if user's email is identified as an admin in database, direct to admin page
-        location = request.app.router['admin'].url_for()
+        # creating new session variables
+        session = await aiohttp_session.new_session(request)
+        session['authorized'] = True
+        session['email'] = idinfo['email']
+        session['name'] = idinfo['name']
 
-        # otherwise, take them to student page
-        # location = request.app.router['student'].url_for()
+        print('EMAIL:', session['email'])
+        print('NAME: ', session['name'])
 
-        raise web.HTTPFound(location=location)
+        # change to check database to assign role
+        if random.randint(0, 1) == 0:
+            session['role'] = 'admin'
+            print('RANDOMLY ASSIGNED ADMIN')
+        else:
+            session['role'] = 'student'
+            print('RANDOMLY ASSIGNED STUDENT')
+
+        # redirect to the correct page based on role
+        if session.get('role') == 'admin':
+            raise web.HTTPFound(location=request.app.router['admin'].url_for())
+        elif session.get('role') == 'student':
+            raise web.HTTPFound(location=request.app.router['student'].url_for())
+
+        # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
+        # maybe we set authorized to false and make the user sign in again
+
     except ValueError:
         # Invalid token
         pass
+
+async def logout(request):
+    session = await aiohttp_session.get_session(request)
+    session['name'] = None
+    session['email'] = None
+    location = request.app.router['index'].url_for()
+    raise web.HTTPFound(location=location)
 
 @aiohttp_jinja2.template('login_test.html')
 async def login_test(request):
@@ -141,10 +175,11 @@ async def login_test(request):
     data = await request.post()
     session = await aiohttp_session.new_session(request)
     session['username'] = data['username']
-    return {'username':session['username']}
+    return {'username':session.get('username')}
 
 @aiohttp_jinja2.template('login_test.html')
 async def logout_test(request):
+    # await check_login(request, logout_test)
     session = await aiohttp_session.get_session(request)
-    session['username'] = None;
-    return {'username': session['username']}
+    session.invalidate()
+    return {'username':session.get('username')}
