@@ -3,6 +3,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_db import *
 import aiohttp_jinja2
+import aiohttp_session
 import db
 import asyncio
 from google.oauth2 import id_token
@@ -14,6 +15,11 @@ import numpy as np
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
 
 conn = initialize_db()
+
+# bruh idek what this does
+def require_login(f):
+    f.__require_login__ = True
+    return f
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
@@ -105,7 +111,7 @@ async def tokensignin(request):
         domain = idinfo.get('hd')
         #print(idinfo['hd'])
         if domain != None:
-        #****Change validation to db lookup****
+        # ****Change validation to db lookup****
             if 'srvusd' not in domain:
                 raise ValueError('Wrong hosted domain.')
         else:
@@ -113,8 +119,32 @@ async def tokensignin(request):
 
         # ID token is valid. Get the user's Google Account ID from the decoded token.
         userid = idinfo['sub']
+
+        # if user's email is identified as an admin in database, direct to admin page
         location = request.app.router['admin'].url_for()
+
+        # otherwise, take them to student page
+        # location = request.app.router['student'].url_for()
+
         raise web.HTTPFound(location=location)
     except ValueError:
         # Invalid token
         pass
+
+@aiohttp_jinja2.template('login_test.html')
+async def login_test(request):
+    if request.method == 'GET':
+        session = await aiohttp_session.get_session(request)
+        if 'username' in session:
+            return {'username':session['username']}
+        return {'username':None}
+    data = await request.post()
+    session = await aiohttp_session.new_session(request)
+    session['username'] = data['username']
+    return {'username':session['username']}
+
+@aiohttp_jinja2.template('login_test.html')
+async def logout_test(request):
+    session = await aiohttp_session.get_session(request)
+    session['username'] = None;
+    return {'username': session['username']}

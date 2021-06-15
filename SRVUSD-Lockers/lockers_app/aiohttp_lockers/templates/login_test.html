@@ -1,0 +1,10 @@
+{% if username is not none %}
+<p>Logged in as {{ username }}.</p>
+<a href="{{ url('logout_test' )}}">log out</a>
+{% else %}
+<p>Please log in below.</p>
+<form action="/login_test" method="post">
+  <input type="text" name="username" value="" required>
+  <button type="submit">Update</button>
+</form>
+{% endif %}
