@@ -19,15 +19,19 @@ conn = initialize_db()
 
 @web.middleware
 async def check_login(request, handler, role):
+    # print('REQUEST:', request)
     require_login = getattr(handler, '__require_login__', False)
     session = await aiohttp_session.get_session(request)
     authorized = session.get('authorized')
     if authorized == None or session.get('role') != role:
+        print(f'CHECKING LOGIN FOR {handler.__name__}', authorized, session.get('role'), session)
         raise web.HTTPFound(location=request.app.router['index'].url_for())
     return await handler(request)
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
+    session = await aiohttp_session.get_session(request)
+    print(session) 
     # async with request.app['db'].acquire() as conn:
     #     cursor = await conn.execute(db.question.select())
     #     records = await cursor.fetchall()
@@ -107,20 +111,22 @@ async def admin(request):
 
 # @asyncio.coroutine
 async def login(request):
+    print('login called')
     data = await request.post()
     token = data['idtoken']
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-        # print(idinfo)
+        print(idinfo)
 
         # If auth request is from a G Suite domain:
         domain = idinfo.get('hd')
-        #print(idinfo['hd'])
-        if domain != None and 'srvusd' not in domain:
-        # ****Change validation to db lookup****
-            raise ValueError('Wrong hosted domain.')
-            # return '/' index template with bootstrap alert "Please use district email address."
+        print(idinfo['hd'])
+        if domain != None:
+            if 'srvusd' not in domain:
+                # ****Change validation to db lookup****
+                raise ValueError('Wrong hosted domain.')
+                # return '/' index template with bootstrap alert "Please use district email address."
         else:
             raise ValueError('Wrong hosted domain.')
             # return '/' index template with bootstrap alert "Please use district email address."
@@ -145,10 +151,14 @@ async def login(request):
             session['role'] = 'student'
             print('RANDOMLY ASSIGNED STUDENT')
 
+        print(session['role'], session)
+
         # redirect to the correct page based on role
         if session.get('role') == 'admin':
+            print('redirecting to admin')
             raise web.HTTPFound(location=request.app.router['admin'].url_for())
         elif session.get('role') == 'student':
+            print('redirecting to student')
             raise web.HTTPFound(location=request.app.router['student'].url_for())
 
         # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
@@ -156,14 +166,13 @@ async def login(request):
 
     except ValueError:
         # Invalid token
-        pass
+        # pass
+        raise web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
     session = await aiohttp_session.get_session(request)
-    session['name'] = None
-    session['email'] = None
-    location = request.app.router['index'].url_for()
-    raise web.HTTPFound(location=location)
+    session.invalidate()
+    raise web.HTTPFound(location=request.app.router['index'].url_for())
 
 @aiohttp_jinja2.template('login_test.html')
 async def login_test(request):
