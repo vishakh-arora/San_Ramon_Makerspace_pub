@@ -79,36 +79,35 @@ async def admin(request):
     print('RAW RESPONSE:', data, '\n')
     print('KEYS', data.keys(), '\n')
 
-    # for sheet_id in fields:
-    #     # empty submission and not existing in database
-    #     if type(data[sheet_id]) == bytearray:
-    #         # add check to see if the spreadsheet already exists in database
-    #         sheets[sheet_id]['error'] = f'Missing {sheet_id.capitalize()} Spreadsheet.'
-    #         continue
-    #     else:
-    #         try:
-    #             sheet = data[sheet_id]
+    for sheet_id in fields:
+        # empty submission and not existing in database
+        if type(data[sheet_id]) == bytearray:
+            # add check to see if the spreadsheet already exists in database
+            sheets[sheet_id]['error'] = f'Missing {sheet_id.capitalize()} Spreadsheet.'
+            continue
+        else:
+            try:
+                sheet = data[sheet_id]
 
-    #             # filename contains the name of the file in string format.
-    #             sheets[sheet_id]['filename'] = sheet.filename
+                # filename contains the name of the file in string format.
+                sheets[sheet_id]['filename'] = sheet.filename
 
-    #             # input_file contains the actual file data which needs to be
-    #             # stored somewhere.
-    #             sheets[sheet_id]['data'] = sheet.file
-    #             df = pd.read_excel(sheet.file, engine="openpyxl").to_numpy()
+                # input_file contains the actual file data which needs to be
+                # stored somewhere.
+                sheets[sheet_id]['data'] = sheet.file
+                df = pd.read_excel(sheet.file, engine="openpyxl").to_numpy()
 
-    #             # length validation
+                # length validation
 
-    #             # print()
-    #             # print(df.columns)
-    #             # sheets[sheet_id]['df'] = df
+                # print()
+                # print(df.columns)
+                # sheets[sheet_id]['df'] = df
 
-    #         except Exception as e:
-    #             print('EXCEPTIONS:', e)
+            except Exception as e:
+                print('EXCEPTIONS:', e)
 
-    # print('FINAL DICT', sheets)
-    # return {'sheets':sheets}
-    return {}
+    print('FINAL DICT', sheets)
+    return {'sheets':sheets}
 
     # print(sheets)
     # return web.Response(body=sheets['students'][2],
