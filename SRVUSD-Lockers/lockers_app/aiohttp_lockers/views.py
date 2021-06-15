@@ -113,80 +113,81 @@ async def admin(request):
     # return web.Response(body=sheets['students'][2],
     #                     headers=MultiDict({'CONTENT-DISPOSITION': 'inline'}))
 
+async def login(request):
+    data = await request.post()
+    session = await new_session(request)
+    session['authorized'] = True
+    session['username'] = data['username']
+    session['role'] = data['role']
+    print('SESSION CREATED:', session)
+    return web.HTTPFound(location=request.app.router[data['role']].url_for())
+
 # async def login(request):
 #     if request.method == 'GET':
-#         session = await new_session(request)
-#         session['username'] = 'default'
-#         session['role'] = 'admin'
-#         print('SESSION CREATED:', session)
-#     return await admin(request)
-
-async def login(request):
-    if request.method == 'GET':
-       session = await new_session(request)
-       session['authorized'] = True
-       session['role'] = 'student'
-       return web.HTTPFound(location=request.app.router['student'].url_for())
-
-    print('RECEIVED LOGIN REQUEST')
-    data = await request.post()
-    token = data['idtoken']
-    print('RECEIVED TOKEN')
-    try:
-        # Specify the CLIENT_ID of the app that accesses the backend:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-        print(idinfo)
-
-        # If auth request is from a G Suite domain:
-        domain = idinfo.get('hd')
-        print(idinfo['hd'])
-        if domain != None:
-            if 'srvusd' not in domain:
-                # ****Change validation to db lookup****
-                raise ValueError('Wrong hosted domain.')
-                # return '/' index template with bootstrap alert "Please use district email address."
-        else:
-            raise ValueError('Wrong hosted domain.')
-            # return '/' index template with bootstrap alert "Please use district email address."
-
-        # ID token is valid. Get the user's Google Account ID from the decoded token.
-        userid = idinfo['sub']
-
-        # # creating new session variables
-        session = await get_session(request)
-        session['authorized'] = True
-        session['email'] = idinfo['email']
-        session['name'] = idinfo['name']
-
-        # print('EMAIL:', session['email'])
-        # print('NAME: ', session['name'])
-
-        # change to check database to assign role
-        if random.randint(0, 1) == 0:
-            session['role'] = 'admin'
-            print('RANDOMLY ASSIGNED ADMIN')
-        else:
-            session['role'] = 'student'
-            print('RANDOMLY ASSIGNED STUDENT')
-
-        # print('session created', session)
-
-        # redirect to the correct page based on role
-        if session.get('role') == 'admin':
-            print('redirecting to admin')
-            return web.HTTPFound(location=request.app.router['admin'].url_for())
-        elif session.get('role') == 'student':
-            print('redirecting to student')
-            return web.HTTPFound(location=request.app.router['student'].url_for())
-        else:
-            return web.HTTPFound(location=request.app.router['index'].url_for())
-        # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
-        # maybe we set authorized to false and make the user sign in again
-
-    except ValueError:
-        # Invalid token
-        # pass
-        return web.HTTPFound(location=request.app.router['index'].url_for())
+#        session = await new_session(request)
+#        session['authorized'] = True
+#        session['role'] = 'student'
+#        return web.HTTPFound(location=request.app.router['student'].url_for())
+#
+#     print('RECEIVED LOGIN REQUEST')
+#     data = await request.post()
+#     token = data['idtoken']
+#     print('RECEIVED TOKEN')
+#     try:
+#         # Specify the CLIENT_ID of the app that accesses the backend:
+#         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+#         print(idinfo)
+#
+#         # If auth request is from a G Suite domain:
+#         domain = idinfo.get('hd')
+#         print(idinfo['hd'])
+#         if domain != None:
+#             if 'srvusd' not in domain:
+#                 # ****Change validation to db lookup****
+#                 raise ValueError('Wrong hosted domain.')
+#                 # return '/' index template with bootstrap alert "Please use district email address."
+#         else:
+#             raise ValueError('Wrong hosted domain.')
+#             # return '/' index template with bootstrap alert "Please use district email address."
+#
+#         # ID token is valid. Get the user's Google Account ID from the decoded token.
+#         userid = idinfo['sub']
+#
+#         # # creating new session variables
+#         session = await get_session(request)
+#         session['authorized'] = True
+#         session['email'] = idinfo['email']
+#         session['name'] = idinfo['name']
+#
+#         # print('EMAIL:', session['email'])
+#         # print('NAME: ', session['name'])
+#
+#         # change to check database to assign role
+#         if random.randint(0, 1) == 0:
+#             session['role'] = 'admin'
+#             print('RANDOMLY ASSIGNED ADMIN')
+#         else:
+#             session['role'] = 'student'
+#             print('RANDOMLY ASSIGNED STUDENT')
+#
+#         # print('session created', session)
+#
+#         # redirect to the correct page based on role
+#         if session.get('role') == 'admin':
+#             print('redirecting to admin')
+#             return web.HTTPFound(location=request.app.router['admin'].url_for())
+#         elif session.get('role') == 'student':
+#             print('redirecting to student')
+#             return web.HTTPFound(location=request.app.router['student'].url_for())
+#         else:
+#             return web.HTTPFound(location=request.app.router['index'].url_for())
+#         # idk what to do when role isn't identified ig make qjj face or sumt idgaf g_
+#         # maybe we set authorized to false and make the user sign in again
+#
+#     except ValueError:
+#         # Invalid token
+#         # pass
+#         return web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
     session = await get_session(request)
