@@ -13,12 +13,13 @@ import pandas as pd
 import numpy as np
 import random
 
+# temp_storage = {'partner':[None for i in range(3)]}
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
 
 conn = initialize_db()
 
 async def index(request):
-    messages = []
+    messages = {'success':[], 'danger':[], 'info':[]}
     # getting user session
     session = await get_session(request)
 
@@ -58,11 +59,10 @@ async def index(request):
             }
             # creating context
             ctx_students = {
-                'test_dict': {'water':'tastes good'},
                 'student_list': student_list,
                 'organization_fields': organization_fields,
-                'partner_preferences':['', '', ''],
-                'locker_preferences':['', '', ''], # ex: [building, floor, row]
+                'partner_preferences': [None for i in range(3)], # temp_storage['partner'], (TEST)
+                'locker_preferences':[None for i in range(3)], # ex: [building, floor, row]
                 'locker_options':{}, # ex: ['building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]]
                 'session': session,
                 'messages': messages
@@ -84,8 +84,12 @@ async def index(request):
                 # loading post request data
                 data = await request.post()
                 # save data into database
+                # EXAMPLE:
+                # temp_storage['partner'][0] = data['preference1']
+                # temp_storage['partner'][1] = data['preference2']
+                # temp_storage['partner'][2] = data['preference3']
                 # message to reload
-                messages.append('Reload the page to view updated preferences.')
+                messages['success'].append('Recorded Preferences Successfully.')
                 # creating response
                 response = aiohttp_jinja2.render_template(
                     'student.html',
@@ -131,7 +135,7 @@ async def index(request):
                 data = await request.post()
                 # save data into database
                 # message to reload
-                messages.append('Reload the page to view updated preferences.')
+                message['success'].append('Recorded Sheets Successfully.')
                 # creating response
                 response = aiohttp_jinja2.render_template(
                     'admin.html',

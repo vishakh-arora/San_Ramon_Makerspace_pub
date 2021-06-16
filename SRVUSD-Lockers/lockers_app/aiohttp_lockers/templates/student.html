@@ -17,30 +17,42 @@ Record your preferences.
       <p class="text-danger">*Mandatory Fields</p>
       <div class="my-3">
         <label for="preference1" class="form-label">First Preference Student</label><label class="text-danger" for="{{ value }}">*</label>
-        <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="Type to search..." required>
-          <datalist id="preference1StudentList">
-            {% for option in student_list %}
-              <option value="{{ option }}">
-            {% endfor %}
-          </datalist>
+        {% if partner_preferences[0] is not none%}
+          <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="{{ partner_preferences[0] }}" required>
+        {% else %}
+          <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="Type to search..." required>
+        {% endif %}
+        <datalist id="preference1StudentList">
+          {% for option in student_list %}
+            <option value="{{ option }}">
+          {% endfor %}
+        </datalist>
       </div>
       <div class="my-3">
         <label for="preference2" class="form-label">Second Preference Student</label>
-        <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="Type to search...">
-          <datalist id="preference2StudentList">
-            {% for option in student_list %}
-              <option value="{{ option }}">
-            {% endfor %}
-          </datalist>
+        {% if partner_preferences[1] is not none%}
+          <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="{{ partner_preferences[1] }}">
+        {% else %}
+          <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="Type to search...">
+        {% endif %}
+        <datalist id="preference2StudentList">
+          {% for option in student_list %}
+            <option value="{{ option }}">
+          {% endfor %}
+        </datalist>
       </div>
       <div class="my-3">
-        <label for="preference3" class="form-label">First Preference Student</label>
-        <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="Type to search...">
-          <datalist id="preference3StudentList">
-            {% for option in student_list %}
-              <option value="{{ option }}">
-            {% endfor %}
-          </datalist>
+        <label for="preference3" class="form-label">Third Preference Student</label>
+        {% if partner_preferences[2] is not none%}
+          <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="{{ partner_preferences[2] }}">
+        {% else %}
+          <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="Type to search...">
+        {% endif %}
+        <datalist id="preference3StudentList">
+          {% for option in student_list %}
+            <option value="{{ option }}">
+          {% endfor %}
+        </datalist>
       </div>
       {% for key, value in organization_fields.items() %}
         <div class="my-3">
