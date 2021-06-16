@@ -28,7 +28,9 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         </ul>
         <div class="d-flex">
-          <!-- <button class="btn btn-primary btn-sm my-2" type="">Log In</button> -->
+          {% if session.get('authorized') is not none %}
+            <a class="btn btn-primary btn-sm my-2" href="{{ url('logout') }}">Log Out</a>
+          {% endif %}
           <!-- <div class="g-signin2 my-2" data-longtitle="true" data-onsuccess="onSignIn"></div>
           <script>
             function onSignIn(googleUser) {

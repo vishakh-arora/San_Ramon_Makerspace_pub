@@ -1,6 +1,6 @@
 from aiohttp import web
 from settings import config
-from routes import setup_routes, student
+from routesv2 import setup_routes
 import aiohttp_jinja2
 import aiohttp_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
