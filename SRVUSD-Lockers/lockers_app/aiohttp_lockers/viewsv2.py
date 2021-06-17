@@ -63,6 +63,7 @@ async def index(request):
 
     # getting user session
     session = await get_session(request)
+    print('Index Session:', session)
 
     # user is not logged in
     if session.get('authorized') == None:
@@ -193,13 +194,13 @@ async def login(request):
     # email = data['email']
 
     # final: OAuth2 flow when it's figured out
-    token = data['id_token']
+    token = data['idtoken']
     idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
     print('USER INFO:', idinfo)
 
     # id_info attributes required to authorize a user
-    domain = id_info.get('hd')
-    email = id_info.get('email')
+    domain = idinfo.get('hd')
+    email = idinfo.get('email')
 
     # authorizing the user email exists in database (given by admin sheet)
     # conn.Query('student')
@@ -210,18 +211,23 @@ async def login(request):
     # if user already has a session
     session = await get_session(request)
     if session.get('authorized'):
+        print('User is already authorized')
+        print('Session Exists:', session)
         # return to / page, correct view will be rendered based on user's role
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # if user doesn't have a session
     if session.get('authorized') == None:
+        print('User does not have a session')
+        print('Creating Session...')
         # transferring info from id_info into session
         session = await new_session(request)
         session['authorized'] = True
-        session['first_name'] = id_info.get('given_name')
-        session['last_name'] = id_info.get('family_name')
+        session['first_name'] = idinfo.get('given_name')
+        session['last_name'] = idinfo.get('family_name')
         session['email'] = email
         session['role'] = 'student'
+        print('Session Created:', session)
         # return to / page, correct view will be rendered based on user's role
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
