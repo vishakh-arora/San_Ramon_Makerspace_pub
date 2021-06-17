@@ -9,7 +9,7 @@ Dashboard
   <div class="container-fluid">
     <div class="row">
       <div class="col-md rounded p-5 text-light bg-dark">
-        <h2>Welcome {{session.get('name')}}.</h2>
+        <h2>{% block page_title %}{% endblock %}</h2>
         <p class="lead">{% block page_description %}{% endblock %}</p>
       </div>
     </div>

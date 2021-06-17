@@ -190,26 +190,40 @@ async def login(request):
     data = await request.post()
 
     # test: from form fields on home page
-    email = data['email']
+    # email = data['email']
 
     # final: OAuth2 flow when it's figured out
-    # OAuth2 code here
+    token = data['id_token']
+    idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+    print('USER INFO:', idinfo)
 
-    # validating the user email exists in database (given by admin sheet)
+    # id_info attributes required to authorize a user
+    domain = id_info.get('hd')
+    email = id_info.get('email')
+
+    # authorizing the user email exists in database (given by admin sheet)
     # conn.Query('student')
     # conn.Query('admin')
     # If the user is found, create session, set authorized to true, and redirect
     # If not, send back to home page
 
-    # creating new user session
-    session = await new_session(request)
+    # if user already has a session
+    session = await get_session(request)
+    if session.get('authorized'):
+        # return to / page, correct view will be rendered based on user's role
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
-    session['authorized'] = True
-    session['name'] = email
-    session['role'] = 'student'
-
-    # return to / page, correct view will be rendered based on user's role
-    return web.HTTPFound(location=request.app.router['index'].url_for())
+    # if user doesn't have a session
+    if session.get('authorized') == None:
+        # transferring info from id_info into session
+        session = await new_session(request)
+        session['authorized'] = True
+        session['first_name'] = id_info.get('given_name')
+        session['last_name'] = id_info.get('family_name')
+        session['email'] = email
+        session['role'] = 'student'
+        # return to / page, correct view will be rendered based on user's role
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
     # getting user session
