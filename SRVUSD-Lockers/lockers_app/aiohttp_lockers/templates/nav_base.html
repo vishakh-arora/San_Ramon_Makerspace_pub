@@ -55,6 +55,13 @@
       </div>
     </div>
   </nav>
+  {% for key, value in messages.items() %}
+    {% for message in value %}
+      <div class="alert alert-{{ key }} text-center" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endfor %}
   {% block body %}
   {% endblock %}
   {% block script %}

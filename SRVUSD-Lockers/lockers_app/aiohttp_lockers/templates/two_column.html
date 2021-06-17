@@ -5,14 +5,6 @@ Dashboard
 {% endblock %}
 
 {% block body %}
-
-{% for key, value in messages.items() %}
-  {% for message in value %}
-    <div class="alert alert-{{ key }} text-center" role="alert">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endfor %}
 <div class="container-fluid p-5 mb-5">
   <div class="container-fluid">
     <div class="row">

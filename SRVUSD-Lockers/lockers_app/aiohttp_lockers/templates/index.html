@@ -26,12 +26,10 @@ Home
     <!-- <a class="btn btn-lg btn-primary" href="">Sign Up</a> -->
     <!-- <div class="btn btn-lg g-signin2" id="auth2" data-longtitle="true" data-onsuccess="onSignIn"></div> -->
     <form action="/login" method="post" accept-charset="utf-8" enctype="multipart/form-data">
-      <input type="text" name="name" value="" required>
-      <select id="role" name="role">
-        <option value="student">student</option>
-        <option value="admin">admin</option>
-      </select>
-      <button class="btn btn-primary" type="submit">Log In</button>
+      <div class="input-group">
+        <input type="email" class="form-control" id="exampleInputEmail1" name="email" aria-describedby="emailHelp" placeholder="example@domain" required>
+        <button class="btn btn-primary" type="submit">Log In</button>
+      </div>
     </form>
     <!-- <button type="button" name="button" onclick="myFunction()"></button> -->
   </div>

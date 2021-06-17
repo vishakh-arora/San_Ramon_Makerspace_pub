@@ -18,8 +18,49 @@ CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleuserconten
 
 conn = initialize_db()
 
+# create hardcoded entries (TEST)
+# creating school
+# access(
+#     conn,
+#     'school',
+#     'insert',
+#     {
+#         'id': 0,
+#         'name': 'Dougherty Valley High School'
+#     }
+# )
+# # creating student user
+# access(
+#     conn,
+#     'student',
+#     'insert',
+#     {
+#         'id': 0,
+#         'email': 'dh.skumar@students.srvusd.net',
+#         'first_name': 'shubham',
+#         'last_name': 'kumar',
+#         'school_id': 0,
+#         'grade': 12
+#     }
+# )
+# # creating admin user
+# access(
+#     conn,
+#     'admin',
+#     'insert',
+#     {
+#         'id': 0,
+#         'email': 'eliddle@srvusd.net',
+#         'prefix': 'Mr.',
+#         'last_name': 'liddle',
+#         'school_id': 0
+#     }
+# )
+
 async def index(request):
+    # creating message dictionary
     messages = {'success':[], 'danger':[], 'info':[]}
+
     # getting user session
     session = await get_session(request)
 
@@ -84,7 +125,7 @@ async def index(request):
                 # loading post request data
                 data = await request.post()
                 # save data into database
-                # EXAMPLE:
+                # EXAMPLE: (TEST)
                 # temp_storage['partner'][0] = data['preference1']
                 # temp_storage['partner'][1] = data['preference2']
                 # temp_storage['partner'][2] = data['preference3']
@@ -148,15 +189,24 @@ async def login(request):
     # loading post request data
     data = await request.post()
 
-    # validate the user email exists in database (given by admin sheet)
+    # test: from form fields on home page
+    email = data['email']
+
+    # final: OAuth2 flow when it's figured out
+    # OAuth2 code here
+
+    # validating the user email exists in database (given by admin sheet)
+    # conn.Query('student')
+    # conn.Query('admin')
+    # If the user is found, create session, set authorized to true, and redirect
+    # If not, send back to home page
+
     # creating new user session
     session = await new_session(request)
-    # final: OAuth2 flow when it's figured out
 
-    # test: from form fields on home page
     session['authorized'] = True
-    session['name'] = data['name']
-    session['role'] = data['role']
+    session['name'] = email
+    session['role'] = 'student'
 
     # return to / page, correct view will be rendered based on user's role
     return web.HTTPFound(location=request.app.router['index'].url_for())
