@@ -207,23 +207,7 @@ async def login(request):
 
     # user is not a member of the district
     if domain == None or 'srvusd' not in domain:
-        # return to / page, correct view will be rendered
-        # return web.HTTPFound(location=request.app.router['index'].url_for())
-        # login failed
-        messages['danger'].append('Log In failed. Please use your district email.')
-        # creating context
-        ctx_login = {
-            'session': session,
-            'messages': messages
-        }
-        # creating response
-        response = aiohttp_jinja2.render_template(
-            'index.html',
-            request,
-            ctx_login
-        )
-        # rendering for user
-        return response
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # authorizing the user email exists in database (given by admin sheet)
     # conn.Query('student')
