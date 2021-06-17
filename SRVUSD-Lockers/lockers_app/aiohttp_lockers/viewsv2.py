@@ -187,6 +187,9 @@ async def index(request):
                 return response
 
 async def login(request):
+    # creating message dictionary
+    messages = {'success':[], 'danger':[], 'info':[]}
+
     # loading post request data
     data = await request.post()
 
@@ -201,6 +204,26 @@ async def login(request):
     # id_info attributes required to authorize a user
     domain = idinfo.get('hd')
     email = idinfo.get('email')
+
+    # user is not a member of the district
+    if domain == None or 'srvusd' not in domain:
+        # return to / page, correct view will be rendered
+        # return web.HTTPFound(location=request.app.router['index'].url_for())
+        # login failed
+        messages['danger'].append('Log In failed. Please use your district email.')
+        # creating context
+        ctx_login = {
+            'session': session,
+            'messages': messages
+        }
+        # creating response
+        response = aiohttp_jinja2.render_template(
+            'index.html',
+            request,
+            ctx_login
+        )
+        # rendering for user
+        return response
 
     # authorizing the user email exists in database (given by admin sheet)
     # conn.Query('student')
@@ -232,11 +255,31 @@ async def login(request):
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def logout(request):
+    # creating message dictionary
+    messages = {'success':[], 'danger':[], 'info':[]}
+
     # getting user session
     session = await get_session(request)
+
+    # log out successful
+    if session.get('authorized'):
+        messages['success'].append('Logged Out Successfully.')
 
     # invalidating session
     session.invalidate()
 
-    # return to / page, correct view will be rendered based on user's role
-    return web.HTTPFound(location=request.app.router['index'].url_for())
+    # return to / page, correct view will be rendered based
+    # return web.HTTPFound(location=request.app.router['index'].url_for())
+    # creating context
+    ctx_logout = {
+        'session': session,
+        'messages': messages
+    }
+    # creating response
+    response = aiohttp_jinja2.render_template(
+        'index.html',
+        request,
+        ctx_logout
+    )
+    # rendering for user
+    return response
