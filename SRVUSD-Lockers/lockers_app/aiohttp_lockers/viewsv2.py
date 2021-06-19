@@ -152,6 +152,7 @@ async def index(request):
             }
 
             # querying database for student options (grade & school must be the same)
+            # exclude the logged in student from the list
             student_db_request = conn.execute(
                 student.select().
                     where(
@@ -163,16 +164,47 @@ async def index(request):
                     )
                 )
 
+            # i[0] is id, i[2] is first name, i[3] is last name and i[1] is email
             student_dict = {
-                i[0]:f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
+                i[0]: f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
                 for i in student_db_request
             }
+
+            # querying database for existing student preferences
+            # sort preferences by partner rank (least to greatest)
+
+            # preference_request = conn.execute(preference.select())
+            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+
+            preference_db_request = sorted(
+                conn.execute(
+                preference.select().
+                    where(preference.c.student_id == session['id'])
+                ).fetchall(),
+                key=lambda i: i[3] # preference
+            )
+
+            print(preference_db_request)
+            preference_request = conn.execute(preference.select())
+            print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+
+            # create list to be passed into jinja prepopulated with student name and email
+            partner_preferences = [None, None, None]
+            for i in preference_db_request:
+                print(i[2])
+                s = conn.execute(
+                    student.select().
+                        where(student.c.id == i[2])
+                ).first()
+                partner_preferences[i[3]] = f'{s[2].capitalize()} {s[3].capitalize()} ({s[1]})'
+
+            print(partner_preferences)
 
             # creating context
             ctx_students = {
                 'student_dict': student_dict,
                 'organization_fields': organization_fields,
-                'partner_preferences': [None for i in range(3)], # temp_storage['partner'], (TEST)
+                'partner_preferences': partner_preferences, # temp_storage['partner'], (TEST)
                 'locker_preferences':[None for i in range(3)], # ex: [building, floor, row]
                 'locker_options':{}, # ex: ['building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]]
                 'session': session,
@@ -223,8 +255,10 @@ async def index(request):
                     'student_id': session['id'],
                     'partner_id': data['preference1'],
                     'partner_rank': 0,
-                    'locker_pref': locker_db_request[0],
+                    'locker_pref': locker_preference_id,
                 }))
+
+                preference_request = conn.execute(preference.select())
 
                 if data['preference2'] != 'none':
                     conn.execute(preference.insert({
@@ -232,7 +266,7 @@ async def index(request):
                         'student_id': session['id'],
                         'partner_id': data['preference2'],
                         'partner_rank': 1,
-                        'locker_pref': locker_db_request[0],
+                        'locker_pref': locker_preference_id,
                     }))
 
                 if data['preference3'] != 'none':
@@ -241,7 +275,7 @@ async def index(request):
                         'student_id': session['id'],
                         'partner_id': data['preference3'],
                         'partner_rank': 2,
-                        'locker_pref': locker_db_request[0],
+                        'locker_pref': locker_preference_id,
                     }))
 
                 # message to reload
