@@ -1,7 +1,7 @@
 {% extends "two_column.html" %}
 
 {% block page_title %}
-Welcome {{session.get('last_name')}}.
+Welcome {{session.get('prefix') + ' ' + session.get('last_name').capitalize()}}.
 {% endblock %}
 
 {% block page_description %}
@@ -9,11 +9,11 @@ Enter locker & student details.
 {% endblock %}
 
 {% block column_one %}
-<div class="card border-white text-dark rounded shadow">
+<div class="card bg-light border border-white text-dark rounded shadow">
   <form action="/" method="post" accept-charset="utf-8" enctype="multipart/form-data">
     <div class="card-body p-3">
-      <h2 class="card-title">Administrator Form.</h2>
-      <p class="card-subtitle mb-5 text-muted">Submit the following documents.<p>
+      <h2 class="card-title mt-2">Administrator Form.</h2>
+      <p class="card-subtitle mb-2 text-muted">Submit the following documents.<p>
       {% if sheets['students']['error'] is not none %}
       <div class="alert alert-danger" role="alert">
         {{ sheets['students']['error'] }}
@@ -23,8 +23,8 @@ Enter locker & student details.
         Accepted Students Spreadsheet.
       </div>
       {% endif %}
-      <div class="mb-5 bg-light shadow rounded p-3">
-        <h5 class="card-subtitle">Students Spreadsheet.</h5>
+      <div class="mb-4 bg-white shadow rounded p-3">
+        <h5 class="card-subtitle mt-1 mb-4 text-muted">Students Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
         <table class="table table-primary table-striped">
           <thead>
@@ -61,8 +61,8 @@ Enter locker & student details.
         Accepted Lockers Spreadsheet.
       </div>
       {% endif %}
-      <div class="mb-5 bg-light shadow rounded p-3">
-        <h5 class="card-subtitle">Lockers Spreadsheet.</h5>
+      <div class="mb-4 bg-white shadow rounded p-3">
+        <h5 class="card-subtitle mt-1 mb-4 text-muted">Lockers Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
         <table class="table table-primary table-striped">
           <thead>
@@ -96,8 +96,8 @@ Enter locker & student details.
         Accepted Preassignments Spreadsheet.
       </div>
       {% endif %}
-      <div class="bg-light shadow rounded p-3 mb-4">
-        <h5 class="card-subtitle">Pre-Assignments Spreadsheet.</h5>
+      <div class="mb-4 bg-white shadow rounded p-3">
+        <h5 class="card-subtitle mt-1 mb-4 text-muted">Pre-Assignments Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
         <table class="table table-primary table-striped">
           <thead>

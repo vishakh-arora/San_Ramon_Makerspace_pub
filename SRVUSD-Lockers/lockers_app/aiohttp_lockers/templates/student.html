@@ -1,7 +1,7 @@
 {% extends "two_column.html" %}
 
 {% block page_title %}
-Welcome {{session.get('first_name')}}.
+Welcome {{session.get('first_name').capitalize()}}.
 {% endblock %}
 
 {% block page_description %}
@@ -9,61 +9,99 @@ Record your preferences.
 {% endblock %}
 
 {% block column_one %}
-<div class="card border-white text-dark rounded shadow">
+<div class="card bg-light border border-white text-dark rounded shadow">
   <form action="/" method="post" accept-charset="utf-8" enctype="multipart/form-data">
     <div class="card-body">
-      <h2 class="card-title">Student Form.</h2>
+      <h2 class="card-title mt-2">Student Form.</h2>
       <p class="card-subtitle mb-2 text-muted">You can change your preferences until the deadline.<p>
-      <p class="text-danger">*Mandatory Fields</p>
-      <div class="my-3">
-        <label for="preference1" class="form-label">First Preference Student</label><label class="text-danger" for="{{ value }}">*</label>
-        {% if partner_preferences[0] is not none%}
-          <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="{{ partner_preferences[0] }}" required>
-        {% else %}
-          <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="Type to search..." required>
-        {% endif %}
-        <datalist id="preference1StudentList">
-          {% for option in student_list %}
-            <option value="{{ option }}">
-          {% endfor %}
-        </datalist>
-      </div>
-      <div class="my-3">
-        <label for="preference2" class="form-label">Second Preference Student</label>
-        {% if partner_preferences[1] is not none%}
-          <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="{{ partner_preferences[1] }}">
-        {% else %}
-          <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="Type to search...">
-        {% endif %}
-        <datalist id="preference2StudentList">
-          {% for option in student_list %}
-            <option value="{{ option }}">
-          {% endfor %}
-        </datalist>
-      </div>
-      <div class="my-3">
-        <label for="preference3" class="form-label">Third Preference Student</label>
-        {% if partner_preferences[2] is not none%}
-          <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="{{ partner_preferences[2] }}">
-        {% else %}
-          <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="Type to search...">
-        {% endif %}
-        <datalist id="preference3StudentList">
-          {% for option in student_list %}
-            <option value="{{ option }}">
-          {% endfor %}
-        </datalist>
-      </div>
-      {% for key, value in organization_fields.items() %}
+      <p class="text-danger">* Mandatory Fields</p>
+      <div class="bg-white shadow rounded p-3 mb-4">
+        <h5 class="card-subtitle mt-1 mb-4 text-muted">Partner Preferences.</h5>
         <div class="my-3">
-            <label for="{{ key }}" class="form-label">{{ key.capitalize() }}</label><label class="text-danger" for="{{ key }}">*</label>
-            <select id="{{ key }}" name="{{ key }}" class="form-select" aria-label="Default select example" required>
+          <!-- <label for="preference1" class="form-label">First Preference Student</label><label class="text-danger" for="preference1">*</label>
+          {% if partner_preferences[0] is not none %}
+            <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="{{ partner_preferences[0] }}" required>
+          {% else %}
+            <input class="form-control" list="preference1StudentList" id="preference1" name="preference1" placeholder="Type to search..." required>
+          {% endif %}
+          <datalist id="preference1StudentList">
+            {% for option in student_list %}
+              <option value="{{ option }}">
+            {% endfor %}
+          </datalist> -->
+          <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
+          {% if partner_preferences[0] is not none %}
+            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% else %}
+            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% endif %}
+          {% for key, value in student_dict.items() %}
+            <option value="{{ key }}">{{ value }}</option>
+          {% endfor %}
+          </select>
+        </div>
+        <div class="my-3">
+          <!-- <label for="preference2" class="form-label">Second Preference Student</label>
+          {% if partner_preferences[1] is not none %}
+            <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="{{ partner_preferences[1] }}">
+          {% else %}
+            <input class="form-control" list="preference2StudentList" id="preference2" name="preference2" placeholder="Type to search...">
+          {% endif %}
+          <datalist id="preference2StudentList">
+            {% for option in student_list %}
+              <option value="{{ option }}">
+            {% endfor %}
+          </datalist> -->
+          <label for="preference2" class="form-label">Second Preference Student</label>
+          {% if partner_preferences[0] is not none %}
+            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% else %}
+            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% endif %}
+            <option value="none">No Preference</option>
+          {% for key, value in student_dict.items() %}
+            <option value="{{ key }}">{{ value }}</option>
+          {% endfor %}
+          </select>
+        </div>
+        <div class="my-3">
+          <!-- <label for="preference3" class="form-label">Third Preference Student</label>
+          {% if partner_preferences[2] is not none %}
+            <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="{{ partner_preferences[2] }}">
+          {% else %}
+            <input class="form-control" list="preference3StudentList" id="preference3" name="preference3" placeholder="Type to search...">
+          {% endif %}
+          <datalist id="preference3StudentList">
+            {% for option in student_list %}
+              <option value="{{ option }}">
+            {% endfor %}
+          </datalist> -->
+          <label for="preference3" class="form-label">Third Preference Student</label>
+          {% if partner_preferences[0] is not none %}
+            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% else %}
+            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% endif %}
+            <option value="none">No Preference</option>
+          {% for key, value in student_dict.items() %}
+            <option value="{{ key }}">{{ value }}</option>
+          {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="bg-white shadow rounded p-3 mb-4">
+        <h5 class="card-subtitle mt-1 mb-4 text-muted">Locker Preferences.</h5>
+        {% for key, value in organization_fields.items() %}
+        <div class="my-3">
+            <label for="{{ key }}" class="form-label">{{ key.capitalize() }}</label> <label class="text-danger" for="{{ key }}">*</label>
+            <select class="selectpicker show-tick border rounded" id="{{ key }}" name="{{ key }}" data-width="100%" title="Choose one of the following..." required>
               {% for option in value %}
                 <option value="{{ option }}">{{ option.capitalize() }}</option>
               {% endfor %}
             </select>
         </div>
-      {% endfor %}
+        {% endfor %}
+      </div>
     </div>
     <div class="d-grid gap-2 col-6 mb-4 mx-auto">
       <button class="btn btn-primary" type="submit">Update</button>
