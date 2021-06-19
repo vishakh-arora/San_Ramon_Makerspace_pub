@@ -30,13 +30,13 @@ Record your preferences.
             {% endfor %}
           </datalist> -->
           <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
-          {% if partner_preferences[0] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="{{ partner_preferences[0] }}">
-          {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Choose one of the following...">
-          {% endif %}
+          <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Choose one of the following..." required>
           {% for key, value in student_dict.items() %}
-            <option value="{{ key }}">{{ value }}</option>
+            {% if value == partner_preferences[0]%}
+              <option value="{{ key }}" selected>{{ value }}</option>
+            {% else %}
+              <option value="{{ key }}" >{{ value }}</option>
+            {% endif %}
           {% endfor %}
           </select>
         </div>
@@ -53,14 +53,18 @@ Record your preferences.
             {% endfor %}
           </datalist> -->
           <label for="preference2" class="form-label">Second Preference Student</label>
-          {% if partner_preferences[0] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%" title="{{ partner_preferences[1] }}">
+          <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% if partner_preferences[1] is none %}
+            <option value="none" selected>No Preference</option>
           {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%" title="Choose one of the following...">
-          {% endif %}
             <option value="none">No Preference</option>
+          {% endif %}
           {% for key, value in student_dict.items() %}
-            <option value="{{ key }}">{{ value }}</option>
+            {% if value == partner_preferences[1]%}
+              <option value="{{ key }}" selected>{{ value }}</option>
+            {% else %}
+              <option value="{{ key }}" >{{ value }}</option>
+            {% endif %}
           {% endfor %}
           </select>
         </div>
@@ -77,14 +81,18 @@ Record your preferences.
             {% endfor %}
           </datalist> -->
           <label for="preference3" class="form-label">Third Preference Student</label>
-          {% if partner_preferences[0] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="{{ partner_preferences[2] }}">
+          <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
+          {% if partner_preferences[2] is none %}
+            <option value="none" selected>No Preference</option>
           {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
-          {% endif %}
             <option value="none">No Preference</option>
+          {% endif %}
           {% for key, value in student_dict.items() %}
-            <option value="{{ key }}">{{ value }}</option>
+            {% if value == partner_preferences[2]%}
+              <option value="{{ key }}" selected>{{ value }}</option>
+            {% else %}
+              <option value="{{ key }}" >{{ value }}</option>
+            {% endif %}
           {% endfor %}
           </select>
         </div>
