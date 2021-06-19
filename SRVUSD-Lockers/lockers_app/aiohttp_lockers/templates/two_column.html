@@ -8,10 +8,13 @@ Dashboard
 <div class="container-fluid p-5 mb-5">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md rounded p-5 text-light" style="background-image: url('../static/img/{{ session['school_id'] }}.jpg');   background-position: center; background-repeat: no-repeat; background-size: cover;">
+      <div class="col-md rounded p-5 text-light" style="background-image: url('../static/img/{{ session['school_id'] | string + '_banner' }}.png');   background-position: center; background-repeat: no-repeat; background-size: cover;">
         <div class="p-3 rounded" style="background-color: rgba(0, 0, 0, 0.5)">
-          <h2>{% block page_title %}{% endblock %}</h2>
-          <p class="lead">{% block page_description %}{% endblock %}</p>
+          <div class="">
+            <img src="../static/img/{{ session['school_id'] | string + '_logo' }}.png" height="100" width="100" alt="">
+            <h2>{% block page_title %}{% endblock %}</h2>
+            <p class="lead">{% block page_description %}{% endblock %}</p>
+          </div>
         </div>
       </div>
     </div>
