@@ -27,16 +27,32 @@ conn.execute(student.delete())
 conn.execute(admin.delete())
 conn.execute(preference.delete())
 conn.execute(organization.delete())
+conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
+# creating organizations w names
+conn.execute(org_name.insert({
+    'id': 0,
+    'hierarchy_1': 'Building',
+    'hierarchy_2': 'Floor',
+    'hierarchy_3': 'Level'
+}))
+conn.execute(org_name.insert({
+    'id': 1,
+    'hierarchy_1': 'Floor',
+    'hierarchy_2': 'Bay',
+    'hierarchy_3': 'Level'
+}))
 # creating school
 conn.execute(school.insert({
     'id': 0,
-    'name': 'Dougherty Valley High School'
+    'name': 'Dougherty Valley High School',
+    'org_id': 0
 }))
 conn.execute(school.insert({
     'id': 1,
-    'name': 'California High School'
+    'name': 'California High School',
+    'org_id': 1
 }))
 
 # creating student users
@@ -86,10 +102,9 @@ conn.execute(organization.insert({
     'school_id': 0,
     'hierarchy_1': '1000',
     'hierarchy_2': 'top',
-    'hierarchy_3': 'top',
-    'hierarchy_4': None,
-    'hierarchy_5': None
+    'hierarchy_3': 'top'
 }))
+
 
 # preview tables
 school_request = conn.execute(school.select())
@@ -226,6 +241,7 @@ async def index(request):
             if request.method == 'POST':
                 # loading post request data
                 data = await request.post()
+                print(data)
                 # save data into database
                 # EXAMPLE: (TEST)
                 # temp_storage['partner'][0] = data['preference1']

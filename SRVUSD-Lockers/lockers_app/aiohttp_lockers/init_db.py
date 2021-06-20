@@ -7,7 +7,7 @@ DSN = "postgresql://{user}:{password}@{host}:{port}/{database}"
 
 def create_tables(engine):
     meta = MetaData()
-    meta.create_all(bind=engine, tables=[student, admin, school, preference, locker, organization, assignment])
+    meta.create_all(bind=engine, tables=[student, admin, school, preference, locker, organization, assignment, org_name])
 
 def connect(engine):
     conn = engine.connect()
@@ -28,9 +28,11 @@ def initialize_db():
 
     return conn
 
+# conn = initialize_db()
+
 # if __name__ == '__main__':
 #     db_url = DSN.format(**config['postgres'])
 #     engine = create_engine(db_url)
 #
 #     create_tables(engine)
-    #connect(engine)
+#     connect(engine)

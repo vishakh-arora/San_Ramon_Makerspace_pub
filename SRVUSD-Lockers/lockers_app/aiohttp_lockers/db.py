@@ -6,7 +6,7 @@ from sqlalchemy import (
 from sqlalchemy_json import mutable_json_type
 from sqlalchemy.dialects.postgresql import JSONB
 
-__all__ = ['student', 'admin', 'school', 'preference', 'locker', 'organization', 'assignment']
+__all__ = ['student', 'admin', 'school', 'preference', 'locker', 'organization', 'assignment', 'org_name']
 
 meta = MetaData()
 
@@ -42,6 +42,7 @@ school = Table(
 
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
+    Column('org_id', Integer, ForeignKey('org_name.id', ondelete='CASCADE'), nullable=False)
 )
 
 # Store student preferences for their partner/locker
@@ -93,6 +94,23 @@ organization = Table(
 # there will be many lockers belonging to each row though.
 # This makes it easy to look up all lockers belonging to a specific org - simply look up all lockers that have
 # a specific org id.
+
+# Store every possible organization as names
+# Should be populated from lockers spreadsheet
+org_name = Table(
+    'org_name', meta,
+
+    Column('id', Integer, primary_key=True),
+    Column('hierarchy_1', String(32)), # 'Building'
+    Column('hierarchy_2', String(32)), # 'Floor'
+    Column('hierarchy_3', String(32)), # 'Level'
+    Column('hierarchy_4', String(32)),
+    Column('hierarchy_5', String(32))
+)
+# Example of org_name table:
+# 1 | 23 | Building | Floor | Level
+# 2 | 12 | Building | Floor | Bay | Level
+# ...
 
 # Store final outcomes of partner/locker assignment
 # Should be populated from preassignments spreadsheet
