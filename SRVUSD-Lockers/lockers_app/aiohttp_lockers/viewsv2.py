@@ -199,21 +199,14 @@ async def index(request):
                 key=lambda i: i[3] # preference
             )
 
-            print(preference_db_request)
-            preference_request = conn.execute(preference.select())
-            print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-
             # create list to be passed into jinja prepopulated with student name and email
             partner_preferences = [None, None, None]
             for i in preference_db_request:
-                print(i[2])
                 s = conn.execute(
                     student.select().
                         where(student.c.id == i[2])
                 ).first()
                 partner_preferences[i[3]] = f'{s[2].capitalize()} {s[3].capitalize()} ({s[1]})'
-
-            print(partner_preferences)
 
             # creating context
             ctx_students = {
@@ -295,14 +288,14 @@ async def index(request):
                     }))
 
                 # message to reload
-                messages['success'].append('Recorded Preferences Successfully.')
+                messages['success'].append('Saved successfully. Reload to view preferences.')
                 # creating response
-                response = aiohttp_jinja2.render_template(
-                    'student.html',
-                    request,
-                    ctx_students
-                )
-                return response
+                # response = aiohttp_jinja2.render_template(
+                #     'student.html',
+                #     request,
+                #     ctx_students
+                # )
+                return web.HTTPFound(location=request.app.router['index'].url_for())
 
 
         # user is an administrator
@@ -341,7 +334,7 @@ async def index(request):
                 data = await request.post()
                 # save data into database
                 # message to reload
-                message['success'].append('Recorded Sheets Successfully.')
+                messages['success'].append('Saved sheets successfully. Reload to view sheets.')
                 # creating response
                 response = aiohttp_jinja2.render_template(
                     'admin.html',
@@ -422,7 +415,7 @@ async def logout(request):
 
     # log out successful
     if session.get('authorized'):
-        messages['success'].append('Logged Out Successfully.')
+        messages['success'].append('Logged out successfully.')
 
     # invalidating session
     session.invalidate()
