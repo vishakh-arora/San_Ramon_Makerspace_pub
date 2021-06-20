@@ -91,14 +91,10 @@ Record your preferences.
           {% if partner_preferences[2] is none %}
             <option value="none" selected>No Preference</option>
           {% else %}
-<<<<<<< Updated upstream
+
             <option value="none">No Preference</option>
           {% endif %}
-=======
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
-          {% endif %}
-            <option name="nopref" value="none">No Preference</option>
->>>>>>> Stashed changes
+
           {% for key, value in student_dict.items() %}
             {% if value == partner_preferences[2]%}
               <option value="{{ key }}" selected>{{ value }}</option>
