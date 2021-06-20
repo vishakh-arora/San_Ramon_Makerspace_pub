@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
 import random
+import itertools
 
 # temp_storage = {'partner':[None for i in range(3)]}
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
@@ -33,15 +34,15 @@ conn.execute(org_name.delete())
 # creating organizations w names
 conn.execute(org_name.insert({
     'id': 0,
-    'hierarchy_1': 'Building',
-    'hierarchy_2': 'Floor',
-    'hierarchy_3': 'Level'
+    'hierarchy_1': 'building',
+    'hierarchy_2': 'floor',
+    'hierarchy_3': 'level'
 }))
 conn.execute(org_name.insert({
     'id': 1,
-    'hierarchy_1': 'Floor',
-    'hierarchy_2': 'Bay',
-    'hierarchy_3': 'Level'
+    'hierarchy_1': 'floor',
+    'hierarchy_2': 'bay',
+    'hierarchy_3': 'level'
 }))
 # creating school
 conn.execute(school.insert({
@@ -96,15 +97,32 @@ conn.execute(admin.insert({
     'last_name': 'liddle',
     'school_id': 0
 }))
-# creating an organization
-conn.execute(organization.insert({
-    'id': 0,
-    'school_id': 0,
-    'hierarchy_1': '1000',
-    'hierarchy_2': 'top',
-    'hierarchy_3': 'top'
-}))
+# creating organizations
+options = {
+    0: {
+        'building': ['1000', '2000', '3000', '4000'],
+        'floor': ['top', 'bottom'],
+        'level': ['top', 'bottom']
+    },
+    1: {
+        'floor': ['top', 'bottom'],
+        'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+        'level': ['top', 'bottom']
+    }
+}
 
+x = 0
+for i in options: #(0, 1)
+    prod = list(itertools.product(*[j for j in list(options[i].values())]))
+    for a, b, c in prod:
+        conn.execute(organization.insert({
+            'id': x,
+            'school_id': i,
+            'hierarchy_1': a,
+            'hierarchy_2': b,
+            'hierarchy_3': c
+        }))
+        x += 1
 
 # preview tables
 school_request = conn.execute(school.select())
@@ -112,12 +130,14 @@ student_request = conn.execute(student.select())
 admin_request = conn.execute(admin.select())
 preference_request = conn.execute(preference.select())
 organization_request = conn.execute(organization.select())
+org_name_request = conn.execute(org_name.select())
 
 print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
 print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
 print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
 print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
 print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
+print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
 
 async def index(request):
     # creating message dictionary
@@ -160,11 +180,11 @@ async def index(request):
             #     'veggu (dh.veggu@students.srvusd.net)',
             #     'shubhert (dh.shubhert@students.srvusd.net)'
             # ]
-            organization_fields = {
-                'building': ['1000', '2000', '3000', '4000'],
-                'floor': ['top', 'bottom'],
-                'row': ['top', 'bottom']
-            }
+            # organization_fields = {
+            #     'building': ['1000', '2000', '3000', '4000'],
+            #     'floor': ['top', 'bottom'],
+            #     'row': ['top', 'bottom']
+            # }
 
             # querying database for student options (grade & school must be the same)
             # exclude the logged in student from the list
@@ -179,8 +199,9 @@ async def index(request):
                     )
                 )
 
+            # create dict to be passed into jinja prepopulated with student ids and info
             # i[0] is id, i[2] is first name, i[3] is last name and i[1] is email
-            student_dict = {
+            student_options = {
                 i[0]: f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
                 for i in student_db_request
             }
@@ -191,30 +212,94 @@ async def index(request):
             # preference_request = conn.execute(preference.select())
             # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
 
-            preference_db_request = sorted(
-                conn.execute(
+            preference_db_request = conn.execute(
                 preference.select().
                     where(preference.c.student_id == session['id'])
-                ).fetchall(),
-                key=lambda i: i[3] # preference
-            )
+                ).fetchall()
+
+            latest_preference_db_request = sorted(preference_db_request, key=lambda i: i[3])
 
             # create list to be passed into jinja prepopulated with student name and email
             partner_preferences = [None, None, None]
-            for i in preference_db_request:
+            for i in latest_preference_db_request:
                 s = conn.execute(
                     student.select().
                         where(student.c.id == i[2])
                 ).first()
                 partner_preferences[i[3]] = f'{s[2].capitalize()} {s[3].capitalize()} ({s[1]})'
 
+
+            # querying database for locker options
+            # finding org_id for school
+            school_db_request = conn.execute(
+            school.select().
+                where(school.c.id == session['school_id'])
+            ).first(),
+
+            org_id = school_db_request[0][2]
+            # org_id = 0
+
+            # finding hierarchy names for user's school
+            hierarchies = list(filter(None, conn.execute(
+            org_name.select().
+                where(org_name.c.id == org_id)
+            ).first()[1:]))
+
+            # finding options for each hierarchy at the user's school
+            hierarchy_db_request = conn.execute(
+            organization.select().
+                where(organization.c.school_id == session['school_id'])
+            ).fetchall()
+
+            hierarchy_db_request = [list(filter(None, i[2:])) for i in hierarchy_db_request]
+
+            # print()
+            # print(*hierarchy_db_request, sep='\n')
+            # print()
+
+            hierarchy_options = [set() for i in range(len(hierarchies))]
+
+            for i in hierarchy_db_request: # (1000, top, top)
+                for j in range(len(i)):
+                    hierarchy_options[j].add(i[j])
+
+            # print()
+            # print(*hierarchy_options, sep='\n')
+            # print()
+
+            hierarchy_options = [sorted(list(i)) for i in hierarchy_options]
+
+            locker_options = {
+                i: j
+                for i, j in zip(hierarchies, hierarchy_options)
+            }
+
+            # print()
+            # print(locker_options)
+            # print()
+
+            # querying database for locker preferences
+            # finding org_id for school
+            if len(latest_preference_db_request) != 0:
+                locker_preference_id = latest_preference_db_request[0][-1]
+                locker_db_request = conn.execute(
+                    organization.select().
+                        where(organization.c.id == locker_preference_id)
+                    ).first()
+                lp = filter(None, locker_db_request[2:])
+            else:
+                lp = [None, None, None]
+            locker_preferences = {
+                i: j
+                for i, j in zip(hierarchies, lp)
+            }
+
             # creating context
             ctx_students = {
-                'student_dict': student_dict,
-                'organization_fields': organization_fields,
+                'student_options': student_options,
                 'partner_preferences': partner_preferences, # temp_storage['partner'], (TEST)
-                'locker_preferences':[None for i in range(3)], # ex: [building, floor, row]
-                'locker_options':{}, # ex: ['building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]]
+                'locker_preferences': locker_preferences, # ex: {'building':1000, 'floor':1, 'row':1}
+                'locker_options': locker_options, # ex: {'building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]}
                 'session': session,
                 'messages': messages
             }
@@ -234,7 +319,7 @@ async def index(request):
             if request.method == 'POST':
                 # loading post request data
                 data = await request.post()
-                print(data)
+
                 # save data into database
                 # EXAMPLE: (TEST)
                 # temp_storage['partner'][0] = data['preference1']
@@ -242,14 +327,14 @@ async def index(request):
                 # temp_storage['partner'][2] = data['preference3']
 
                 # TEMPORARY
-                # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HEIRARCHIES
+                # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
                 locker_db_request = conn.execute(
                     organization.select().
                         where(
                             and_(
                                 organization.c.hierarchy_1 == data['building'],
                                 organization.c.hierarchy_2 == data['floor'],
-                                organization.c.hierarchy_3 == data['row']
+                                organization.c.hierarchy_3 == data['level']
                             )
                         )
                     ).first()
@@ -267,7 +352,7 @@ async def index(request):
                     'locker_pref': locker_preference_id,
                 }))
 
-                preference_request = conn.execute(preference.select())
+                # preference_request = conn.execute(preference.select())
 
                 if data['preference2'] != 'none':
                     conn.execute(preference.insert({

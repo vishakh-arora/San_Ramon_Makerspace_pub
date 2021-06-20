@@ -37,7 +37,7 @@ Record your preferences.
           </datalist> -->
           <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
           <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Select" required>
-          {% for key, value in student_dict.items() %}
+          {% for key, value in student_options.items() %}
             {% if value == partner_preferences[0]%}
               <option value="{{ key }}" selected>{{ value }}</option>
             {% else %}
@@ -65,7 +65,7 @@ Record your preferences.
           {% else %}
             <option value="none">No Preference</option>
           {% endif %}
-          {% for key, value in student_dict.items() %}
+          {% for key, value in student_options.items() %}
             {% if value == partner_preferences[1]%}
               <option value="{{ key }}" selected>{{ value }}</option>
             {% else %}
@@ -91,15 +91,9 @@ Record your preferences.
           {% if partner_preferences[2] is none %}
             <option value="none" selected>No Preference</option>
           {% else %}
-<<<<<<< Updated upstream
             <option value="none">No Preference</option>
           {% endif %}
-=======
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%" title="Choose one of the following...">
-          {% endif %}
-            <option name="nopref" value="none">No Preference</option>
->>>>>>> Stashed changes
-          {% for key, value in student_dict.items() %}
+          {% for key, value in student_options.items() %}
             {% if value == partner_preferences[2]%}
               <option value="{{ key }}" selected>{{ value }}</option>
             {% else %}
@@ -112,12 +106,16 @@ Record your preferences.
       <div class="bg-white shadow rounded p-3 mb-4">
         <h5 class="card-subtitle mt-1 mb-1 text-muted">Locker Preferences.</h5>
         <div class="row row-cols-xxl-3 row-cols-xl-2">
-          {% for key, value in organization_fields.items() %}
+          {% for key, value in locker_options.items() %}
           <div class="cols-xxl-3 cols-xl-2 my-2">
               <label for="{{ key }}" class="form-label">{{ key.capitalize() }} Preference</label> <label class="text-danger" for="{{ key }}">*</label>
-              <select class="selectpicker show-tick border rounded" id="{{ key }}" name="{{ key }}" data-width="100%" title="Select" required>
+              <select class="selectpicker show-tick border rounded" id="{{ key }}" name="{{ key }}" data-width="100%" title="Select" data-live-search="true" required>
                 {% for option in value %}
-                  <option value="{{ option }}">{{ option.capitalize() }}</option>
+                  {% if locker_preferences[key] == option %}
+                    <option value="{{ option }}" selected>{{ option.capitalize() }}</option>
+                  {% else %}
+                    <option value="{{ option }}">{{ option.capitalize() }}</option>
+                  {% endif %}
                 {% endfor %}
               </select>
           </div>
