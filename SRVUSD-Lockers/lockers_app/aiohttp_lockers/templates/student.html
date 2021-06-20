@@ -91,8 +91,10 @@ Record your preferences.
           {% if partner_preferences[2] is none %}
             <option value="none" selected>No Preference</option>
           {% else %}
+
             <option value="none">No Preference</option>
           {% endif %}
+
           {% for key, value in student_options.items() %}
             {% if value == partner_preferences[2]%}
               <option value="{{ key }}" selected>{{ value }}</option>
