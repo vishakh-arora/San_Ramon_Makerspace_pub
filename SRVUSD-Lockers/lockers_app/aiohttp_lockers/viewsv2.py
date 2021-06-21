@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
-from aiohttp import web
+from aiohttp import web, web_request
 import aiohttp_jinja2
 from aiohttp_session import get_session, new_session
 from init_db import *
@@ -15,6 +15,8 @@ import pandas as pd
 import numpy as np
 import random
 import itertools
+import re
+import math
 
 # temp_storage = {'partner':[None for i in range(3)]}
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
@@ -48,12 +50,18 @@ conn.execute(org_name.insert({
 conn.execute(school.insert({
     'id': 0,
     'name': 'Dougherty Valley High School',
-    'org_id': 0
+    'org_id': 0,
+    'students_spreadsheet_uploaded': False,
+    'lockers_spreadsheet_uploaded': False,
+    'preassignments_spreadsheet_uploaded': False
 }))
 conn.execute(school.insert({
     'id': 1,
     'name': 'California High School',
-    'org_id': 1
+    'org_id': 1,
+    'students_spreadsheet_uploaded': False,
+    'lockers_spreadsheet_uploaded': False,
+    'preassignments_spreadsheet_uploaded': False
 }))
 
 # creating student users
@@ -226,7 +234,7 @@ async def index(request):
             # sort preferences by partner rank (least to greatest)
 
             preference_request = conn.execute(preference.select())
-            print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
 
             preference_db_request = conn.execute(
                 preference.select().
@@ -348,10 +356,12 @@ async def index(request):
                     data['preference2'],
                     data['preference3']
                 ]
-                data_proc = list(filter(lambda x: x!="none", user_form_response))
-                print('USER RESPONSE', data_proc)
+                data_proc = list(filter(lambda x: x!='none', user_form_response))
+
+                # print('USER RESPONSE', data_proc)
+
                 if len(set(data_proc)) != len(data_proc):
-                    messages['danger'].append("Please choose different people for each preference or select \"No Preference.\"")
+                    messages['danger'].append('Please choose different people for each preference or select \'No Preference.\'')
                     response = aiohttp_jinja2.render_template(
                         'student.html',
                         request,
@@ -362,6 +372,7 @@ async def index(request):
 
                 # TEMPORARY
                 # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
+                # hierarchies: names of the hierarchies (building, floor, level etc.)
                 locker_db_request = conn.execute(
                     organization.select().
                         where(
@@ -445,7 +456,7 @@ async def index(request):
                     )
 
                 # message to reload
-                messages['success'].append('Saved successfully. Reload to view preferences.')
+                # messages['success'].append('Saved successfully. Reload to view preferences.')
                 # creating response
                 # response = aiohttp_jinja2.render_template(
                 #     'student.html',
@@ -460,19 +471,37 @@ async def index(request):
             # creating context
             # populate these with values from database if they exist
             fields = ['students', 'lockers', 'preassignments']
+
             ctx_admin = {
                 'fields': fields,
                 'sheets':{
                     i:{
+                        'validated': False,
                         'filename': None,
                         'data': None,
-                        'error': None
+                        'messages': []
                     }
                     for i in fields
                 },
                 'session': session,
                 'messages': messages
             }
+
+            # check to see if sheets have been uploaded
+            school_db_request = conn.execute(
+                school.select().where(
+                    school.c.id == session['school_id']
+                )
+            ).first()[3:]
+
+            print(school_db_request)
+
+            for i in range(3):
+                if not school_db_request[i]:
+                    ctx_admin['sheets'][fields[i]]['messages'].append(f'Missing {fields[i].capitalize()} Spreadsheet.')
+                else:
+                    ctx_admin['sheets'][fields[i]]['validated'] = True
+                    ctx_admin['sheets'][fields[i]]['messages'].append(f'Accepted {fields[i].capitalize()} Spreadsheet.')
 
             # get request
             if request.method == 'GET':
@@ -489,16 +518,232 @@ async def index(request):
             if request.method == 'POST':
                 # loading post request data
                 data = await request.post()
-                # save data into database
-                # message to reload
-                messages['success'].append('Saved sheets successfully. Reload to view sheets.')
-                # creating response
-                response = aiohttp_jinja2.render_template(
-                    'admin.html',
-                    request,
-                    ctx_admin
-                )
-                return response
+
+                # validate data
+                # validation variables
+                preassignments_is_valid = True
+                lockers_is_valid = True
+                students_is_valid = True
+
+                # validation loop
+                for field in fields:
+                    response_sheet = data.get(field)
+
+                    # print()
+                    # print('RESPONSE SHEET: \n', response_sheet, type(response_sheet))
+                    # print()
+
+                    # if the submission is a valid file
+                    if type(response_sheet) == web_request.FileField:
+                        # get file name and file info to extract from
+                        sheet_filename = response_sheet.filename
+                        sheet_file = response_sheet.file
+
+                        # open file for validation
+                        df = pd.read_excel(sheet_file, engine='openpyxl')
+                        sheet_columns = list(df.columns)
+                        sheet_data = df.to_numpy()
+
+                        # debug
+                        # print()
+                        # print('2D ARRAY SHEET DATA: \n', sheet_data)
+                        # print()
+                        #
+                        # print()
+                        # print('SHEET COLUMNS:', sheet_columns)
+                        # print()
+
+                        # validation for students spreadsheet
+                        if field == 'students':
+                            # reset on resubmission
+                            ctx_admin['sheets'][field]['validated'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
+
+                            conn.execute(
+                                school.update().where(and_(
+                                    school.c.id == session['school_id']
+                                    )
+                                ).values(
+                                    students_spreadsheet_uploaded = False
+                                )
+                            )
+                            # wrong number of columns
+                            if len(sheet_columns) != 4:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                            else:
+                                for i in range(len(sheet_data)):
+                                    row = sheet_data[i]
+                                    # check for valid emails
+                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[3]):
+                                        students_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
+                                        break
+                                    # check for numerical grade values
+                                    if not type(row[2]) == int:
+                                        students_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid grade value in row {i+1}, received {row[2]}.')
+                                        break
+                                    blank = False
+                                    # check for any blank values
+                                    for j in range(len(row)):
+                                        if type(row[j]) == float:
+                                            students_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                            blank = True
+                                            break
+                                    if blank:
+                                        break
+                            if students_is_valid:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        students_spreadsheet_uploaded = True
+                                    )
+                                )
+                            else:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        students_spreadsheet_uploaded = False
+                                    )
+                                )
+
+                        # validation for lockers spreadsheet
+                        if field == 'lockers':
+                            # reset on resubmission
+                            ctx_admin['sheets'][field]['validated'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
+                            conn.execute(
+                                school.update().where(and_(
+                                    school.c.id == session['school_id']
+                                    )
+                                ).values(
+                                    lockers_spreadsheet_uploaded = False
+                                )
+                            )
+                            # too many hierarchy values
+                            if len(sheet_columns)-2 > 5 or len(sheet_columns) < 2:
+                                lockers_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of location attribute values. Expected between 2 and 5, received {len(sheet_columns)}.')
+                            else:
+                                for i in range(len(sheet_data)):
+                                    row = sheet_data[i]
+                                    # check if locker number is numeric
+                                    if not type(row[0]) == int:
+                                        lockers_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
+                                        break
+                                    # check if locker combo has three values
+                                    if not len(row[1].split(',')) == 3:
+                                        lockers_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#-#-#\', received {row[1]}.')
+                                        break
+                                    blank = False
+                                    # check for any blank values
+                                    for j in range(len(row)):
+                                        if type(row[j]) == float:
+                                            lockers_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                            blank = True
+                                            break
+                                    if blank:
+                                        break
+                            if lockers_is_valid:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        lockers_spreadsheet_uploaded = True
+                                    )
+                                )
+                            else:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        lockers_spreadsheet_uploaded = False
+                                    )
+                                )
+
+                        # validation for preassignments spreadsheet
+                        if field == 'preassignments':
+                            # reset on resubmission
+                            ctx_admin['sheets'][field]['validated'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
+                            conn.execute(
+                                school.update().where(and_(
+                                    school.c.id == session['school_id']
+                                    )
+                                ).values(
+                                    preassignments_spreadsheet_uploaded = False
+                                )
+                            )
+                            if len(sheet_columns) != 4:
+                                preassignments_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                            else:
+                                for i in range(len(sheet_data)):
+                                    row = sheet_data[i]
+                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[2]):
+                                        preassignments_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
+                                        break
+                                    # check if locker number is numeric
+                                    if not type(row[3]) == int:
+                                        preassignments_is_valid = False
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[3]}.')
+                                        break
+                                    blank = False
+                                    # check for any blank values
+                                    for j in range(len(row)):
+                                        if type(row[j]) == float:
+                                            preassignments_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                            blank = True
+                                            break
+                                    if blank:
+                                        break
+                            if preassignments_is_valid:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        preassignments_spreadsheet_uploaded = True
+                                    )
+                                )
+                            else:
+                                conn.execute(
+                                    school.update().where(and_(
+                                        school.c.id == session['school_id']
+                                        )
+                                    ).values(
+                                        preassignments_spreadsheet_uploaded = False
+                                    )
+                                )
+
+                # reload if everything looks right
+                if students_is_valid and lockers_is_valid and preassignments_is_valid:
+                    # redirect
+                    return web.HTTPFound(location=request.app.router['index'].url_for())
+                # return messages if there are errors
+                else:
+                    # message to reload
+                    # messages['success'].append('Saved sheets successfully. Reload to view sheets.')
+                    # creating response
+                    response = aiohttp_jinja2.render_template(
+                        'admin.html',
+                        request,
+                        ctx_admin
+                    )
+                    return response
 
 async def login(request):
     # creating message dictionary

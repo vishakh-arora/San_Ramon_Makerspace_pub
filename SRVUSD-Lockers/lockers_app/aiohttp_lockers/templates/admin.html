@@ -14,15 +14,19 @@ Enter locker & student details.
     <div class="card-body p-3">
       <h2 class="card-title mt-2">Administrator Form.</h2>
       <p class="card-subtitle mb-2 text-muted">Submit the following documents.<p>
-      {% if sheets['students']['error'] is not none %}
-      <div class="alert alert-danger" role="alert">
-        {{ sheets['students']['error'] }}
-      </div>
-      {% else %}
-      <div class="alert alert-success" role="alert">
-        Accepted Students Spreadsheet.
-      </div>
-      {% endif %}
+        
+        {% for message in sheets['students']['messages']%}
+          {% if sheets['students']['validated'] %}
+            <div class="alert alert-success" role="alert">
+              {{ message }}
+            </div>
+          {% else %}
+            <div class="alert alert-danger" role="alert">
+              {{ message }}
+            </div>
+          {% endif %}
+        {% endfor %}
+
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Students Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
@@ -50,17 +54,21 @@ Enter locker & student details.
            </tr>
          </tbody>
         </table>
-        <input class="form-control" type="file" id="formFile" name="students">
+        <input class="form-control" type="file" id="formFile" name="students" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
-      {% if sheets['lockers']['error'] is not none %}
-      <div class="alert alert-danger" role="alert">
-        {{ sheets['lockers']['error'] }}
-      </div>
-      {% else %}
-      <div class="alert alert-success" role="alert">
-        Accepted Lockers Spreadsheet.
-      </div>
-      {% endif %}
+
+      {% for message in sheets['lockers']['messages']%}
+        {% if sheets['lockers']['validated'] %}
+          <div class="alert alert-success" role="alert">
+            {{ message }}
+          </div>
+        {% else %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Lockers Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
@@ -69,33 +77,43 @@ Enter locker & student details.
             <tr>
               <th scope="col">Locker Number</th>
               <th scope="col">Locker Combo</th>
-              <th scope="col">Location (Bldg, Floor, Etc.)</th>
+              <th scope="col">Building</th>
+              <th scope="col">Floor</th>
+              <th scope="col">Other Location Attributes</th>
             </tr>
           </thead>
           <tbody>
            <tr>
-             <td scope="row">John</td>
-             <td>Doe</td>
-             <td>(1000, 1, Top)</td>
+             <td scope="row">1234</td>
+             <td>10-20-30</td>
+             <td>1000</td>
+             <td>Top</td>
+             <td>...</td>
            </tr>
            <tr>
              <td scope="row">...</td>
              <td>...</td>
              <td>...</td>
+             <td>...</td>
+             <td>...</td>
            </tr>
          </tbody>
         </table>
-        <input class="form-control" type="file" id="formFile" name="lockers">
+        <input class="form-control" type="file" id="formFile" name="lockers" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
-      {% if sheets['preassignments']['error'] is not none %}
-      <div class="alert alert-danger" role="alert">
-        {{ sheets['preassignments']['error'] }}
-      </div>
-      {% else %}
-      <div class="alert alert-success" role="alert">
-        Accepted Preassignments Spreadsheet.
-      </div>
-      {% endif %}
+
+      {% for message in sheets['preassignments']['messages']%}
+        {% if sheets['preassignments']['validated'] %}
+          <div class="alert alert-success" role="alert">
+            {{ message }}
+          </div>
+        {% else %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Pre-Assignments Spreadsheet.</h5>
         <label for="formFile" class="form-label">Please use the following format</label>
@@ -123,7 +141,7 @@ Enter locker & student details.
            </tr>
          </tbody>
         </table>
-        <input class="form-control" type="file" id="formFile" name="preassignemnts">
+        <input class="form-control" type="file" id="formFile" name="preassignments" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
     </div>
     <div class="d-grid gap-2 col-6 mb-4 mx-auto">

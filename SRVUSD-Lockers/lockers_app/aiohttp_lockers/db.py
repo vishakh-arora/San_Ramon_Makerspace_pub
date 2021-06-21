@@ -1,7 +1,7 @@
 import aiopg.sa
 from sqlalchemy import (
     MetaData, Table, Column, ForeignKey,
-    Integer, String, DateTime
+    Integer, String, Boolean, DateTime
 )
 from sqlalchemy_json import mutable_json_type
 from sqlalchemy.dialects.postgresql import JSONB
@@ -42,7 +42,10 @@ school = Table(
 
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
-    Column('org_id', Integer, ForeignKey('org_name.id', ondelete='CASCADE'), nullable=False)
+    Column('org_id', Integer, ForeignKey('org_name.id', ondelete='CASCADE'), nullable=False),
+    Column('students_spreadsheet_uploaded', Boolean),
+    Column('lockers_spreadsheet_uploaded', Boolean),
+    Column('preassignments_spreadsheet_uploaded', Boolean),
 )
 
 # Store student preferences for their partner/locker
