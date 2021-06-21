@@ -46,6 +46,9 @@ school = Table(
     Column('students_spreadsheet_uploaded', Boolean),
     Column('lockers_spreadsheet_uploaded', Boolean),
     Column('preassignments_spreadsheet_uploaded', Boolean),
+    Column('students_spreadsheet_filename', String(100)),
+    Column('lockers_spreadsheet_filename', String(100)),
+    Column('preassignments_spreadsheet_filename', String(100))
 )
 
 # Store student preferences for their partner/locker

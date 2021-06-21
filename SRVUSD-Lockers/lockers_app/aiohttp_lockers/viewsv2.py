@@ -501,7 +501,8 @@ async def index(request):
                     ctx_admin['sheets'][fields[i]]['messages'].append(f'Missing {fields[i].capitalize()} Spreadsheet.')
                 else:
                     ctx_admin['sheets'][fields[i]]['validated'] = True
-                    ctx_admin['sheets'][fields[i]]['messages'].append(f'Accepted {fields[i].capitalize()} Spreadsheet.')
+                    # ctx_admin['sheets'][fields[i]]['messages'].append(f'Accepted {fields[i].capitalize()} Spreadsheet.')
+                    ctx_admin['sheets'][fields[i]]['filename'] = school_db_request[i+3]
 
             # get request
             if request.method == 'GET':
@@ -564,9 +565,11 @@ async def index(request):
                                     school.c.id == session['school_id']
                                     )
                                 ).values(
-                                    students_spreadsheet_uploaded = False
+                                    students_spreadsheet_uploaded = False,
+                                    students_spreadsheet_filename = None
                                 )
                             )
+
                             # wrong number of columns
                             if len(sheet_columns) != 4:
                                 students_is_valid = False
@@ -600,16 +603,8 @@ async def index(request):
                                         school.c.id == session['school_id']
                                         )
                                     ).values(
-                                        students_spreadsheet_uploaded = True
-                                    )
-                                )
-                            else:
-                                conn.execute(
-                                    school.update().where(and_(
-                                        school.c.id == session['school_id']
-                                        )
-                                    ).values(
-                                        students_spreadsheet_uploaded = False
+                                        students_spreadsheet_uploaded = True,
+                                        students_spreadsheet_filename = sheet_filename
                                     )
                                 )
 
@@ -623,7 +618,8 @@ async def index(request):
                                     school.c.id == session['school_id']
                                     )
                                 ).values(
-                                    lockers_spreadsheet_uploaded = False
+                                    lockers_spreadsheet_uploaded = False,
+                                    lockers_spreadsheet_filename = None
                                 )
                             )
                             # too many hierarchy values
@@ -659,16 +655,8 @@ async def index(request):
                                         school.c.id == session['school_id']
                                         )
                                     ).values(
-                                        lockers_spreadsheet_uploaded = True
-                                    )
-                                )
-                            else:
-                                conn.execute(
-                                    school.update().where(and_(
-                                        school.c.id == session['school_id']
-                                        )
-                                    ).values(
-                                        lockers_spreadsheet_uploaded = False
+                                        lockers_spreadsheet_uploaded = True,
+                                        lockers_spreadsheet_filename = sheet_filename
                                     )
                                 )
 
@@ -682,7 +670,8 @@ async def index(request):
                                     school.c.id == session['school_id']
                                     )
                                 ).values(
-                                    preassignments_spreadsheet_uploaded = False
+                                    preassignments_spreadsheet_uploaded = False,
+                                    preassignments_spreadsheet_filename = None
                                 )
                             )
                             if len(sheet_columns) != 4:
@@ -716,16 +705,8 @@ async def index(request):
                                         school.c.id == session['school_id']
                                         )
                                     ).values(
-                                        preassignments_spreadsheet_uploaded = True
-                                    )
-                                )
-                            else:
-                                conn.execute(
-                                    school.update().where(and_(
-                                        school.c.id == session['school_id']
-                                        )
-                                    ).values(
-                                        preassignments_spreadsheet_uploaded = False
+                                        preassignments_spreadsheet_uploaded = True,
+                                        preassignments_spreadsheet_filename = sheet_filename
                                     )
                                 )
 

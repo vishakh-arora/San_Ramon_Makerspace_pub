@@ -15,17 +15,17 @@ Enter locker & student details.
       <h2 class="card-title mt-2">Administrator Form.</h2>
       <p class="card-subtitle mb-2 text-muted">Submit the following documents.<p>
 
-        {% for message in sheets['students']['messages']%}
-          {% if sheets['students']['validated'] %}
-            <div class="alert alert-success" role="alert">
-              {{ message }}
-            </div>
-          {% else %}
+        {% if sheets['students']['validated'] %}
+          <div class="alert alert-success" role="alert">
+            Accepted <a href="#" class="alert-link"> {{ sheets['students']['filename'] }} </a> students spreadsheet.
+          </div>
+        {% else %}
+          {% for message in sheets['students']['messages']%}
             <div class="alert alert-danger" role="alert">
               {{ message }}
             </div>
-          {% endif %}
-        {% endfor %}
+          {% endfor %}
+        {% endif %}
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Students Spreadsheet.</h5>
@@ -57,17 +57,17 @@ Enter locker & student details.
         <input class="form-control" type="file" id="formFile" name="students" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
 
-      {% for message in sheets['lockers']['messages']%}
-        {% if sheets['lockers']['validated'] %}
-          <div class="alert alert-success" role="alert">
-            {{ message }}
-          </div>
-        {% else %}
+      {% if sheets['lockers']['validated'] %}
+        <div class="alert alert-success" role="alert">
+          Accepted <a href="#" class="alert-link"> {{ sheets['lockers']['filename'] }} </a> lockers spreadsheet.
+        </div>
+      {% else %}
+        {% for message in sheets['lockers']['messages']%}
           <div class="alert alert-danger" role="alert">
             {{ message }}
           </div>
-        {% endif %}
-      {% endfor %}
+        {% endfor %}
+      {% endif %}
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Lockers Spreadsheet.</h5>
@@ -102,17 +102,17 @@ Enter locker & student details.
         <input class="form-control" type="file" id="formFile" name="lockers" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
 
-      {% for message in sheets['preassignments']['messages']%}
-        {% if sheets['preassignments']['validated'] %}
-          <div class="alert alert-success" role="alert">
-            {{ message }}
-          </div>
-        {% else %}
+      {% if sheets['preassignments']['validated'] %}
+        <div class="alert alert-success" role="alert">
+          Accepted <a href="#" class="alert-link"> {{ sheets['preassignments']['filename'] }} </a> preassignments spreadsheet.
+        </div>
+      {% else %}
+        {% for message in sheets['preassignments']['messages']%}
           <div class="alert alert-danger" role="alert">
             {{ message }}
           </div>
-        {% endif %}
-      {% endfor %}
+        {% endfor %}
+      {% endif %}
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Pre-Assignments Spreadsheet.</h5>
