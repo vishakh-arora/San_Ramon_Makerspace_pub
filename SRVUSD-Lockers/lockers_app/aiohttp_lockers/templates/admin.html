@@ -17,7 +17,7 @@ Enter locker & student details.
 
         {% if sheets['students']['validated'] %}
           <div class="alert alert-success" role="alert">
-            Accepted <a href="#" class="alert-link"> {{ sheets['students']['filename'] }} </a> students spreadsheet.
+            Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['students']['filename'] }} </a> students spreadsheet.
           </div>
         {% else %}
           {% for message in sheets['students']['messages']%}
@@ -59,7 +59,7 @@ Enter locker & student details.
 
       {% if sheets['lockers']['validated'] %}
         <div class="alert alert-success" role="alert">
-          Accepted <a href="#" class="alert-link"> {{ sheets['lockers']['filename'] }} </a> lockers spreadsheet.
+          Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['lockers']['filename'] }} </a> lockers spreadsheet.
         </div>
       {% else %}
         {% for message in sheets['lockers']['messages']%}
@@ -104,7 +104,7 @@ Enter locker & student details.
 
       {% if sheets['preassignments']['validated'] %}
         <div class="alert alert-success" role="alert">
-          Accepted <a href="#" class="alert-link"> {{ sheets['preassignments']['filename'] }} </a> preassignments spreadsheet.
+          Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['preassignments']['filename'] }} </a> preassignments spreadsheet.
         </div>
       {% else %}
         {% for message in sheets['preassignments']['messages']%}
