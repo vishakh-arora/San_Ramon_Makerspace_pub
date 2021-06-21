@@ -569,34 +569,39 @@ async def index(request):
                                     students_spreadsheet_filename = None
                                 )
                             )
-
-                            # wrong number of columns
-                            if len(sheet_columns) != 4:
-                                students_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    # check for valid emails
-                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[3]):
-                                        students_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
-                                        break
-                                    # check for numerical grade values
-                                    if not type(row[2]) == int:
-                                        students_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid grade value in row {i+1}, received {row[2]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            # try validation
+                            try:
+                                # wrong number of columns
+                                if len(sheet_columns) != 4:
+                                    students_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        # check for valid emails
+                                        if not re.match('[^@]+@[^@]+\.[^@]+', row[3]):
                                             students_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check for numerical grade values
+                                        if not type(row[2]) == int:
+                                            students_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid grade value in row {i+1}, received {row[2]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                students_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if students_is_valid:
                                 conn.execute(
                                     school.update().where(and_(
@@ -622,33 +627,39 @@ async def index(request):
                                     lockers_spreadsheet_filename = None
                                 )
                             )
-                            # too many hierarchy values
-                            if len(sheet_columns)-2 > 5 or len(sheet_columns) < 2:
-                                lockers_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of location attribute values. Expected between 2 and 5, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    # check if locker number is numeric
-                                    if not type(row[0]) == int:
-                                        lockers_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
-                                        break
-                                    # check if locker combo has three values
-                                    if type(row[1]) != str or len(row[1].split(',')) != 3:
-                                        lockers_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            # try validation
+                            try:
+                                # too many hierarchy values
+                                if len(sheet_columns)-2 > 5 or len(sheet_columns) < 2:
+                                    lockers_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of location attribute values. Expected between 2 and 5, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        # check if locker number is numeric
+                                        if not type(row[0]) == int:
                                             lockers_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check if locker combo has three values
+                                        if type(row[1]) != str or len(row[1].split(',')) != 3:
+                                            lockers_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                lockers_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if lockers_is_valid:
                                 conn.execute(
                                     school.update().where(and_(
@@ -674,31 +685,36 @@ async def index(request):
                                     preassignments_spreadsheet_filename = None
                                 )
                             )
-                            if len(sheet_columns) != 4:
-                                preassignments_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[2]):
-                                        preassignments_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
-                                        break
-                                    # check if locker number is numeric
-                                    if not type(row[3]) == int:
-                                        preassignments_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[3]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            try:
+                                if len(sheet_columns) != 4:
+                                    preassignments_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        if not re.match('[^@]+@[^@]+\.[^@]+', row[2]):
                                             preassignments_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check if locker number is numeric
+                                        if not type(row[3]) == int:
+                                            preassignments_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[3]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                preassignments_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if preassignments_is_valid:
                                 conn.execute(
                                     school.update().where(and_(
