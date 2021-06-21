@@ -641,7 +641,7 @@ async def index(request):
                                     # check if locker combo has three values
                                     if not len(row[1].split(',')) == 3:
                                         lockers_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#-#-#\', received {row[1]}.')
+                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
                                         break
                                     blank = False
                                     # check for any blank values
