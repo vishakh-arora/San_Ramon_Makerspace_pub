@@ -9,7 +9,7 @@ from db import *
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from multidict import MultiDict
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
@@ -83,6 +83,22 @@ conn.execute(student.insert({
 }))
 conn.execute(student.insert({
     'id': 3,
+    'email': 'dh.smehrotra@students.srvusd.net',
+    'first_name': 'shlok',
+    'last_name': 'mehrotra',
+    'school_id': 0,
+    'grade': 12
+}))
+conn.execute(student.insert({
+    'id': 4,
+    'email': 'dh.abhakat@students.srvusd.net',
+    'first_name': 'anay',
+    'last_name': 'bhakat',
+    'school_id': 0,
+    'grade': 12
+}))
+conn.execute(student.insert({
+    'id': 5,
     'email': 'ch.somefool@students.srvusd.net',
     'first_name': 'some',
     'last_name': 'fool',
@@ -209,8 +225,8 @@ async def index(request):
             # querying database for existing student preferences
             # sort preferences by partner rank (least to greatest)
 
-            # preference_request = conn.execute(preference.select())
-            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+            preference_request = conn.execute(preference.select())
+            print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
 
             preference_db_request = conn.execute(
                 preference.select().
@@ -326,6 +342,24 @@ async def index(request):
                 # temp_storage['partner'][1] = data['preference2']
                 # temp_storage['partner'][2] = data['preference3']
 
+                # invalid input: same choices for mulitple fields
+                user_form_response = [
+                    data['preference1'],
+                    data['preference2'],
+                    data['preference3']
+                ]
+                data_proc = list(filter(lambda x: x!="none", user_form_response))
+                print('USER RESPONSE', data_proc)
+                if len(set(data_proc)) != len(data_proc):
+                    messages['danger'].append("Please choose different people for each preference or select \"No Preference.\"")
+                    response = aiohttp_jinja2.render_template(
+                        'student.html',
+                        request,
+                        ctx_students
+                    )
+                    # rendering for user
+                    return response
+
                 # TEMPORARY
                 # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
                 locker_db_request = conn.execute(
@@ -340,37 +374,75 @@ async def index(request):
                     ).first()
 
                 locker_preference_id = locker_db_request[0]
+                criteria_preference1_upsert = [
+                    preference.c.student_id == session['id'],
+                    or_(
+                        preference.c.partner_id == data['preference1'],
+                        preference.c.partner_rank == 0
+                    )
+                ]
 
                 # TEMPORARY
                 # NEED TO FIGURE OUT UPSERTS
-
-                conn.execute(preference.insert({
+                upsert(conn, preference, criteria_preference1_upsert, {
                     'submit_time': datetime.now(timezone.utc),
                     'student_id': session['id'],
                     'partner_id': data['preference1'],
                     'partner_rank': 0,
                     'locker_pref': locker_preference_id,
-                }))
+                })
 
                 # preference_request = conn.execute(preference.select())
 
                 if data['preference2'] != 'none':
-                    conn.execute(preference.insert({
+                    criteria_preference2_upsert = [
+                        preference.c.student_id == session['id'],
+                        or_(
+                            preference.c.partner_id == data['preference2'],
+                            preference.c.partner_rank == 1
+                        )
+                    ]
+                    upsert(conn, preference, criteria_preference2_upsert, {
                         'submit_time': datetime.now(timezone.utc),
                         'student_id': session['id'],
                         'partner_id': data['preference2'],
                         'partner_rank': 1,
                         'locker_pref': locker_preference_id,
-                    }))
+                    })
+                else:
+                    conn.execute(
+                        preference.delete().where(
+                            and_(
+                                preference.c.student_id == session['id'],
+                                preference.c.partner_rank == 1
+                            )
+                        )
+                    )
 
                 if data['preference3'] != 'none':
-                    conn.execute(preference.insert({
+                    criteria_preference3_upsert = [
+                        preference.c.student_id == session['id'],
+                        or_(
+                            preference.c.partner_id == data['preference3'],
+                            preference.c.partner_rank == 2
+                        )
+                    ]
+                    upsert(conn, preference, criteria_preference3_upsert, {
                         'submit_time': datetime.now(timezone.utc),
                         'student_id': session['id'],
                         'partner_id': data['preference3'],
                         'partner_rank': 2,
                         'locker_pref': locker_preference_id,
-                    }))
+                    })
+                else:
+                    conn.execute(
+                        preference.delete().where(
+                            and_(
+                                preference.c.student_id == session['id'],
+                                preference.c.partner_rank == 2
+                            )
+                        )
+                    )
 
                 # message to reload
                 messages['success'].append('Saved successfully. Reload to view preferences.')
