@@ -250,7 +250,7 @@ async def index(request):
                     student.select().
                         where(student.c.id == i[2])
                 ).first()
-                partner_preferences[i[3]] = f'{s[2].capitalize()} {s[3].capitalize()} ({s[1]})'
+                partner_preferences[i[3]] = s[0]
 
 
             # querying database for locker options
@@ -325,7 +325,8 @@ async def index(request):
                 'locker_preferences': locker_preferences, # ex: {'building':1000, 'floor':1, 'row':1}
                 'locker_options': locker_options, # ex: {'building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]}
                 'session': session,
-                'messages': messages
+                'messages': messages,
+                'issues': [None, None, None]
             }
 
             # get request
@@ -361,7 +362,21 @@ async def index(request):
                 # print('USER RESPONSE', data_proc)
 
                 if len(set(data_proc)) != len(data_proc):
-                    messages['danger'].append('Please choose different people for each preference or select \'No Preference.\'')
+                    messages['danger'].append('Please choose different people for each preference.')
+                    # prefilling fields
+                    ctx_students['locker_preferences'] = {
+                        i: data[i]
+                        for i in hierarchies
+                    }
+                    ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
+                    # checking for duplicate names
+                    for i in range(3):
+                        for j in range(i, 3):
+                            if i == j:
+                                continue
+                            if user_form_response[i] == user_form_response[j]:
+                                ctx_students['issues'][i] = True
+                                ctx_students['issues'][j] = True
                     response = aiohttp_jinja2.render_template(
                         'student.html',
                         request,
