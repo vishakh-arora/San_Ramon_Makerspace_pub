@@ -196,6 +196,10 @@ async def index(request):
 
         # user is a student
         if session['role'] == 'student':
+            preference_request = conn.execute(preference.select())
+            # print()
+            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+            # print()
             # populate these with values from database if they exist
             # EXAMPLES:
             # student_list = [
