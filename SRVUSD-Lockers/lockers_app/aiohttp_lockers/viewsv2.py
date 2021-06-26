@@ -107,9 +107,17 @@ conn.execute(student.insert({
 }))
 conn.execute(student.insert({
     'id': 5,
-    'email': 'ch.somefool@students.srvusd.net',
-    'first_name': 'some',
-    'last_name': 'fool',
+    'email': 'ch.student1@students.srvusd.net',
+    'first_name': 'CalStudent1',
+    'last_name': 'Test',
+    'school_id': 1,
+    'grade': 12
+}))
+conn.execute(student.insert({
+    'id': 6,
+    'email': 'ch.student2@students.srvusd.net',
+    'first_name': 'CalStudent2',
+    'last_name': 'Test',
     'school_id': 1,
     'grade': 12
 }))
@@ -256,7 +264,6 @@ async def index(request):
                 ).first()
                 partner_preferences[i[3]] = s[0]
 
-
             # querying database for locker options
             # finding org_id for school
             school_db_request = conn.execute(
@@ -392,14 +399,24 @@ async def index(request):
                 # TEMPORARY
                 # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
                 # hierarchies: names of the hierarchies (building, floor, level etc.)
+
+                criteria_hierarchy_query = [
+                    [organization.c.hierarchy_1, None],
+                    [organization.c.hierarchy_2, None],
+                    [organization.c.hierarchy_3, None],
+                    [organization.c.hierarchy_4, None],
+                    [organization.c.hierarchy_5, None]
+                ]
+
+                for i in range(len(hierarchies)):
+                    criteria_hierarchy_query[i][1] = data[hierarchies[i]]
+
+                criteria_hierarchy_query = [i[0] == i[1] for i in criteria_hierarchy_query]
+
                 locker_db_request = conn.execute(
                     organization.select().
                         where(
-                            and_(
-                                organization.c.hierarchy_1 == data['building'],
-                                organization.c.hierarchy_2 == data['floor'],
-                                organization.c.hierarchy_3 == data['level']
-                            )
+                            and_(*criteria_hierarchy_query)
                         )
                     ).first()
 
@@ -513,7 +530,7 @@ async def index(request):
                 )
             ).first()[3:]
 
-            print(school_db_request)
+            # print(school_db_request)
 
             for i in range(3):
                 if not school_db_request[i]:
