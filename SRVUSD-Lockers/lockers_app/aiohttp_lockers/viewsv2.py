@@ -512,7 +512,7 @@ async def index(request):
                 'fields': fields,
                 'sheets':{
                     i:{
-                        'validated': False,
+                        'saved': False,
                         'filename': None,
                         'data': None,
                         'messages': []
@@ -530,13 +530,13 @@ async def index(request):
                 )
             ).first()[3:]
 
-            # print(school_db_request)
+            print(school_db_request)
 
             for i in range(3):
                 if not school_db_request[i]:
                     ctx_admin['sheets'][fields[i]]['messages'].append(f'Missing {fields[i].capitalize()} Spreadsheet.')
                 else:
-                    ctx_admin['sheets'][fields[i]]['validated'] = True
+                    ctx_admin['sheets'][fields[i]]['saved'] = True
                     # ctx_admin['sheets'][fields[i]]['messages'].append(f'Accepted {fields[i].capitalize()} Spreadsheet.')
                     ctx_admin['sheets'][fields[i]]['filename'] = school_db_request[i+3]
 
@@ -593,18 +593,18 @@ async def index(request):
                         # validation for students spreadsheet
                         if field == 'students':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
 
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    students_spreadsheet_uploaded = False,
-                                    students_spreadsheet_filename = None
-                                )
-                            )
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         students_spreadsheet_uploaded = False,
+                            #         students_spreadsheet_filename = None
+                            #     )
+                            # )
                             # try validation
                             try:
                                 # wrong number of columns
@@ -639,6 +639,7 @@ async def index(request):
                                 students_is_valid = False
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if students_is_valid:
+                                ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
                                         school.c.id == session['school_id']
@@ -652,17 +653,17 @@ async def index(request):
                         # validation for lockers spreadsheet
                         if field == 'lockers':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    lockers_spreadsheet_uploaded = False,
-                                    lockers_spreadsheet_filename = None
-                                )
-                            )
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         lockers_spreadsheet_uploaded = False,
+                            #         lockers_spreadsheet_filename = None
+                            #     )
+                            # )
                             # try validation
                             try:
                                 # too many hierarchy values
@@ -697,6 +698,7 @@ async def index(request):
                                 students_is_valid = False
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if lockers_is_valid:
+                                ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
                                         school.c.id == session['school_id']
@@ -710,17 +712,17 @@ async def index(request):
                         # validation for preassignments spreadsheet
                         if field == 'preassignments':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    preassignments_spreadsheet_uploaded = False,
-                                    preassignments_spreadsheet_filename = None
-                                )
-                            )
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         preassignments_spreadsheet_uploaded = False,
+                            #         preassignments_spreadsheet_filename = None
+                            #     )
+                            # )
                             try:
                                 if len(sheet_columns) != 4:
                                     preassignments_is_valid = False
@@ -752,6 +754,7 @@ async def index(request):
                                 students_is_valid = False
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if preassignments_is_valid:
+                                ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
                                         school.c.id == session['school_id']
