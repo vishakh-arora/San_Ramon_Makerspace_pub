@@ -65,62 +65,62 @@ conn.execute(school.insert({
 }))
 
 # creating student users
-conn.execute(student.insert({
-    'id': 0,
-    'email': 'dh.skumar@students.srvusd.net',
-    'first_name': 'shubham',
-    'last_name': 'kumar',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 1,
-    'email': 'dh.varora@students.srvusd.net',
-    'first_name': 'vishakh',
-    'last_name': 'arora',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 2,
-    'email': 'dh.cnookala@students.srvusd.net',
-    'first_name': 'chaitanya',
-    'last_name': 'nookala',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 3,
-    'email': 'dh.smehrotra@students.srvusd.net',
-    'first_name': 'shlok',
-    'last_name': 'mehrotra',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 4,
-    'email': 'dh.abhakat@students.srvusd.net',
-    'first_name': 'anay',
-    'last_name': 'bhakat',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 5,
-    'email': 'ch.student1@students.srvusd.net',
-    'first_name': 'CalStudent1',
-    'last_name': 'Test',
-    'school_id': 1,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 6,
-    'email': 'ch.student2@students.srvusd.net',
-    'first_name': 'CalStudent2',
-    'last_name': 'Test',
-    'school_id': 1,
-    'grade': 12
-}))
+# conn.execute(student.insert({
+#     'id': 0,
+#     'email': 'dh.skumar@students.srvusd.net',
+#     'first_name': 'shubham',
+#     'last_name': 'kumar',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 1,
+#     'email': 'dh.varora@students.srvusd.net',
+#     'first_name': 'vishakh',
+#     'last_name': 'arora',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 2,
+#     'email': 'dh.cnookala@students.srvusd.net',
+#     'first_name': 'chaitanya',
+#     'last_name': 'nookala',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 3,
+#     'email': 'dh.smehrotra@students.srvusd.net',
+#     'first_name': 'shlok',
+#     'last_name': 'mehrotra',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 4,
+#     'email': 'dh.abhakat@students.srvusd.net',
+#     'first_name': 'anay',
+#     'last_name': 'bhakat',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 5,
+#     'email': 'ch.student1@students.srvusd.net',
+#     'first_name': 'CalStudent1',
+#     'last_name': 'Test',
+#     'school_id': 1,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 6,
+#     'email': 'ch.student2@students.srvusd.net',
+#     'first_name': 'CalStudent2',
+#     'last_name': 'Test',
+#     'school_id': 1,
+#     'grade': 12
+# }))
 # creating admin user
 conn.execute(admin.insert({
     'id': 0,
@@ -157,19 +157,19 @@ for i in options: #(0, 1)
         x += 1
 
 # preview tables
-school_request = conn.execute(school.select())
-student_request = conn.execute(student.select())
-admin_request = conn.execute(admin.select())
-preference_request = conn.execute(preference.select())
-organization_request = conn.execute(organization.select())
-org_name_request = conn.execute(org_name.select())
-
-print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
-print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
-print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
-print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
-print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+# school_request = conn.execute(school.select())
+# student_request = conn.execute(student.select())
+# admin_request = conn.execute(admin.select())
+# preference_request = conn.execute(preference.select())
+# organization_request = conn.execute(organization.select())
+# org_name_request = conn.execute(org_name.select())
+#
+# print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
+# print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+# print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
+# print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+# print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
+# print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
 
 async def index(request):
     # creating message dictionary
@@ -594,7 +594,7 @@ async def index(request):
                         if field == 'students':
                             # reset on resubmission
                             # ctx_admin['sheets'][field]['saved'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
 
                             # conn.execute(
                             #     school.update().where(and_(
@@ -649,12 +649,32 @@ async def index(request):
                                         students_spreadsheet_filename = sheet_filename
                                     )
                                 )
+                                # print('\n STUDENT SHEET DATA \n')
+                                # for i in sheet_data:
+                                #     print(i)
+                                # print('\n\n')
+
+                                for last_name, first_name, grade, email in sheet_data:
+                                    criteria = [student.c.email == email]
+                                    upsert(conn, student, criteria, {
+                                        'email': email,
+                                        'first_name': first_name,
+                                        'last_name': last_name,
+                                        'school_id': session['school_id'],
+                                        'grade': grade
+                                    })
+
+                                print('INSERTED STUDENT DATA: \n')
+                                student_request = conn.execute(student.select())
+                                print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+                                print()
+
 
                         # validation for lockers spreadsheet
                         if field == 'lockers':
                             # reset on resubmission
                             # ctx_admin['sheets'][field]['saved'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
                             # conn.execute(
                             #     school.update().where(and_(
                             #         school.c.id == session['school_id']
@@ -713,7 +733,7 @@ async def index(request):
                         if field == 'preassignments':
                             # reset on resubmission
                             # ctx_admin['sheets'][field]['saved'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Rejected {sheet_filename} {field} spreadsheet.']
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
                             # conn.execute(
                             #     school.update().where(and_(
                             #         school.c.id == session['school_id']
