@@ -83,8 +83,8 @@ organization = Table(
 
     Column('id', Integer, primary_key=True),
     Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False),
-    Column('hierarchy_1', String(32)), #1000, 2000, 3000, 4000 (building)
-    Column('hierarchy_2', String(32)), # 1,2 (Floor)
+    Column('hierarchy_1', String(32)), # 1000, 2000, 3000, 4000 (building)
+    Column('hierarchy_2', String(32)), # 1, 2 (Floor)
     Column('hierarchy_3', String(32)), # T, B (Level)
     Column('hierarchy_4', String(32)),
     Column('hierarchy_5', String(32))

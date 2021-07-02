@@ -431,6 +431,7 @@ async def index(request):
 
                 # TEMPORARY
                 # NEED TO FIGURE OUT UPSERTS
+                # FIGURED IT OUT OREN
                 upsert(conn, preference, criteria_preference1_upsert, {
                     'submit_time': datetime.now(timezone.utc),
                     'student_id': session['id'],
@@ -664,10 +665,10 @@ async def index(request):
                                         'grade': grade
                                     })
 
-                                print('INSERTED STUDENT DATA: \n')
-                                student_request = conn.execute(student.select())
-                                print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
-                                print()
+                                # print('INSERTED STUDENT DATA: \n')
+                                # student_request = conn.execute(student.select())
+                                # print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+                                # print()
 
 
                         # validation for lockers spreadsheet
@@ -744,20 +745,20 @@ async def index(request):
                             #     )
                             # )
                             try:
-                                if len(sheet_columns) != 4:
+                                if len(sheet_columns) != 3:
                                     preassignments_is_valid = False
                                     ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
                                 else:
                                     for i in range(len(sheet_data)):
                                         row = sheet_data[i]
-                                        if not re.match('[^@]+@[^@]+\.[^@]+', row[2]):
+                                        if not (re.match('[^@]+@[^@]+\.[^@]+', row[0]) or re.match('[^@]+@[^@]+\.[^@]+', row[1])):
                                             preassignments_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[0]}.')
                                             break
                                         # check if locker number is numeric
-                                        if not type(row[3]) == int:
+                                        if not type(row[2]) == int:
                                             preassignments_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[3]}.')
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[2]}.')
                                             break
                                         blank = False
                                         # check for any blank values
@@ -774,16 +775,45 @@ async def index(request):
                                 students_is_valid = False
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if preassignments_is_valid:
-                                ctx_admin['sheets'][field]['messages'] = []
-                                conn.execute(
-                                    school.update().where(and_(
-                                        school.c.id == session['school_id']
+                                try:
+                                    for student_email_1, student_email_2, locker_number in sheet_data:
+                                        student_id_1 = conn.execute(
+                                            student.select().where(student.c.email == student_email_1)
+                                            ).first()[0]
+                                        student_id_2 = conn.execute(
+                                            student.select().where(student.c.email == student_email_2)
+                                            ).first()[0]
+                                        criteria_preassignment = [
+                                            or_(
+                                                assignment.c.student_id == student_id_1,
+                                                assignment.c.partner_id == student_id_1
+                                            ),
+                                            or_(
+                                                assignment.c.student_id == student_id_2,
+                                                assignment.c.partner_id == student_id_2
+                                            )
+                                        ]
+                                        # DO LOCKER GUYS FIRST SO ID CAN BE FOUND :QJJ:
+                                        upsert(conn, assignment, criteria_preassignment, {
+                                            'student_id': student_id_1,
+                                            'partner_id': student_id_2,
+                                            'status': 'MATCH',
+                                            'locker_id': 0
+                                        })
+                                        ctx_admin['sheets'][field]['messages'] = []
+                                        conn.execute(
+                                            school.update().where(and_(
+                                                school.c.id == session['school_id']
+                                                )
+                                            ).values(
+                                                preassignments_spreadsheet_uploaded = True,
+                                                preassignments_spreadsheet_filename = sheet_filename
+                                            )
                                         )
-                                    ).values(
-                                        preassignments_spreadsheet_uploaded = True,
-                                        preassignments_spreadsheet_filename = sheet_filename
-                                    )
-                                )
+                                except Exception as e:
+                                    # print(e)
+                                    preassignments_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append('Please upload students & lockers spreadsheets first. Student(s)/Locker not found.')
 
                 # reload if everything looks right
                 if students_is_valid and lockers_is_valid and preassignments_is_valid:
