@@ -34,23 +34,23 @@ conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
 # creating organizations w names
-conn.execute(org_name.insert({
-    'id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'level'
-}))
-conn.execute(org_name.insert({
-    'id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
+# conn.execute(org_name.insert({
+    # 'id': 0,
+    # 'hierarchy_1': 'building',
+    # 'hierarchy_2': 'floor',
+    # 'hierarchy_3': 'level'
+# }))
+# conn.execute(org_name.insert({
+    # 'id': 1,
+    # 'hierarchy_1': 'floor',
+    # 'hierarchy_2': 'bay',
+    # 'hierarchy_3': 'level'
+# }))
 # creating school
 conn.execute(school.insert({
     'id': 0,
     'name': 'Dougherty Valley High School',
-    'org_id': 0,
+    # 'org_id': 0,
     'students_spreadsheet_uploaded': False,
     'lockers_spreadsheet_uploaded': False,
     'preassignments_spreadsheet_uploaded': False
@@ -58,7 +58,7 @@ conn.execute(school.insert({
 conn.execute(school.insert({
     'id': 1,
     'name': 'California High School',
-    'org_id': 1,
+    # 'org_id': 1,
     'students_spreadsheet_uploaded': False,
     'lockers_spreadsheet_uploaded': False,
     'preassignments_spreadsheet_uploaded': False
@@ -130,48 +130,55 @@ conn.execute(admin.insert({
     'school_id': 0
 }))
 # creating organizations
-options = {
-    0: {
-        'building': ['1000', '2000', '3000', '4000'],
-        'floor': ['top', 'bottom'],
-        'level': ['top', 'bottom']
-    },
-    1: {
-        'floor': ['top', 'bottom'],
-        'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-        'level': ['top', 'bottom']
-    }
-}
+# options = {
+#     0: {
+#         'building': ['1000', '2000', '3000', '4000'],
+#         'floor': ['top', 'bottom'],
+#         'level': ['top', 'bottom']
+#     },
+#     1: {
+#         'floor': ['top', 'bottom'],
+#         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+#         'level': ['top', 'bottom']
+#     }
+# }
 
-x = 0
-for i in options: #(0, 1)
-    prod = list(itertools.product(*[j for j in list(options[i].values())]))
-    for a, b, c in prod:
-        conn.execute(organization.insert({
-            'id': x,
-            'school_id': i,
-            'hierarchy_1': a,
-            'hierarchy_2': b,
-            'hierarchy_3': c
-        }))
-        x += 1
+# x = 0
+# for i in options: #(0, 1)
+#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
+#     for a, b, c in prod:
+#         conn.execute(organization.insert({
+#             'id': x,
+#             'school_id': i,
+#             'hierarchy_1': a,
+#             'hierarchy_2': b,
+#             'hierarchy_3': c
+#         }))
+#         x += 1
 
-# preview tables
-# school_request = conn.execute(school.select())
-# student_request = conn.execute(student.select())
-# admin_request = conn.execute(admin.select())
-# preference_request = conn.execute(preference.select())
-# organization_request = conn.execute(organization.select())
-# org_name_request = conn.execute(org_name.select())
-#
-# print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
-# print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
-# print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
-# print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-# print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
-# print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+def preview_db():
+    # preview tables
+    school_request = conn.execute(school.select())
+    student_request = conn.execute(student.select())
+    admin_request = conn.execute(admin.select())
+    preference_request = conn.execute(preference.select())
+    organization_request = conn.execute(organization.select())
+    org_name_request = conn.execute(org_name.select())
+
+    print()
+    print()
+    print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
+    print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+    print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
+    print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+    print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
+    print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+    print()
+    print()
 
 async def index(request):
+    preview_db()
+
     # creating message dictionary
     messages = {
         'success': [],
@@ -181,7 +188,7 @@ async def index(request):
 
     # getting user session
     session = await get_session(request)
-    print('Index Session:', session)
+    # print('Index Session:', session)
 
     # user is not logged in
     if session.get('authorized') == None:
@@ -265,19 +272,20 @@ async def index(request):
                 partner_preferences[i[3]] = s[0]
 
             # querying database for locker options
+            # ya buddy this one changed slihjtly oren
             # finding org_id for school
-            school_db_request = conn.execute(
-            school.select().
-                where(school.c.id == session['school_id'])
-            ).first(),
+            # school_db_request = conn.execute(
+            # school.select().
+            #     where(school.c.id == session['school_id'])
+            # ).first()
 
-            org_id = school_db_request[0][2]
+            # org_id = school_db_request[0][2]
             # org_id = 0
 
             # finding hierarchy names for user's school
             hierarchies = list(filter(None, conn.execute(
             org_name.select().
-                where(org_name.c.id == org_id)
+                where(org_name.c.school_id == session['school_id'])
             ).first()[1:]))
 
             # finding options for each hierarchy at the user's school
@@ -397,6 +405,7 @@ async def index(request):
                     return response
 
                 # TEMPORARY
+                # MAN I DID ET DUMD
                 # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
                 # hierarchies: names of the hierarchies (building, floor, level etc.)
 
@@ -405,7 +414,8 @@ async def index(request):
                     [organization.c.hierarchy_2, None],
                     [organization.c.hierarchy_3, None],
                     [organization.c.hierarchy_4, None],
-                    [organization.c.hierarchy_5, None]
+                    [organization.c.hierarchy_5, None],
+                    [organization.c.school_id, session['school_id']]
                 ]
 
                 for i in range(len(hierarchies)):
@@ -421,6 +431,7 @@ async def index(request):
                     ).first()
 
                 locker_preference_id = locker_db_request[0]
+
                 criteria_preference1_upsert = [
                     preference.c.student_id == session['id'],
                     or_(
@@ -529,9 +540,9 @@ async def index(request):
                 school.select().where(
                     school.c.id == session['school_id']
                 )
-            ).first()[3:]
+            ).first()[2:]
 
-            print(school_db_request)
+            # print(school_db_request)
 
             for i in range(3):
                 if not school_db_request[i]:
@@ -719,6 +730,7 @@ async def index(request):
                                 students_is_valid = False
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if lockers_is_valid:
+                                # validated frontend and database
                                 ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
@@ -729,6 +741,64 @@ async def index(request):
                                         lockers_spreadsheet_filename = sheet_filename
                                     )
                                 )
+
+                                # input data storage
+                                num_hierarchies = sheet_data.shape[1]-2
+                                locker_options = [set() for i in range(num_hierarchies)]
+
+                                # create organization data for db
+                                for i in sheet_data:
+                                    locker = i[2:]
+                                    for j in range(num_hierarchies):
+                                        # if type(locker[j]) == str:
+                                            # locker[j].lower()
+                                        locker_options[j].add(str(locker[j]).lower())
+
+                                organization_options = itertools.product(*locker_options)
+
+                                # add in organizations into db
+                                criteria_hierarchy_upsert = [
+                                    [organization.c.hierarchy_1, 'hierarchy_1', None],
+                                    [organization.c.hierarchy_2, 'hierarchy_2', None],
+                                    [organization.c.hierarchy_3, 'hierarchy_3', None],
+                                    [organization.c.hierarchy_4, 'hierarchy_4', None],
+                                    [organization.c.hierarchy_5, 'hierarchy_5', None],
+                                    [organization.c.school_id, 'school_id', session['school_id']]
+                                ]
+
+                                for i in organization_options:
+                                    for j in range(num_hierarchies):
+                                        criteria_hierarchy_upsert[j][2] = i[j]
+                                    temp_criteria_hierarchy_upsert = [i[0] == i[2] for i in criteria_hierarchy_upsert]
+                                    organization_values = {
+                                        i[1]: i[2]
+                                        for i in criteria_hierarchy_upsert
+                                    }
+                                    organization_values['school_id'] = session['school_id']
+                                    upsert(conn, organization, temp_criteria_hierarchy_upsert, organization_values)
+
+                                # add in organization names into db
+                                hierarchy_name_upsert = [
+                                    ['hierarchy_1', None],
+                                    ['hierarchy_2', None],
+                                    ['hierarchy_3', None],
+                                    ['hierarchy_4', None],
+                                    ['hierarchy_5', None],
+                                    ['school_id', session['school_id']]
+                                ]
+
+                                for i in range(num_hierarchies):
+                                    hierarchy_name_upsert[i][1] = sheet_columns[i+2].lower()
+
+                                organization_name_values = {
+                                    i[0]: i[1]
+                                    for i in hierarchy_name_upsert
+                                }
+                                upsert(conn, org_name, [org_name.c.school_id == session['school_id']], organization_name_values)
+
+                                # add in the lockers
+                                # GODDA DO THIS ONE STILL G
+
 
                         # validation for preassignments spreadsheet
                         if field == 'preassignments':
@@ -874,7 +944,7 @@ async def login(request):
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # new session
-    print('Creating Session...')
+    # print('Creating Session...')
     session = await new_session(request)
 
     # user info
@@ -885,7 +955,7 @@ async def login(request):
     for key, value in kv:
         session[key] = value
 
-    print('Session Created:', session)
+    # print('Session Created:', session)
 
     # return to / page, correct view will be rendered based on user's role and login status
     return web.HTTPFound(location=request.app.router['index'].url_for())
