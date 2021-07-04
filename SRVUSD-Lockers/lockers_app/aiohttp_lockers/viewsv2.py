@@ -846,6 +846,16 @@ async def index(request):
                                 ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if preassignments_is_valid:
                                 try:
+                                    ctx_admin['sheets'][field]['messages'] = []
+                                    conn.execute(
+                                        school.update().where(and_(
+                                            school.c.id == session['school_id']
+                                            )
+                                        ).values(
+                                            preassignments_spreadsheet_uploaded = True,
+                                            preassignments_spreadsheet_filename = sheet_filename
+                                        )
+                                    )
                                     for student_email_1, student_email_2, locker_number in sheet_data:
                                         student_id_1 = conn.execute(
                                             student.select().where(student.c.email == student_email_1)
@@ -870,16 +880,6 @@ async def index(request):
                                             'status': 'MATCH',
                                             'locker_id': 0
                                         })
-                                        ctx_admin['sheets'][field]['messages'] = []
-                                        conn.execute(
-                                            school.update().where(and_(
-                                                school.c.id == session['school_id']
-                                                )
-                                            ).values(
-                                                preassignments_spreadsheet_uploaded = True,
-                                                preassignments_spreadsheet_filename = sheet_filename
-                                            )
-                                        )
                                 except Exception as e:
                                     # print(e)
                                     preassignments_is_valid = False
