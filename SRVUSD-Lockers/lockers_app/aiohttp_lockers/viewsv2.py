@@ -2,8 +2,10 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
 from aiohttp import web, web_request
+from urllib.parse import urlencode
 import aiohttp_jinja2
 from aiohttp_session import get_session, new_session
+from cryptography.fernet import Fernet
 from init_db import *
 from db import *
 from google.oauth2 import id_token
@@ -163,6 +165,8 @@ print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
 print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
 print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
 
+all_sessions = {}
+
 async def index(request):
     # creating message dictionary
     messages = {
@@ -170,13 +174,31 @@ async def index(request):
         'danger': [],
         'info': []
     }
-
+    print('ALL SESSIONS')
+    print(all_sessions)
     # getting user session
-    session = await get_session(request)
+    sessionid = request.cookies.get('sessionid')
+    print('Cookie Session:', sessionid)
+    session = None
+    if (sessionid == None or sessionid == ''):
+        print('\nGETTING PARAMETER\n')
+        sessionid = str(request.rel_url.query.get('sessionid')).strip()
+        print(sessionid)
+        if (sessionid == None):
+            sessionid = ''
+    if (sessionid != None):
+        session = all_sessions.get(sessionid)
     print('Index Session:', session)
 
+    if (session == None):
+        session = {}
+#        exc = web.HTTPFound(location=request.app.router['index'].url_for())
+#        print('Deleting cookie...')
+#        exc.set_cookie('sessionid','')
+#        raise exc
+
     # user is not logged in
-    if session.get('authorized') == None:
+    if (session.get('authorized') == None):
         # creating context
         ctx_index = {
             'session': session,
@@ -188,6 +210,7 @@ async def index(request):
             request,
             ctx_index
         )
+        response.set_cookie('sessionid','')
         # rendering for user
         return response
 
@@ -196,6 +219,7 @@ async def index(request):
 
         # user is a student
         if session['role'] == 'student':
+            print('\nAUTHORIZED as student\n')
             # populate these with values from database if they exist
             # EXAMPLES:
             # student_list = [
@@ -328,15 +352,18 @@ async def index(request):
                 'messages': messages
             }
 
+            print(ctx_students)
             # get request
-            if request.method == 'GET':
+            if (request.method == 'GET'):
                 # creating response
                 response = aiohttp_jinja2.render_template(
                     'student.html',
                     request,
                     ctx_students
                 )
+                response.set_cookie('sessionid',sessionid)
                 # rendering for user
+                print(request.method)
                 return response
 
             # post request
@@ -367,6 +394,7 @@ async def index(request):
                         request,
                         ctx_students
                     )
+                    response.set_cookie('sessionid',sessionid)
                     # rendering for user
                     return response
 
@@ -512,6 +540,7 @@ async def index(request):
                      request,
                      ctx_admin
                 )
+                response.set_cookie('sessionid',sessionid)
                 # rendering for user
                 return response
 
@@ -724,6 +753,7 @@ async def index(request):
                         request,
                         ctx_admin
                     )
+                    response.set_cookie('sessionid',sessionid)
                     return response
 
 async def login(request):
@@ -736,17 +766,21 @@ async def login(request):
 
     # loading post request data
     data = await request.post()
-
+    print()
+    print(request.remote)
+    print(request.headers)
+    print()
     # test: from form fields on home page (TEST)
-    email = data['email']
-
-    # final: OAuth2 flow when it's figured out
-    # token = data['idtoken']
-    # idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-    # print('USER INFO:', idinfo)
-    #
-    # # id_info attributes required to authorize a user
-    # email = idinfo.get('email')
+    if data.get('idtoken') == None:
+        email = data['email']
+    else:
+        # final: OAuth2 flow when it's figured out
+        token = data['idtoken']
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+        print('USER INFO:', idinfo)
+    
+        # id_info attributes required to authorize a user
+        email = idinfo.get('email')
 
     # authorizing the user email exists in database (given by admin sheet)
     # querying email and recording response
@@ -766,11 +800,17 @@ async def login(request):
     # user is not found
     else:
         # return to / page, correct view will be rendered based on user's role and login status
+        print('\nNO ROLE FOUND\n')
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # new session
-    print('Creating Session...')
-    session = await new_session(request)
+    #session = await new_session(request)
+    sessionid = request.cookies["sessionid"]
+    print('Checking Session...' + sessionid)
+    if (sessionid == '' or sessionid == None):
+        sessionid = Fernet.generate_key().decode()
+        all_sessions[sessionid] = {}
+    session = all_sessions.get(sessionid)
 
     # user info
     session['authorized'] = True
@@ -781,9 +821,16 @@ async def login(request):
         session[key] = value
 
     print('Session Created:', session)
-
+    print(all_sessions[sessionid])
     # return to / page, correct view will be rendered based on user's role and login status
-    return web.HTTPFound(location=request.app.router['index'].url_for())
+    location = str(request.app.router['index'].url_for())+ '?' + urlencode({"sessionid": sessionid})
+    print(location)
+    exc = web.HTTPFound(location=location)
+
+    print(sessionid)
+#    exc.set_cookie('sessionid', sessionid)
+    raise exc
+#    return web.Response()
 
 async def logout(request):
     # creating message dictionary
@@ -794,14 +841,16 @@ async def logout(request):
     }
 
     # getting user session
-    session = await get_session(request)
+#    session = await get_session(request)
+    sessionid = request.cookies["sessionid"]
+    session = all_sessions.get(sessionid)
 
     # log out successful
-    if session.get('authorized'):
+    if (session != None and session.get('authorized')):
         messages['success'].append('Logged out successfully.')
 
     # invalidating session
-    session.invalidate()
+    del all_sessions[sessionid]
 
     # return to / page, correct view will be rendered based
     return web.HTTPFound(location=request.app.router['index'].url_for())
