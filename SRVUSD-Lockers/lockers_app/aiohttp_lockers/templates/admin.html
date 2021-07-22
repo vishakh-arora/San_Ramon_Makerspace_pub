@@ -15,17 +15,16 @@ Enter locker & student details.
       <h2 class="card-title mt-2">Administrator Form.</h2>
       <p class="card-subtitle mb-2 text-muted">Submit the following documents.<p>
 
-        {% if sheets['students']['validated'] %}
+        {% if sheets['students']['saved'] %}
           <div class="alert alert-success" role="alert">
             Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['students']['filename'] }} </a> students spreadsheet.
           </div>
-        {% else %}
-          {% for message in sheets['students']['messages']%}
-            <div class="alert alert-danger" role="alert">
-              {{ message }}
-            </div>
-          {% endfor %}
         {% endif %}
+        {% for message in sheets['students']['messages']%}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Students Spreadsheet.</h5>
@@ -57,17 +56,16 @@ Enter locker & student details.
         <input class="form-control" type="file" id="formFile" name="students" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
 
-      {% if sheets['lockers']['validated'] %}
+      {% if sheets['lockers']['saved'] %}
         <div class="alert alert-success" role="alert">
           Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['lockers']['filename'] }} </a> lockers spreadsheet.
         </div>
-      {% else %}
-        {% for message in sheets['lockers']['messages']%}
-          <div class="alert alert-danger" role="alert">
-            {{ message }}
-          </div>
-        {% endfor %}
       {% endif %}
+      {% for message in sheets['lockers']['messages']%}
+        <div class="alert alert-danger" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Lockers Spreadsheet.</h5>
@@ -102,17 +100,17 @@ Enter locker & student details.
         <input class="form-control" type="file" id="formFile" name="lockers" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
       </div>
 
-      {% if sheets['preassignments']['validated'] %}
+      {% if sheets['preassignments']['saved'] %}
         <div class="alert alert-success" role="alert">
           Accepted <a href="#" class="alert-link text-decoration-none text-primary"> {{ sheets['preassignments']['filename'] }} </a> preassignments spreadsheet.
         </div>
-      {% else %}
-        {% for message in sheets['preassignments']['messages']%}
-          <div class="alert alert-danger" role="alert">
-            {{ message }}
-          </div>
-        {% endfor %}
       {% endif %}
+      {% for message in sheets['preassignments']['messages']%}
+        <div class="alert alert-danger" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+
 
       <div class="mb-4 bg-white shadow rounded p-3">
         <h5 class="card-subtitle mt-1 mb-4 text-muted">Pre-Assignments Spreadsheet.</h5>
@@ -120,22 +118,19 @@ Enter locker & student details.
         <table class="table table-primary table-striped">
           <thead>
             <tr>
-              <th scope="col">Last Name</th>
-              <th scope="col">First Name</th>
-              <th scope="col">District E-Mail</th>
+              <th scope="col">District E-Mail Partner 1</th>
+              <th scope="col">District E-Mail Partner 2</th>
               <th scope="col">Locker Number</th>
             </tr>
           </thead>
           <tbody>
            <tr>
-             <td scope="row">John</td>
-             <td>Doe</td>
-             <td>dh.jdoe@students.srvusd.net</td>
+             <td scope="row">dh.jdoe1@students.srvusd.net</td>
+             <td>dh.jdoe2@students.srvusd.net</td>
              <td>1112</td>
            </tr>
            <tr>
              <td scope="row">...</td>
-             <td>...</td>
              <td>...</td>
              <td>...</td>
            </tr>

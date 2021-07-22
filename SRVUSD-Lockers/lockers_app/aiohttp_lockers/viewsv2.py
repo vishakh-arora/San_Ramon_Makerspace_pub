@@ -36,23 +36,23 @@ conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
 # creating organizations w names
-conn.execute(org_name.insert({
-    'id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'level'
-}))
-conn.execute(org_name.insert({
-    'id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
+# conn.execute(org_name.insert({
+    # 'id': 0,
+    # 'hierarchy_1': 'building',
+    # 'hierarchy_2': 'floor',
+    # 'hierarchy_3': 'level'
+# }))
+# conn.execute(org_name.insert({
+    # 'id': 1,
+    # 'hierarchy_1': 'floor',
+    # 'hierarchy_2': 'bay',
+    # 'hierarchy_3': 'level'
+# }))
 # creating school
 conn.execute(school.insert({
     'id': 0,
     'name': 'Dougherty Valley High School',
-    'org_id': 0,
+    # 'org_id': 0,
     'students_spreadsheet_uploaded': False,
     'lockers_spreadsheet_uploaded': False,
     'preassignments_spreadsheet_uploaded': False
@@ -60,61 +60,69 @@ conn.execute(school.insert({
 conn.execute(school.insert({
     'id': 1,
     'name': 'California High School',
-    'org_id': 1,
+    # 'org_id': 1,
     'students_spreadsheet_uploaded': False,
     'lockers_spreadsheet_uploaded': False,
     'preassignments_spreadsheet_uploaded': False
 }))
 
 # creating student users
-conn.execute(student.insert({
-    'id': 0,
-    'email': 'dh.skumar@students.srvusd.net',
-    'first_name': 'shubham',
-    'last_name': 'kumar',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 1,
-    'email': 'dh.varora@students.srvusd.net',
-    'first_name': 'vishakh',
-    'last_name': 'arora',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 2,
-    'email': 'dh.cnookala@students.srvusd.net',
-    'first_name': 'chaitanya',
-    'last_name': 'nookala',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 3,
-    'email': 'dh.smehrotra@students.srvusd.net',
-    'first_name': 'shlok',
-    'last_name': 'mehrotra',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 4,
-    'email': 'dh.abhakat@students.srvusd.net',
-    'first_name': 'anay',
-    'last_name': 'bhakat',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-    'id': 5,
-    'email': 'ch.somefool@students.srvusd.net',
-    'first_name': 'some',
-    'last_name': 'fool',
-    'school_id': 1,
-    'grade': 12
-}))
+# conn.execute(student.insert({
+#     'id': 0,
+#     'email': 'dh.skumar@students.srvusd.net',
+#     'first_name': 'shubham',
+#     'last_name': 'kumar',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 1,
+#     'email': 'dh.varora@students.srvusd.net',
+#     'first_name': 'vishakh',
+#     'last_name': 'arora',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 2,
+#     'email': 'dh.cnookala@students.srvusd.net',
+#     'first_name': 'chaitanya',
+#     'last_name': 'nookala',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 3,
+#     'email': 'dh.smehrotra@students.srvusd.net',
+#     'first_name': 'shlok',
+#     'last_name': 'mehrotra',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 4,
+#     'email': 'dh.abhakat@students.srvusd.net',
+#     'first_name': 'anay',
+#     'last_name': 'bhakat',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 5,
+#     'email': 'ch.student1@students.srvusd.net',
+#     'first_name': 'CalStudent1',
+#     'last_name': 'Test',
+#     'school_id': 1,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#     'id': 6,
+#     'email': 'ch.student2@students.srvusd.net',
+#     'first_name': 'CalStudent2',
+#     'last_name': 'Test',
+#     'school_id': 1,
+#     'grade': 12
+# }))
 # creating admin user
 conn.execute(admin.insert({
     'id': 0,
@@ -124,50 +132,57 @@ conn.execute(admin.insert({
     'school_id': 0
 }))
 # creating organizations
-options = {
-    0: {
-        'building': ['1000', '2000', '3000', '4000'],
-        'floor': ['top', 'bottom'],
-        'level': ['top', 'bottom']
-    },
-    1: {
-        'floor': ['top', 'bottom'],
-        'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-        'level': ['top', 'bottom']
-    }
-}
+# options = {
+#     0: {
+#         'building': ['1000', '2000', '3000', '4000'],
+#         'floor': ['top', 'bottom'],
+#         'level': ['top', 'bottom']
+#     },
+#     1: {
+#         'floor': ['top', 'bottom'],
+#         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+#         'level': ['top', 'bottom']
+#     }
+# }
 
-x = 0
-for i in options: #(0, 1)
-    prod = list(itertools.product(*[j for j in list(options[i].values())]))
-    for a, b, c in prod:
-        conn.execute(organization.insert({
-            'id': x,
-            'school_id': i,
-            'hierarchy_1': a,
-            'hierarchy_2': b,
-            'hierarchy_3': c
-        }))
-        x += 1
+# x = 0
+# for i in options: #(0, 1)
+#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
+#     for a, b, c in prod:
+#         conn.execute(organization.insert({
+#             'id': x,
+#             'school_id': i,
+#             'hierarchy_1': a,
+#             'hierarchy_2': b,
+#             'hierarchy_3': c
+#         }))
+#         x += 1
 
-# preview tables
-school_request = conn.execute(school.select())
-student_request = conn.execute(student.select())
-admin_request = conn.execute(admin.select())
-preference_request = conn.execute(preference.select())
-organization_request = conn.execute(organization.select())
-org_name_request = conn.execute(org_name.select())
+def preview_db():
+    # preview tables
+    school_request = conn.execute(school.select())
+    student_request = conn.execute(student.select())
+    admin_request = conn.execute(admin.select())
+    preference_request = conn.execute(preference.select())
+    organization_request = conn.execute(organization.select())
+    org_name_request = conn.execute(org_name.select())
 
-print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
-print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
-print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
-print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
-print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+    print()
+    print()
+    print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
+    print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+    print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
+    print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+    print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
+    print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+    print()
+    print()
 
 all_sessions = {}
 
 async def index(request):
+    preview_db()
+
     # creating message dictionary
     messages = {
         'success': [],
@@ -220,6 +235,10 @@ async def index(request):
         # user is a student
         if session['role'] == 'student':
             print('\nAUTHORIZED as student\n')
+            preference_request = conn.execute(preference.select())
+            # print()
+            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+            # print()
             # populate these with values from database if they exist
             # EXAMPLES:
             # student_list = [
@@ -274,23 +293,23 @@ async def index(request):
                     student.select().
                         where(student.c.id == i[2])
                 ).first()
-                partner_preferences[i[3]] = f'{s[2].capitalize()} {s[3].capitalize()} ({s[1]})'
-
+                partner_preferences[i[3]] = s[0]
 
             # querying database for locker options
+            # ya buddy this one changed slihjtly oren
             # finding org_id for school
-            school_db_request = conn.execute(
-            school.select().
-                where(school.c.id == session['school_id'])
-            ).first(),
+            # school_db_request = conn.execute(
+            # school.select().
+            #     where(school.c.id == session['school_id'])
+            # ).first()
 
-            org_id = school_db_request[0][2]
+            # org_id = school_db_request[0][2]
             # org_id = 0
 
             # finding hierarchy names for user's school
             hierarchies = list(filter(None, conn.execute(
             org_name.select().
-                where(org_name.c.id == org_id)
+                where(org_name.c.school_id == session['school_id'])
             ).first()[1:]))
 
             # finding options for each hierarchy at the user's school
@@ -349,7 +368,8 @@ async def index(request):
                 'locker_preferences': locker_preferences, # ex: {'building':1000, 'floor':1, 'row':1}
                 'locker_options': locker_options, # ex: {'building':[1000, 2000, 3000, 4000], 'floor':[1, 2], 'row':[1, 2]}
                 'session': session,
-                'messages': messages
+                'messages': messages,
+                'issues': [None, None, None]
             }
 
             print(ctx_students)
@@ -388,7 +408,21 @@ async def index(request):
                 # print('USER RESPONSE', data_proc)
 
                 if len(set(data_proc)) != len(data_proc):
-                    messages['danger'].append('Please choose different people for each preference or select \'No Preference.\'')
+                    messages['danger'].append('Please choose different people for each preference.')
+                    # prefilling fields
+                    ctx_students['locker_preferences'] = {
+                        i: data[i]
+                        for i in hierarchies
+                    }
+                    ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
+                    # checking for duplicate names
+                    for i in range(3):
+                        for j in range(i, 3):
+                            if i == j:
+                                continue
+                            if user_form_response[i] == user_form_response[j]:
+                                ctx_students['issues'][i] = True
+                                ctx_students['issues'][j] = True
                     response = aiohttp_jinja2.render_template(
                         'student.html',
                         request,
@@ -399,20 +433,33 @@ async def index(request):
                     return response
 
                 # TEMPORARY
+                # MAN I DID ET DUMD
                 # NEED TO FIGURE OUT A WAY TO DEAL WITH VARIABLE HIERARCHIES
                 # hierarchies: names of the hierarchies (building, floor, level etc.)
+
+                criteria_hierarchy_query = [
+                    [organization.c.hierarchy_1, None],
+                    [organization.c.hierarchy_2, None],
+                    [organization.c.hierarchy_3, None],
+                    [organization.c.hierarchy_4, None],
+                    [organization.c.hierarchy_5, None],
+                    [organization.c.school_id, session['school_id']]
+                ]
+
+                for i in range(len(hierarchies)):
+                    criteria_hierarchy_query[i][1] = data[hierarchies[i]]
+
+                criteria_hierarchy_query = [i[0] == i[1] for i in criteria_hierarchy_query]
+
                 locker_db_request = conn.execute(
                     organization.select().
                         where(
-                            and_(
-                                organization.c.hierarchy_1 == data['building'],
-                                organization.c.hierarchy_2 == data['floor'],
-                                organization.c.hierarchy_3 == data['level']
-                            )
+                            and_(*criteria_hierarchy_query)
                         )
                     ).first()
 
                 locker_preference_id = locker_db_request[0]
+
                 criteria_preference1_upsert = [
                     preference.c.student_id == session['id'],
                     or_(
@@ -423,6 +470,7 @@ async def index(request):
 
                 # TEMPORARY
                 # NEED TO FIGURE OUT UPSERTS
+                # FIGURED IT OUT OREN
                 upsert(conn, preference, criteria_preference1_upsert, {
                     'submit_time': datetime.now(timezone.utc),
                     'student_id': session['id'],
@@ -504,7 +552,7 @@ async def index(request):
                 'fields': fields,
                 'sheets':{
                     i:{
-                        'validated': False,
+                        'saved': False,
                         'filename': None,
                         'data': None,
                         'messages': []
@@ -520,15 +568,15 @@ async def index(request):
                 school.select().where(
                     school.c.id == session['school_id']
                 )
-            ).first()[3:]
+            ).first()[2:]
 
-            print(school_db_request)
+            # print(school_db_request)
 
             for i in range(3):
                 if not school_db_request[i]:
                     ctx_admin['sheets'][fields[i]]['messages'].append(f'Missing {fields[i].capitalize()} Spreadsheet.')
                 else:
-                    ctx_admin['sheets'][fields[i]]['validated'] = True
+                    ctx_admin['sheets'][fields[i]]['saved'] = True
                     # ctx_admin['sheets'][fields[i]]['messages'].append(f'Accepted {fields[i].capitalize()} Spreadsheet.')
                     ctx_admin['sheets'][fields[i]]['filename'] = school_db_request[i+3]
 
@@ -586,47 +634,53 @@ async def index(request):
                         # validation for students spreadsheet
                         if field == 'students':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
 
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    students_spreadsheet_uploaded = False,
-                                    students_spreadsheet_filename = None
-                                )
-                            )
-
-                            # wrong number of columns
-                            if len(sheet_columns) != 4:
-                                students_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    # check for valid emails
-                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[3]):
-                                        students_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
-                                        break
-                                    # check for numerical grade values
-                                    if not type(row[2]) == int:
-                                        students_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid grade value in row {i+1}, received {row[2]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         students_spreadsheet_uploaded = False,
+                            #         students_spreadsheet_filename = None
+                            #     )
+                            # )
+                            # try validation
+                            try:
+                                # wrong number of columns
+                                if len(sheet_columns) != 4:
+                                    students_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        # check for valid emails
+                                        if not re.match('[^@]+@[^@]+\.[^@]+', row[3]):
                                             students_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check for numerical grade values
+                                        if not type(row[2]) == int:
+                                            students_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid grade value in row {i+1}, received {row[2]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                students_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if students_is_valid:
+                                ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
                                         school.c.id == session['school_id']
@@ -636,49 +690,77 @@ async def index(request):
                                         students_spreadsheet_filename = sheet_filename
                                     )
                                 )
+                                # print('\n STUDENT SHEET DATA \n')
+                                # for i in sheet_data:
+                                #     print(i)
+                                # print('\n\n')
+
+                                for last_name, first_name, grade, email in sheet_data:
+                                    criteria = [student.c.email == email]
+                                    upsert(conn, student, criteria, {
+                                        'email': email,
+                                        'first_name': first_name,
+                                        'last_name': last_name,
+                                        'school_id': session['school_id'],
+                                        'grade': grade
+                                    })
+
+                                # print('INSERTED STUDENT DATA: \n')
+                                # student_request = conn.execute(student.select())
+                                # print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+                                # print()
+
 
                         # validation for lockers spreadsheet
                         if field == 'lockers':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    lockers_spreadsheet_uploaded = False,
-                                    lockers_spreadsheet_filename = None
-                                )
-                            )
-                            # too many hierarchy values
-                            if len(sheet_columns)-2 > 5 or len(sheet_columns) < 2:
-                                lockers_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of location attribute values. Expected between 2 and 5, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    # check if locker number is numeric
-                                    if not type(row[0]) == int:
-                                        lockers_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
-                                        break
-                                    # check if locker combo has three values
-                                    if type(row[1]) != str or len(row[1].split(',')) != 3:
-                                        lockers_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         lockers_spreadsheet_uploaded = False,
+                            #         lockers_spreadsheet_filename = None
+                            #     )
+                            # )
+                            # try validation
+                            try:
+                                # too many hierarchy values
+                                if len(sheet_columns)-2 > 5 or len(sheet_columns) < 2:
+                                    lockers_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of location attribute values. Expected between 2 and 5, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        # check if locker number is numeric
+                                        if not type(row[0]) == int:
                                             lockers_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check if locker combo has three values
+                                        if type(row[1]) != str or len(row[1].split(',')) != 3:
+                                            lockers_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                lockers_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if lockers_is_valid:
+                                # validated frontend and database
+                                ctx_admin['sheets'][field]['messages'] = []
                                 conn.execute(
                                     school.update().where(and_(
                                         school.c.id == session['school_id']
@@ -689,55 +771,148 @@ async def index(request):
                                     )
                                 )
 
+                                # input data storage
+                                num_hierarchies = sheet_data.shape[1]-2
+                                locker_options = [set() for i in range(num_hierarchies)]
+
+                                # create organization data for db
+                                for i in sheet_data:
+                                    locker = i[2:]
+                                    for j in range(num_hierarchies):
+                                        # if type(locker[j]) == str:
+                                            # locker[j].lower()
+                                        locker_options[j].add(str(locker[j]).lower())
+
+                                organization_options = itertools.product(*locker_options)
+
+                                # add in organizations into db
+                                criteria_hierarchy_upsert = [
+                                    [organization.c.hierarchy_1, 'hierarchy_1', None],
+                                    [organization.c.hierarchy_2, 'hierarchy_2', None],
+                                    [organization.c.hierarchy_3, 'hierarchy_3', None],
+                                    [organization.c.hierarchy_4, 'hierarchy_4', None],
+                                    [organization.c.hierarchy_5, 'hierarchy_5', None],
+                                    [organization.c.school_id, 'school_id', session['school_id']]
+                                ]
+
+                                for i in organization_options:
+                                    for j in range(num_hierarchies):
+                                        criteria_hierarchy_upsert[j][2] = i[j]
+                                    temp_criteria_hierarchy_upsert = [i[0] == i[2] for i in criteria_hierarchy_upsert]
+                                    organization_values = {
+                                        i[1]: i[2]
+                                        for i in criteria_hierarchy_upsert
+                                    }
+                                    organization_values['school_id'] = session['school_id']
+                                    upsert(conn, organization, temp_criteria_hierarchy_upsert, organization_values)
+
+                                # add in organization names into db
+                                hierarchy_name_upsert = [
+                                    ['hierarchy_1', None],
+                                    ['hierarchy_2', None],
+                                    ['hierarchy_3', None],
+                                    ['hierarchy_4', None],
+                                    ['hierarchy_5', None],
+                                    ['school_id', session['school_id']]
+                                ]
+
+                                for i in range(num_hierarchies):
+                                    hierarchy_name_upsert[i][1] = sheet_columns[i+2].lower()
+
+                                organization_name_values = {
+                                    i[0]: i[1]
+                                    for i in hierarchy_name_upsert
+                                }
+                                upsert(conn, org_name, [org_name.c.school_id == session['school_id']], organization_name_values)
+
+                                # add in the lockers
+                                # GODDA DO THIS ONE STILL G
+
+
                         # validation for preassignments spreadsheet
                         if field == 'preassignments':
                             # reset on resubmission
-                            ctx_admin['sheets'][field]['validated'] = False
-                            ctx_admin['sheets'][field]['messages'] = [f'Missing {field.capitalize()} Spreadsheet.']
-                            conn.execute(
-                                school.update().where(and_(
-                                    school.c.id == session['school_id']
-                                    )
-                                ).values(
-                                    preassignments_spreadsheet_uploaded = False,
-                                    preassignments_spreadsheet_filename = None
-                                )
-                            )
-                            if len(sheet_columns) != 4:
-                                preassignments_is_valid = False
-                                ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
-                            else:
-                                for i in range(len(sheet_data)):
-                                    row = sheet_data[i]
-                                    if not re.match('[^@]+@[^@]+\.[^@]+', row[2]):
-                                        preassignments_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[3]}.')
-                                        break
-                                    # check if locker number is numeric
-                                    if not type(row[3]) == int:
-                                        preassignments_is_valid = False
-                                        ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[3]}.')
-                                        break
-                                    blank = False
-                                    # check for any blank values
-                                    for j in range(len(row)):
-                                        if type(row[j]) == float:
+                            # ctx_admin['sheets'][field]['saved'] = False
+                            ctx_admin['sheets'][field]['messages'] = [f'Errors found in {sheet_filename} {field} spreadsheet.']
+                            # conn.execute(
+                            #     school.update().where(and_(
+                            #         school.c.id == session['school_id']
+                            #         )
+                            #     ).values(
+                            #         preassignments_spreadsheet_uploaded = False,
+                            #         preassignments_spreadsheet_filename = None
+                            #     )
+                            # )
+                            try:
+                                if len(sheet_columns) != 3:
+                                    preassignments_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append(f'Incorrect number of columns. Expected 4, received {len(sheet_columns)}.')
+                                else:
+                                    for i in range(len(sheet_data)):
+                                        row = sheet_data[i]
+                                        if not (re.match('[^@]+@[^@]+\.[^@]+', row[0]) or re.match('[^@]+@[^@]+\.[^@]+', row[1])):
                                             preassignments_is_valid = False
-                                            ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
-                                            blank = True
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid e-mail in row {i+1}, received {row[0]}.')
                                             break
-                                    if blank:
-                                        break
+                                        # check if locker number is numeric
+                                        if not type(row[2]) == int:
+                                            preassignments_is_valid = False
+                                            ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[2]}.')
+                                            break
+                                        blank = False
+                                        # check for any blank values
+                                        for j in range(len(row)):
+                                            if type(row[j]) == float:
+                                                preassignments_is_valid = False
+                                                ctx_admin['sheets'][field]['messages'].append(f'Blank entry in row {i+1}, column {j+1}.')
+                                                blank = True
+                                                break
+                                        if blank:
+                                            break
+                            # problem with spreadsheet, but not identified
+                            except:
+                                students_is_valid = False
+                                ctx_admin['sheets'][field]['messages'].append(f'Please follow template carefully. Submission not recognized.')
                             if preassignments_is_valid:
-                                conn.execute(
-                                    school.update().where(and_(
-                                        school.c.id == session['school_id']
+                                try:
+                                    ctx_admin['sheets'][field]['messages'] = []
+                                    conn.execute(
+                                        school.update().where(and_(
+                                            school.c.id == session['school_id']
+                                            )
+                                        ).values(
+                                            preassignments_spreadsheet_uploaded = True,
+                                            preassignments_spreadsheet_filename = sheet_filename
                                         )
-                                    ).values(
-                                        preassignments_spreadsheet_uploaded = True,
-                                        preassignments_spreadsheet_filename = sheet_filename
                                     )
-                                )
+                                    for student_email_1, student_email_2, locker_number in sheet_data:
+                                        student_id_1 = conn.execute(
+                                            student.select().where(student.c.email == student_email_1)
+                                            ).first()[0]
+                                        student_id_2 = conn.execute(
+                                            student.select().where(student.c.email == student_email_2)
+                                            ).first()[0]
+                                        criteria_preassignment = [
+                                            or_(
+                                                assignment.c.student_id == student_id_1,
+                                                assignment.c.partner_id == student_id_1
+                                            ),
+                                            or_(
+                                                assignment.c.student_id == student_id_2,
+                                                assignment.c.partner_id == student_id_2
+                                            )
+                                        ]
+                                        # DO LOCKER GUYS FIRST SO ID CAN BE FOUND :QJJ:
+                                        upsert(conn, assignment, criteria_preassignment, {
+                                            'student_id': student_id_1,
+                                            'partner_id': student_id_2,
+                                            'status': 'MATCH',
+                                            'locker_id': 0
+                                        })
+                                except Exception as e:
+                                    # print(e)
+                                    preassignments_is_valid = False
+                                    ctx_admin['sheets'][field]['messages'].append('Please upload students & lockers spreadsheets first. Student(s)/Locker not found.')
 
                 # reload if everything looks right
                 if students_is_valid and lockers_is_valid and preassignments_is_valid:
@@ -822,6 +997,7 @@ async def login(request):
 
     print('Session Created:', session)
     print(all_sessions[sessionid])
+
     # return to / page, correct view will be rendered based on user's role and login status
     location = str(request.app.router['index'].url_for())+ '?' + urlencode({"sessionid": sessionid})
     print(location)

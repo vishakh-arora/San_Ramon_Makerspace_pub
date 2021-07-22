@@ -42,7 +42,7 @@ school = Table(
 
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
-    Column('org_id', Integer, ForeignKey('org_name.id', ondelete='CASCADE'), nullable=False),
+    # Column('org_id', Integer, ForeignKey('org_name.school_id', ondelete='CASCADE'), nullable=False),
     Column('students_spreadsheet_uploaded', Boolean),
     Column('lockers_spreadsheet_uploaded', Boolean),
     Column('preassignments_spreadsheet_uploaded', Boolean),
@@ -83,8 +83,8 @@ organization = Table(
 
     Column('id', Integer, primary_key=True),
     Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False),
-    Column('hierarchy_1', String(32)), #1000, 2000, 3000, 4000 (building)
-    Column('hierarchy_2', String(32)), # 1,2 (Floor)
+    Column('hierarchy_1', String(32)), # 1000, 2000, 3000, 4000 (building)
+    Column('hierarchy_2', String(32)), # 1, 2 (Floor)
     Column('hierarchy_3', String(32)), # T, B (Level)
     Column('hierarchy_4', String(32)),
     Column('hierarchy_5', String(32))
@@ -106,7 +106,8 @@ organization = Table(
 org_name = Table(
     'org_name', meta,
 
-    Column('id', Integer, primary_key=True),
+    # Column('id', Integer, primary_key=True),
+    Column('school_id', Integer, ForeignKey('school.id', ondelete='CASCADE'), nullable=False, primary_key=True),
     Column('hierarchy_1', String(32)), # 'Building'
     Column('hierarchy_2', String(32)), # 'Floor'
     Column('hierarchy_3', String(32)), # 'Level'
