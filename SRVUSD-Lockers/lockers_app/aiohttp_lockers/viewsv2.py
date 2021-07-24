@@ -166,6 +166,7 @@ def preview_db():
     preference_request = conn.execute(preference.select())
     organization_request = conn.execute(organization.select())
     org_name_request = conn.execute(org_name.select())
+    locker_request = conn.execute(locker.select())
 
     print()
     print()
@@ -175,6 +176,7 @@ def preview_db():
     print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
     print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+    print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
     print()
     print()
 
@@ -740,7 +742,7 @@ async def index(request):
                                             ctx_admin['sheets'][field]['messages'].append(f'Invalid locker number value in row {i+1}, received {row[0]}.')
                                             break
                                         # check if locker combo has three values
-                                        if type(row[1]) != str or len(row[1].split(',')) != 3:
+                                        if type(row[1]) != str or len(row[1].split(',')) != 3 or len(row[1]) != 8:
                                             lockers_is_valid = False
                                             ctx_admin['sheets'][field]['messages'].append(f'Invalid locker combination value in row {i+1}. Should be formatted \'#,#,#\', received {row[1]}.')
                                             break
@@ -777,11 +779,11 @@ async def index(request):
 
                                 # create organization data for db
                                 for i in sheet_data:
-                                    locker = i[2:]
+                                    organization_values = i[2:]
                                     for j in range(num_hierarchies):
                                         # if type(locker[j]) == str:
                                             # locker[j].lower()
-                                        locker_options[j].add(str(locker[j]).lower())
+                                        locker_options[j].add(str(organization_values[j]).lower())
 
                                 organization_options = itertools.product(*locker_options)
 
@@ -825,9 +827,31 @@ async def index(request):
                                 }
                                 upsert(conn, org_name, [org_name.c.school_id == session['school_id']], organization_name_values)
 
+                                hierarchy_query = [
+                                    [organization.c.hierarchy_1, None],
+                                    [organization.c.hierarchy_2, None],
+                                    [organization.c.hierarchy_3, None],
+                                    [organization.c.hierarchy_4, None],
+                                    [organization.c.hierarchy_5, None],
+                                    [organization.c.school_id, session['school_id']]
+                                ]
+                                preview_db()
                                 # add in the lockers
                                 # GODDA DO THIS ONE STILL G
-
+                                for i in sheet_data:
+                                    locker_number = i[0]
+                                    locker_combination = i[1]
+                                    organization_values = i[2:]
+                                    for i in range(len(organization_values)):
+                                        hierarchy_query[i][1] = str(organization_values[i]).lower()
+                                    org_id = conn.execute(organization.select().where(and_(*[i[0] == i[1] for i in hierarchy_query]))).first()[0]
+                                    locker_criteria = [
+                                        [locker.c.number, 'number', str(locker_number)],
+                                        [locker.c.school_id, 'school_id', session['school_id']],
+                                        [locker.c.combination, 'combination', str(locker_combination)],
+                                        [locker.c.organization, 'organization', org_id]
+                                    ]
+                                    upsert(conn, locker, [i[0]==i[2] for i in locker_criteria], {i[1]:i[2] for i in locker_criteria})
 
                         # validation for preassignments spreadsheet
                         if field == 'preassignments':
@@ -953,7 +977,7 @@ async def login(request):
         token = data['idtoken']
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
         print('USER INFO:', idinfo)
-    
+
         # id_info attributes required to authorize a user
         email = idinfo.get('email')
 
