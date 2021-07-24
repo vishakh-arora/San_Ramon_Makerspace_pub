@@ -126,10 +126,18 @@ conn.execute(school.insert({
 # creating admin user
 conn.execute(admin.insert({
     'id': 0,
-    'email':'eliddle@srvusd.net',
+    'email':'DVHS@srvusd.net',
     'prefix': 'Mr.',
-    'last_name': 'liddle',
+    'last_name': 'dvhs admin',
     'school_id': 0
+}))
+
+conn.execute(admin.insert({
+    'id': 1,
+    'email':'CHS@srvusd.net',
+    'prefix': 'Mr.',
+    'last_name': 'chs admin',
+    'school_id': 1
 }))
 # creating organizations
 # options = {
