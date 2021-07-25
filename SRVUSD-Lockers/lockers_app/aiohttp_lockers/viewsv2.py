@@ -190,8 +190,30 @@ def preview_db():
 
 all_sessions = {}
 
+def check_login(request):
+    print('ALL SESSIONS')
+    print(all_sessions)
+    # getting user session
+    sessionid = request.cookies.get('sessionid')
+    print('Cookie Session:', sessionid)
+    session = None
+    if sessionid == None or sessionid == '':
+        print('\nGETTING PARAMETER\n')
+        sessionid = str(request.rel_url.query.get('sessionid')).strip()
+        print(sessionid)
+        if sessionid == None:
+            sessionid = ''
+    if sessionid != None:
+        session = all_sessions.get(sessionid)
+    print('Index Session:', session)
+
+    if session == None:
+        session = {}
+
+    return session, sessionid
+
 async def index(request):
-    preview_db()
+    # preview_db()
 
     # creating message dictionary
     messages = {
@@ -199,28 +221,12 @@ async def index(request):
         'danger': [],
         'info': []
     }
-    print('ALL SESSIONS')
-    print(all_sessions)
-    # getting user session
-    sessionid = request.cookies.get('sessionid')
-    print('Cookie Session:', sessionid)
-    session = None
-    if (sessionid == None or sessionid == ''):
-        print('\nGETTING PARAMETER\n')
-        sessionid = str(request.rel_url.query.get('sessionid')).strip()
-        print(sessionid)
-        if (sessionid == None):
-            sessionid = ''
-    if (sessionid != None):
-        session = all_sessions.get(sessionid)
-    print('Index Session:', session)
-
-    if (session == None):
-        session = {}
 #        exc = web.HTTPFound(location=request.app.router['index'].url_for())
 #        print('Deleting cookie...')
 #        exc.set_cookie('sessionid','')
 #        raise exc
+
+    session, sessionid = check_login(request)
 
     # user is not logged in
     if (session.get('authorized') == None):
@@ -238,6 +244,25 @@ async def index(request):
         response.set_cookie('sessionid','')
         # rendering for user
         return response
+
+    else:
+        return web.HTTPFound(location=request.app.router['dashboard'].url_for())
+
+
+async def dashboard(request):
+    # preview_db()
+
+    # creating message dictionary
+    messages = {
+        'success': [],
+        'danger': [],
+        'info': []
+    }
+
+    session, sessionid = check_login(request)
+
+    if (session.get('authorized') == None):
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # user is logged in
     if session.get('authorized'):
@@ -391,7 +416,7 @@ async def index(request):
                     request,
                     ctx_students
                 )
-                response.set_cookie('sessionid',sessionid)
+                response.set_cookie('sessionid', sessionid)
                 # rendering for user
                 print(request.method)
                 return response
@@ -549,7 +574,7 @@ async def index(request):
                 #     request,
                 #     ctx_students
                 # )
-                return web.HTTPFound(location=request.app.router['index'].url_for())
+                return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 
 
         # user is an administrator
@@ -598,7 +623,7 @@ async def index(request):
                      request,
                      ctx_admin
                 )
-                response.set_cookie('sessionid',sessionid)
+                response.set_cookie('sessionid', sessionid)
                 # rendering for user
                 return response
 
@@ -843,7 +868,7 @@ async def index(request):
                                     [organization.c.hierarchy_5, None],
                                     [organization.c.school_id, session['school_id']]
                                 ]
-                                preview_db()
+                                # preview_db()
                                 # add in the lockers
                                 # GODDA DO THIS ONE STILL G
                                 for i in sheet_data:
@@ -949,7 +974,7 @@ async def index(request):
                 # reload if everything looks right
                 if students_is_valid and lockers_is_valid and preassignments_is_valid:
                     # redirect
-                    return web.HTTPFound(location=request.app.router['index'].url_for())
+                    return web.HTTPFound(location=request.app.router['dashboard'].url_for())
                 # return messages if there are errors
                 else:
                     # message to reload
@@ -960,7 +985,7 @@ async def index(request):
                         request,
                         ctx_admin
                     )
-                    response.set_cookie('sessionid',sessionid)
+                    response.set_cookie('sessionid', sessionid)
                     return response
 
 async def login(request):
@@ -1031,7 +1056,7 @@ async def login(request):
     print(all_sessions[sessionid])
 
     # return to / page, correct view will be rendered based on user's role and login status
-    location = str(request.app.router['index'].url_for())+ '?' + urlencode({"sessionid": sessionid})
+    location = str(request.app.router['dashboard'].url_for())+ '?' + urlencode({"sessionid": sessionid})
     print(location)
     exc = web.HTTPFound(location=location)
 
