@@ -42,7 +42,6 @@ school = Table(
 
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
-    # Column('org_id', Integer, ForeignKey('org_name.school_id', ondelete='CASCADE'), nullable=False),
     Column('students_spreadsheet_uploaded', Boolean),
     Column('lockers_spreadsheet_uploaded', Boolean),
     Column('preassignments_spreadsheet_uploaded', Boolean),
@@ -50,6 +49,7 @@ school = Table(
     Column('lockers_spreadsheet_filename', String(100)),
     Column('preassignments_spreadsheet_filename', String(100))
 )
+    # Column('org_id', Integer, ForeignKey('org_name.school_id', ondelete='CASCADE'), nullable=False), (3rd column)
 
 # Store student preferences for their partner/locker
 # Should be populated upon a student's submission of the form

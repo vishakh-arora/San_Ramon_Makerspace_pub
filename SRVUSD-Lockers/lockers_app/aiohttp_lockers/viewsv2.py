@@ -35,19 +35,6 @@ conn.execute(organization.delete())
 conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
-# creating organizations w names
-# conn.execute(org_name.insert({
-    # 'id': 0,
-    # 'hierarchy_1': 'building',
-    # 'hierarchy_2': 'floor',
-    # 'hierarchy_3': 'level'
-# }))
-# conn.execute(org_name.insert({
-    # 'id': 1,
-    # 'hierarchy_1': 'floor',
-    # 'hierarchy_2': 'bay',
-    # 'hierarchy_3': 'level'
-# }))
 # creating school
 conn.execute(school.insert({
     'id': 0,
@@ -66,6 +53,20 @@ conn.execute(school.insert({
     'preassignments_spreadsheet_uploaded': False
 }))
 
+# creating organizations w names
+conn.execute(org_name.insert({
+    'school_id': 0,
+    'hierarchy_1': 'building',
+    'hierarchy_2': 'floor',
+    'hierarchy_3': 'level'
+}))
+conn.execute(org_name.insert({
+    'school_id': 1,
+    'hierarchy_1': 'floor',
+    'hierarchy_2': 'bay',
+    'hierarchy_3': 'level'
+}))
+
 # creating student users
 # conn.execute(student.insert({
 #     'id': 0,
@@ -75,14 +76,14 @@ conn.execute(school.insert({
 #     'school_id': 0,
 #     'grade': 12
 # }))
-# conn.execute(student.insert({
-#     'id': 1,
-#     'email': 'dh.varora@students.srvusd.net',
-#     'first_name': 'vishakh',
-#     'last_name': 'arora',
-#     'school_id': 0,
-#     'grade': 12
-# }))
+conn.execute(student.insert({
+     'id': 1,
+     'email': 'dh.varora@students.srvusd.net',
+     'first_name': 'vishakh',
+     'last_name': 'arora',
+     'school_id': 0,
+     'grade': 12
+ }))
 # conn.execute(student.insert({
 #     'id': 2,
 #     'email': 'dh.cnookala@students.srvusd.net',
@@ -140,31 +141,31 @@ conn.execute(admin.insert({
     'school_id': 1
 }))
 # creating organizations
-# options = {
-#     0: {
-#         'building': ['1000', '2000', '3000', '4000'],
-#         'floor': ['top', 'bottom'],
-#         'level': ['top', 'bottom']
-#     },
-#     1: {
-#         'floor': ['top', 'bottom'],
-#         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-#         'level': ['top', 'bottom']
-#     }
-# }
+options = {
+     0: {
+         'building': ['1000', '2000', '3000', '4000'],
+         'floor': ['top', 'bottom'],
+         'level': ['top', 'bottom']
+     },
+     1: {
+         'floor': ['top', 'bottom'],
+         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+         'level': ['top', 'bottom']
+     }
+ }
 
-# x = 0
-# for i in options: #(0, 1)
-#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
-#     for a, b, c in prod:
-#         conn.execute(organization.insert({
-#             'id': x,
-#             'school_id': i,
-#             'hierarchy_1': a,
-#             'hierarchy_2': b,
-#             'hierarchy_3': c
-#         }))
-#         x += 1
+x = 0
+for i in options: #(0, 1)
+    prod = list(itertools.product(*[j for j in list(options[i].values())]))
+    for a, b, c in prod:
+        conn.execute(organization.insert({
+            'id': x,
+            'school_id': i,
+            'hierarchy_1': a,
+            'hierarchy_2': b,
+            'hierarchy_3': c
+        }))
+        x += 1
 
 def preview_db():
     # preview tables
