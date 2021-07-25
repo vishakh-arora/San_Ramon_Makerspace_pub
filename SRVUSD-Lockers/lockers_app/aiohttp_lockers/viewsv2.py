@@ -54,18 +54,18 @@ conn.execute(school.insert({
 }))
 
 # creating organizations w names
-conn.execute(org_name.insert({
-    'school_id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'level'
-}))
-conn.execute(org_name.insert({
-    'school_id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
+# conn.execute(org_name.insert({
+#     'school_id': 0,
+#     'hierarchy_1': 'building',
+#     'hierarchy_2': 'floor',
+#     'hierarchy_3': 'level'
+# }))
+# conn.execute(org_name.insert({
+#     'school_id': 1,
+#     'hierarchy_1': 'floor',
+#     'hierarchy_2': 'bay',
+#     'hierarchy_3': 'level'
+# }))
 
 # creating student users
 # conn.execute(student.insert({
@@ -76,14 +76,14 @@ conn.execute(org_name.insert({
 #     'school_id': 0,
 #     'grade': 12
 # }))
-conn.execute(student.insert({
-     'id': 1,
-     'email': 'dh.varora@students.srvusd.net',
-     'first_name': 'vishakh',
-     'last_name': 'arora',
-     'school_id': 0,
-     'grade': 12
- }))
+# conn.execute(student.insert({
+#      'id': 1,
+#      'email': 'dh.varora@students.srvusd.net',
+#      'first_name': 'vishakh',
+#      'last_name': 'arora',
+#      'school_id': 0,
+#      'grade': 12
+#  }))
 # conn.execute(student.insert({
 #     'id': 2,
 #     'email': 'dh.cnookala@students.srvusd.net',
@@ -141,31 +141,31 @@ conn.execute(admin.insert({
     'school_id': 1
 }))
 # creating organizations
-options = {
-     0: {
-         'building': ['1000', '2000', '3000', '4000'],
-         'floor': ['top', 'bottom'],
-         'level': ['top', 'bottom']
-     },
-     1: {
-         'floor': ['top', 'bottom'],
-         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-         'level': ['top', 'bottom']
-     }
- }
-
-x = 0
-for i in options: #(0, 1)
-    prod = list(itertools.product(*[j for j in list(options[i].values())]))
-    for a, b, c in prod:
-        conn.execute(organization.insert({
-            'id': x,
-            'school_id': i,
-            'hierarchy_1': a,
-            'hierarchy_2': b,
-            'hierarchy_3': c
-        }))
-        x += 1
+# options = {
+#      0: {
+#          'building': ['1000', '2000', '3000', '4000'],
+#          'floor': ['top', 'bottom'],
+#          'level': ['top', 'bottom']
+#      },
+#      1: {
+#          'floor': ['top', 'bottom'],
+#          'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+#          'level': ['top', 'bottom']
+#      }
+#  }
+#
+# x = 0
+# for i in options: #(0, 1)
+#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
+#     for a, b, c in prod:
+#         conn.execute(organization.insert({
+#             'id': x,
+#             'school_id': i,
+#             'hierarchy_1': a,
+#             'hierarchy_2': b,
+#             'hierarchy_3': c
+#         }))
+#         x += 1
 
 def preview_db():
     # preview tables
@@ -214,7 +214,7 @@ def check_login(request):
     return session, sessionid
 
 async def index(request):
-    # preview_db()
+    preview_db()
 
     # creating message dictionary
     messages = {
@@ -251,7 +251,7 @@ async def index(request):
 
 
 async def dashboard(request):
-    # preview_db()
+    preview_db()
 
     # creating message dictionary
     messages = {
@@ -1015,6 +1015,8 @@ async def login(request):
         # id_info attributes required to authorize a user
         email = idinfo.get('email')
 
+    print('EMAIL: ', email)
+
     # authorizing the user email exists in database (given by admin sheet)
     # querying email and recording response
     student_db_request = conn.execute(student.select().
@@ -1024,10 +1026,12 @@ async def login(request):
 
     # user is a student
     if student_db_request != None:
+        print('IDENTIFIED AS STUDENT')
         role = 'student'
         kv = zip(student.columns.keys(), student_db_request)
     # user is an admin
     elif admin_db_request != None:
+        print('IDENTIFIED AS ADMIN')
         role = 'admin'
         kv = zip(admin.columns.keys(), admin_db_request)
     # user is not found
@@ -1038,7 +1042,7 @@ async def login(request):
 
     # new session
     #session = await new_session(request)
-    sessionid = request.cookies["sessionid"]
+    sessionid = request.cookies['sessionid']
     print('Checking Session...' + sessionid)
     if (sessionid == '' or sessionid == None):
         sessionid = Fernet.generate_key().decode()
@@ -1057,7 +1061,7 @@ async def login(request):
     print(all_sessions[sessionid])
 
     # return to / page, correct view will be rendered based on user's role and login status
-    location = str(request.app.router['dashboard'].url_for())+ '?' + urlencode({"sessionid": sessionid})
+    location = str(request.app.router['dashboard'].url_for())+ '?' + urlencode({'sessionid': sessionid})
     print(location)
     exc = web.HTTPFound(location=location)
 
@@ -1076,7 +1080,7 @@ async def logout(request):
 
     # getting user session
 #    session = await get_session(request)
-    sessionid = request.cookies["sessionid"]
+    sessionid = request.cookies['sessionid']
     session = all_sessions.get(sessionid)
 
     # log out successful
