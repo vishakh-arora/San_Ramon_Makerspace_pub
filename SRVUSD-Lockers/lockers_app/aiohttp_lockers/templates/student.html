@@ -32,7 +32,7 @@ Record your preferences.
           {% for key, value in student_options.items() %}
             {% if key == partner_preferences[0] %}
               <option value="{{ key }}" selected>{{ value }}</option>
-            {% else %}
+            {% elif key != session['id'] %}
               <option value="{{ key }}" >{{ value }}</option>
             {% endif %}
           {% endfor %}
@@ -53,7 +53,7 @@ Record your preferences.
           {% for key, value in student_options.items() %}
             {% if key == partner_preferences[1]%}
               <option value="{{ key }}" selected>{{ value }}</option>
-            {% else %}
+            {% elif key != session['id'] %}
               <option value="{{ key }}" >{{ value }}</option>
             {% endif %}
           {% endfor %}
@@ -74,7 +74,7 @@ Record your preferences.
           {% for key, value in student_options.items() %}
             {% if key == partner_preferences[2]%}
               <option value="{{ key }}" selected>{{ value }}</option>
-            {% else %}
+            {% elif key != session['id'] %}
               <option value="{{ key }}" >{{ value }}</option>
             {% endif %}
           {% endfor %}

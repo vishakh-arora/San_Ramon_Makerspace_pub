@@ -54,28 +54,28 @@ conn.execute(school.insert({
 }))
 
 # creating organizations w names
-conn.execute(org_name.insert({
-    'school_id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'level'
-}))
-conn.execute(org_name.insert({
-    'school_id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
-
-# creating student users
-conn.execute(student.insert({
-    'id': 0,
-    'email': 'dh.skumar@students.srvusd.net',
-    'first_name': 'shubham',
-    'last_name': 'kumar',
-    'school_id': 0,
-    'grade': 12
-}))
+# conn.execute(org_name.insert({
+#     'school_id': 0,
+#     'hierarchy_1': 'building',
+#     'hierarchy_2': 'floor',
+#     'hierarchy_3': 'row'
+# }))
+# conn.execute(org_name.insert({
+#     'school_id': 1,
+#     'hierarchy_1': 'floor',
+#     'hierarchy_2': 'bay',
+#     'hierarchy_3': 'level'
+# }))
+#
+# # creating student users
+# conn.execute(student.insert({
+#     'id': 0,
+#     'email': 'dh.skumar@students.srvusd.net',
+#     'first_name': 'shubham',
+#     'last_name': 'kumar',
+#     'school_id': 0,
+#     'grade': 12
+# }))
 # conn.execute(student.insert({
 #      'id': 1,
 #      'email': 'dh.varora@students.srvusd.net',
@@ -110,9 +110,9 @@ conn.execute(student.insert({
 # }))
 # conn.execute(student.insert({
 #     'id': 5,
-#     'email': 'ch.student1@students.srvusd.net',
-#     'first_name': 'CalStudent1',
-#     'last_name': 'Test',
+#     'email': 'ch.skumar@students.srvusd.net',
+#     'first_name': 'shubham',
+#     'last_name': 'kumar',
 #     'school_id': 1,
 #     'grade': 12
 # }))
@@ -141,31 +141,31 @@ conn.execute(admin.insert({
     'school_id': 1
 }))
 # creating organizations
-options = {
-     0: {
-         'building': ['1000', '2000', '3000', '4000'],
-         'floor': ['top', 'bottom'],
-         'level': ['top', 'bottom']
-     },
-     1: {
-         'floor': ['top', 'bottom'],
-         'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-         'level': ['top', 'bottom']
-     }
- }
-
-x = 0
-for i in options: #(0, 1)
-    prod = list(itertools.product(*[j for j in list(options[i].values())]))
-    for a, b, c in prod:
-        conn.execute(organization.insert({
-            'id': x,
-            'school_id': i,
-            'hierarchy_1': a,
-            'hierarchy_2': b,
-            'hierarchy_3': c
-        }))
-        x += 1
+# options = {
+#      0: {
+#          'building': ['1000', '2000', '3000', '4000'],
+#          'floor': ['top', 'bottom'],
+#          'row': ['top', 'bottom']
+#      },
+#      1: {
+#          'floor': ['top', 'bottom'],
+#          'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+#          'level': ['top', 'bottom']
+#      }
+#  }
+#
+# x = 0
+# for i in options: #(0, 1)
+#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
+#     for a, b, c in prod:
+#         conn.execute(organization.insert({
+#             'id': x,
+#             'school_id': i,
+#             'hierarchy_1': a,
+#             'hierarchy_2': b,
+#             'hierarchy_3': c
+#         }))
+#         x += 1
 
 def preview_db():
     # preview tables
@@ -191,6 +191,38 @@ def preview_db():
 
 all_sessions = {}
 
+# caches
+student_cache = {0:{9:None, 10:None, 11:None, 12:None}, 1:{9:None, 10:None, 11:None, 12:None}}
+locker_cache = {}
+# STUDENT CJECHJU
+# {
+#     0: {
+#             9: DVHS Freshmen List,
+#             10: DVHS Sophomores List,
+#             11: DVHS Juniors List,
+#             12: DVHS Seniors List,
+#     },
+#     1: {
+#             9: CHS Freshmen List,
+#             10: CHS Sophomores List,
+#             11: CHS Juniors List,
+#             12: CHS Seniors List,
+#     }
+# }
+# LOCKER CJECHJU
+# {
+#     0: {
+#             'building': [1000, 2000, 3000, 4000],
+#             'floor': ['top', 'bottom'],
+#             'row': ['top', 'bottom']
+#     },
+#     1: {
+#             'floor': ['top', 'bottom'],
+#             'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+#             'level': ['top', 'bottom']
+#     }
+# }
+
 def check_login(request):
     print('ALL SESSIONS')
     print(all_sessions)
@@ -214,7 +246,7 @@ def check_login(request):
     return session, sessionid
 
 async def index(request):
-    preview_db()
+    # preview_db()
 
     # creating message dictionary
     messages = {
@@ -251,7 +283,7 @@ async def index(request):
 
 
 async def dashboard(request):
-    preview_db()
+    # preview_db()
 
     # creating message dictionary
     messages = {
@@ -271,7 +303,7 @@ async def dashboard(request):
         # user is a student
         if session['role'] == 'student':
             print('\nAUTHORIZED as student\n')
-            preference_request = conn.execute(preference.select())
+            # preference_request = conn.execute(preference.select())
             # print()
             # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
             # print()
@@ -289,25 +321,31 @@ async def dashboard(request):
             #     'row': ['top', 'bottom']
             # }
 
-            # querying database for student options (grade & school must be the same)
-            # exclude the logged in student from the list
-            student_db_request = conn.execute(
-                student.select().
-                    where(
-                        and_(
-                        student.c.id != session['id'],
-                        student.c.grade == session['grade'],
-                        student.c.school_id == session['school_id']
+            # cache students if not already
+            if student_cache[session['school_id']][session['grade']] != None:
+                student_options = student_cache[session['school_id']][session['grade']]
+                print(f'PULLED STUDENT DATA FROM CACHE')
+            else:
+                # querying database for student options (grade & school must be the same)
+                # exclude the logged in student from the list
+                student_db_request = conn.execute(
+                    student.select().
+                        where(
+                            and_(
+                            # student.c.id != session['id'],
+                            student.c.grade == session['grade'],
+                            student.c.school_id == session['school_id']
+                            )
                         )
                     )
-                )
 
-            # create dict to be passed into jinja prepopulated with student ids and info
-            # i[0] is id, i[2] is first name, i[3] is last name and i[1] is email
-            student_options = {
-                i[0]: f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
-                for i in student_db_request
-            }
+                # create dict to be passed into jinja prepopulated with student ids and info
+                # i[0] is id, i[2] is first name, i[3] is last name and i[1] is email
+                student_options = {
+                    i[0]: f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
+                    for i in student_db_request
+                }
+                student_cache[session['school_id']][session['grade']] = student_options.copy()
 
             # querying database for existing student preferences
             # sort preferences by partner rank (least to greatest)
@@ -408,7 +446,7 @@ async def dashboard(request):
                 'issues': [None, None, None]
             }
 
-            print(ctx_students)
+            # print(ctx_students)
             # get request
             if (request.method == 'GET'):
                 # creating response
