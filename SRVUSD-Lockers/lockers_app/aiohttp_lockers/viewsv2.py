@@ -504,16 +504,30 @@ async def dashboard(request):
                 ]
                 data_proc = list(filter(lambda x: x!='none', user_form_response))
 
-                # print('USER RESPONSE', data_proc)
+                print('USER RESPONSE', data_proc)
 
                 if len(set(data_proc)) != len(data_proc):
                     messages['danger'].append('Please choose different people for each preference.')
                     # prefilling fields
-                    ctx_students['locker_preferences'] = {
-                        i: data[i]
-                        for i in hierarchies
-                    }
-                    ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
+                    # ctx_students['locker_preferences'] = {
+                    #     i: data[i]
+                    #     for i in hierarchies
+                    # }
+                    ctx_students['locker_preferences'] = {}
+                    for i in hierarchies:
+                        try:
+                            ctx_students['locker_preferences'][i] = data[i]
+                        except:
+                            pass
+                    print(user_form_response)
+                    # ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
+                    ctx_students['partner_preferences'] = []
+                    for i in user_form_response:
+                        if i != 'none':
+                            ctx_students['partner_preferences'].append(int(i))
+                        else:
+                            ctx_students['partner_preferences'].append(i)
+                    # print(ctx_students['partner_preferences'])
                     # checking for duplicate names
                     for i in range(3):
                         for j in range(i, 3):
