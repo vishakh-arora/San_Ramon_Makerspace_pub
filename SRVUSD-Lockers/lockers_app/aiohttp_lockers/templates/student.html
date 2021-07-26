@@ -107,3 +107,20 @@ Record your preferences.
   </form>
 </div>
 {% endblock %}
+
+{% block column_two %}
+{% if session['school_id'] == 1%}
+<div class="card mb-3">
+  <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="First Floor Bay Map">
+  <div class="card-body">
+    <p class="card-text">Locker bay map for the first floor of California High School.</p>
+  </div>
+</div>
+<div class="card">
+  <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="Second & Third Floor Bay Map">
+  <div class="card-body">
+    <p class="card-text">Locker bay map for the second and third floors of California High School.</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
