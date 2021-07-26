@@ -48,10 +48,18 @@ Record your preferences.
               <p>An email with your assigned locker number/partner will be sent to the address you will provide below after registration closes.</p>
 
               <p><strong>4. What if I want to change my locker/partner after the assignment?</strong></p>
-              <p>Requests for changes cannot be addressed through the online assignment procedure.  If there is an issue with your assignment, please contact Mr. Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+              {% if session['school_id'] == 0 %}
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Mr. Spain at <a class="text-decoration-none" href="mailto: bspain@srvusd.net">bspain@srvusd.net</a>.</p>
+              {% elif session['school_id'] == 1 %}
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Mr. Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+              {% endif %}
 
               <p><strong>5. Final Note </strong></p>
-              <p>Returning students, please remember to bring the lock that was loaned to you by CHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-CHS issued lock will be removed from lockers.  Freshmen will receive their locks during orientation on August 8.</p>
+              {% if session['school_id'] == 0 %}
+                <p>Returning students, please remember to bring the lock that was loaned to you by DVHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-DVHS issued lock will be removed from lockers. Freshmen will receive their locks during orientation on August 8.</p>
+              {% elif session['school_id'] == 1 %}
+                <p>Returning students, please remember to bring the lock that was loaned to you by CHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-CHS issued lock will be removed from lockers. Freshmen will receive their locks during orientation on August 8.</p>
+              {% endif %}
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
@@ -149,7 +157,7 @@ Record your preferences.
 
 {% block column_two %}
 {% if session['school_id'] == 1%}
-<div class="card bg-light shadow mb-3">
+<div class="card bg-light border border-white shadow mb-3">
   <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="First Floor Bay Map">
   <div class="card-body">
     <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">1st floor</span> of California High School.</strong></p>
@@ -159,7 +167,7 @@ Record your preferences.
     </ul>
   </div>
 </div>
-<div class="card bg-light shadow">
+<div class="card bg-light border border-white shadow">
   <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="Second & Third Floor Bay Map">
   <div class="card-body">
     <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">2nd and 3rd floors</span> of California High School.</strong></p>
