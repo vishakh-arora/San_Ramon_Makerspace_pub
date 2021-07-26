@@ -30,7 +30,7 @@
           </ul>
           <div class="d-flex">
             {% if session.get('authorized') is not none %}
-              <a class="btn btn-primary btn-sm my-2" href="{{ url('logout') }}">Log Out</a>
+              <a class="btn btn-primary btn-sm my-2" onclick="signOut();" href="{{ url('logout') }}">Log Out</a>
             {% endif %}
             <!-- <div class="g-signin2 my-2" data-longtitle="true" data-onsuccess="onSignIn"></div>
             <script>
