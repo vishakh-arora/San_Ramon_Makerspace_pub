@@ -181,11 +181,11 @@ def preview_db():
     print()
     print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
     print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
-    print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
+    # print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
     print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
     print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
-    print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
+    # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
     print()
     print()
 
@@ -283,7 +283,7 @@ async def index(request):
 
 
 async def dashboard(request):
-    # preview_db()
+    preview_db()
 
     # creating message dictionary
     messages = {
@@ -415,6 +415,31 @@ async def dashboard(request):
                 for i, j in zip(hierarchies, hierarchy_options)
             }
 
+            # Dougherty Valley High School
+            # Seniors 1000
+            # Juniors 2000
+            # Sophomores 3000
+            # Freshmen 4000 (with partners)
+            # No need to ask for building information
+            if session['school_id'] == 0:
+                del locker_options['building']
+
+            # California High School
+            # Seniors First Floor
+            # Juniors First & Second Floor
+            # Sophomores Second Floor
+            # Freshmen Third Floor
+            # Only need to offer floor option to juniors
+            if session['school_id'] == 1:
+                if session['grade'] == 9:
+                    del locker_options['floor']
+                if session['grade'] == 10:
+                    del locker_options['floor']
+                if session['grade'] == 11:
+                    locker_options['floor'] = ['2', '3']
+                if session['grade'] == 12:
+                    del locker_options['floor']
+
             # print()
             # print(locker_options)
             # print()
@@ -520,8 +545,44 @@ async def dashboard(request):
                     [organization.c.school_id, session['school_id']]
                 ]
 
-                for i in range(len(hierarchies)):
-                    criteria_hierarchy_query[i][1] = data[hierarchies[i]]
+                # Dougherty Valley High School
+                # Seniors 1000
+                # Juniors 2000
+                # Sophomores 3000
+                # Freshmen 4000 (with partners)
+                # No need to ask for building information
+                if session['school_id'] == 0:
+                    # Populating building
+                    if session['grade'] == 9:
+                        criteria_hierarchy_query[0][1] = '4000'
+                    if session['grade'] == 10:
+                        criteria_hierarchy_query[0][1] = '3000'
+                    if session['grade'] == 11:
+                        criteria_hierarchy_query[0][1] = '2000'
+                    if session['grade'] == 12:
+                        criteria_hierarchy_query[0][1] = '1000'
+                    # Populating other fields
+                    for i in range(len(hierarchies)-1):
+                        criteria_hierarchy_query[i+1][1] = data[hierarchies[i+1]]
+
+                # California High School
+                # Seniors First Floor
+                # Juniors First & Second Floor
+                # Sophomores Second Floor
+                # Freshmen Third Floor
+                # Only need to offer floor option to juniors
+                if session['school_id'] == 1:
+                    if session['grade'] == 9:
+                        criteria_hierarchy_query[0][1] = '3'
+                    if session['grade'] == 10:
+                        criteria_hierarchy_query[0][1] = '2'
+                    if session['grade'] == 11:
+                        criteria_hierarchy_query[0][1] = data['floor']
+                    if session['grade'] == 12:
+                        criteria_hierarchy_query[0][1] = '1'
+                    # Populating other fields
+                    for i in range(len(hierarchies)-1):
+                        criteria_hierarchy_query[i+1][1] = data[hierarchies[i+1]]
 
                 criteria_hierarchy_query = [i[0] == i[1] for i in criteria_hierarchy_query]
 
@@ -772,9 +833,9 @@ async def dashboard(request):
                                 for last_name, first_name, grade, email in sheet_data:
                                     criteria = [student.c.email == email]
                                     upsert(conn, student, criteria, {
-                                        'email': str(email.lower()),
-                                        'first_name': str(first_name.lower()),
-                                        'last_name': str(last_name.lower()),
+                                        'email': str(email.strip().lower()),
+                                        'first_name': str(first_name.strip().lower()),
+                                        'last_name': str(last_name.strip().lower()),
                                         'school_id': session['school_id'],
                                         'grade': grade
                                     })
@@ -855,7 +916,7 @@ async def dashboard(request):
                                     for j in range(num_hierarchies):
                                         # if type(locker[j]) == str:
                                             # locker[j].lower()
-                                        locker_options[j].add(str(organization_values[j]).lower())
+                                        locker_options[j].add(str(organization_values[j]).strip().lower())
 
                                 organization_options = itertools.product(*locker_options)
 
@@ -891,7 +952,7 @@ async def dashboard(request):
                                 ]
 
                                 for i in range(num_hierarchies):
-                                    hierarchy_name_upsert[i][1] = sheet_columns[i+2].lower()
+                                    hierarchy_name_upsert[i][1] = sheet_columns[i+2].strip().lower()
 
                                 organization_name_values = {
                                     i[0]: i[1]
@@ -915,7 +976,7 @@ async def dashboard(request):
                                     locker_combination = i[1]
                                     organization_values = i[2:]
                                     for i in range(len(organization_values)):
-                                        hierarchy_query[i][1] = str(organization_values[i]).lower()
+                                        hierarchy_query[i][1] = str(organization_values[i]).strip().lower()
                                     org_id = conn.execute(organization.select().where(and_(*[i[0] == i[1] for i in hierarchy_query]))).first()[0]
                                     locker_criteria = [
                                         [locker.c.number, 'number', str(locker_number)],
