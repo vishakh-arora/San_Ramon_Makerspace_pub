@@ -67,67 +67,69 @@ Record your preferences.
           </div>
         </div>
       </div>
-      <div class="bg-white shadow rounded p-3 mb-4">
-        <h5 class="card-subtitle mt-1 mb-1 text-muted">Partner Preferences.</h5>
-        <div class="my-3">
-          <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
-          {% if issues[0] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-style="btn-outline-danger" data-width="100%" title="Select" required>
-          {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Select" required>
-          {% endif %}
-          {% for key, value in student_options.items() %}
-            {% if key == partner_preferences[0] %}
-              <option value="{{ key }}" selected>{{ value }}</option>
-            {% elif key != session['id'] %}
-              <option value="{{ key }}" >{{ value }}</option>
+      {% if student_partnerships %}
+        <div class="bg-white shadow rounded p-3 mb-4">
+          <h5 class="card-subtitle mt-1 mb-1 text-muted">Partner Preferences.</h5>
+          <div class="my-3">
+            <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
+            {% if issues[0] is not none %}
+              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-style="btn-outline-danger" data-width="100%" title="Select" required>
+            {% else %}
+              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Select" required>
             {% endif %}
-          {% endfor %}
-          </select>
-        </div>
-        <div class="my-3">
-          <label for="preference2" class="form-label">Second Preference Student</label>
-          {% if issues[1] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-style="btn-outline-danger" title="Select" data-width="100%">
-          {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%">
-          {% endif %}
-          {% if partner_preferences[1] is none %}
-            <option value="none" selected>No Preference</option>
-          {% else %}
-            <option value="none">No Preference</option>
-          {% endif %}
-          {% for key, value in student_options.items() %}
-            {% if key == partner_preferences[1]%}
-              <option value="{{ key }}" selected>{{ value }}</option>
-            {% elif key != session['id'] %}
-              <option value="{{ key }}" >{{ value }}</option>
+            {% for key, value in student_options.items() %}
+              {% if key == partner_preferences[0] %}
+                <option value="{{ key }}" selected>{{ value }}</option>
+              {% elif key != session['id'] %}
+                <option value="{{ key }}" >{{ value }}</option>
+              {% endif %}
+            {% endfor %}
+            </select>
+          </div>
+          <div class="my-3">
+            <label for="preference2" class="form-label">Second Preference Student</label>
+            {% if issues[1] is not none %}
+              <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-style="btn-outline-danger" title="Select" data-width="100%">
+            {% else %}
+              <select class="selectpicker show-tick border rounded" id="preference2" name="preference2" data-live-search="true" data-width="100%">
             {% endif %}
-          {% endfor %}
-          </select>
-        </div>
-        <div class="my-3">
-          <label for="preference3" class="form-label">Third Preference Student</label>
-          {% if issues[2] is not none %}
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-style="btn-outline-danger" title="Select" data-width="100%">
-          {% else %}
-            <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%">
-          {% endif %}
-          {% if partner_preferences[2] is none %}
-            <option value="none" selected>No Preference</option>
-          {% else %}
-            <option value="none">No Preference</option>
-          {% endif %}
-          {% for key, value in student_options.items() %}
-            {% if key == partner_preferences[2]%}
-              <option value="{{ key }}" selected>{{ value }}</option>
-            {% elif key != session['id'] %}
-              <option value="{{ key }}" >{{ value }}</option>
+            {% if partner_preferences[1] is none %}
+              <option value="none" selected>No Preference</option>
+            {% else %}
+              <option value="none">No Preference</option>
             {% endif %}
-          {% endfor %}
-          </select>
+            {% for key, value in student_options.items() %}
+              {% if key == partner_preferences[1]%}
+                <option value="{{ key }}" selected>{{ value }}</option>
+              {% elif key != session['id'] %}
+                <option value="{{ key }}" >{{ value }}</option>
+              {% endif %}
+            {% endfor %}
+            </select>
+          </div>
+          <div class="my-3">
+            <label for="preference3" class="form-label">Third Preference Student</label>
+            {% if issues[2] is not none %}
+              <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-style="btn-outline-danger" title="Select" data-width="100%">
+            {% else %}
+              <select class="selectpicker show-tick border rounded" id="preference3" name="preference3" data-live-search="true" data-width="100%">
+            {% endif %}
+            {% if partner_preferences[2] is none %}
+              <option value="none" selected>No Preference</option>
+            {% else %}
+              <option value="none">No Preference</option>
+            {% endif %}
+            {% for key, value in student_options.items() %}
+              {% if key == partner_preferences[2]%}
+                <option value="{{ key }}" selected>{{ value }}</option>
+              {% elif key != session['id'] %}
+                <option value="{{ key }}" >{{ value }}</option>
+              {% endif %}
+            {% endfor %}
+            </select>
+          </div>
         </div>
-      </div>
+      {% endif %}
       <div class="bg-white shadow rounded p-3 mb-4">
         <h5 class="card-subtitle mt-1 mb-1 text-muted">Locker Preferences.</h5>
         <div class="row row-cols-xxl-3 row-cols-xl-2">

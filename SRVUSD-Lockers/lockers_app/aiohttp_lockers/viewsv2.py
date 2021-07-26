@@ -462,6 +462,7 @@ async def dashboard(request):
 
             # creating context
             ctx_students = {
+                'student_partnerships': True,
                 'student_options': student_options,
                 'partner_preferences': partner_preferences, # temp_storage['partner'], (TEST)
                 'locker_preferences': locker_preferences, # ex: {'building':1000, 'floor':1, 'row':1}
@@ -470,6 +471,9 @@ async def dashboard(request):
                 'messages': messages,
                 'issues': [None, None, None]
             }
+
+            if session['school_id'] == 0 and session['grade'] != 9:
+                ctx_students['student_partnerships'] = False
 
             # print(ctx_students)
             # get request
@@ -497,53 +501,54 @@ async def dashboard(request):
                 # temp_storage['partner'][2] = data['preference3']
 
                 # invalid input: same choices for mulitple fields
-                user_form_response = [
-                    data['preference1'],
-                    data['preference2'],
-                    data['preference3']
-                ]
-                data_proc = list(filter(lambda x: x!='none', user_form_response))
+                if ctx_students['student_partnerships']:
+                    user_form_response = [
+                        data['preference1'],
+                        data['preference2'],
+                        data['preference3']
+                    ]
+                    data_proc = list(filter(lambda x: x!='none', user_form_response))
 
-                print('USER RESPONSE', data_proc)
+                    print('USER RESPONSE', data_proc)
 
-                if len(set(data_proc)) != len(data_proc):
-                    messages['danger'].append('Please choose different people for each preference.')
-                    # prefilling fields
-                    # ctx_students['locker_preferences'] = {
-                    #     i: data[i]
-                    #     for i in hierarchies
-                    # }
-                    ctx_students['locker_preferences'] = {}
-                    for i in hierarchies:
-                        try:
-                            ctx_students['locker_preferences'][i] = data[i]
-                        except:
-                            pass
-                    print(user_form_response)
-                    # ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
-                    ctx_students['partner_preferences'] = []
-                    for i in user_form_response:
-                        if i != 'none':
-                            ctx_students['partner_preferences'].append(int(i))
-                        else:
-                            ctx_students['partner_preferences'].append(i)
-                    # print(ctx_students['partner_preferences'])
-                    # checking for duplicate names
-                    for i in range(3):
-                        for j in range(i, 3):
-                            if i == j:
-                                continue
-                            if user_form_response[i] == user_form_response[j]:
-                                ctx_students['issues'][i] = True
-                                ctx_students['issues'][j] = True
-                    response = aiohttp_jinja2.render_template(
-                        'student.html',
-                        request,
-                        ctx_students
-                    )
-                    response.set_cookie('sessionid',sessionid)
-                    # rendering for user
-                    return response
+                    if len(set(data_proc)) != len(data_proc):
+                        messages['danger'].append('Please choose different people for each preference.')
+                        # prefilling fields
+                        # ctx_students['locker_preferences'] = {
+                        #     i: data[i]
+                        #     for i in hierarchies
+                        # }
+                        ctx_students['locker_preferences'] = {}
+                        for i in hierarchies:
+                            try:
+                                ctx_students['locker_preferences'][i] = data[i]
+                            except:
+                                pass
+                        print(user_form_response)
+                        # ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
+                        ctx_students['partner_preferences'] = []
+                        for i in user_form_response:
+                            if i != 'none':
+                                ctx_students['partner_preferences'].append(int(i))
+                            else:
+                                ctx_students['partner_preferences'].append(i)
+                        # print(ctx_students['partner_preferences'])
+                        # checking for duplicate names
+                        for i in range(3):
+                            for j in range(i, 3):
+                                if i == j:
+                                    continue
+                                if user_form_response[i] == user_form_response[j]:
+                                    ctx_students['issues'][i] = True
+                                    ctx_students['issues'][j] = True
+                        response = aiohttp_jinja2.render_template(
+                            'student.html',
+                            request,
+                            ctx_students
+                        )
+                        response.set_cookie('sessionid',sessionid)
+                        # rendering for user
+                        return response
 
                 # TEMPORARY
                 # MAN I DID ET DUMD
@@ -609,76 +614,86 @@ async def dashboard(request):
 
                 locker_preference_id = locker_db_request[0]
 
-                criteria_preference1_upsert = [
-                    preference.c.student_id == session['id'],
-                    or_(
-                        preference.c.partner_id == data['preference1'],
-                        preference.c.partner_rank == 0
-                    )
-                ]
-
-                # TEMPORARY
-                # NEED TO FIGURE OUT UPSERTS
-                # FIGURED IT OUT OREN
-                upsert(conn, preference, criteria_preference1_upsert, {
-                    'submit_time': datetime.now(timezone.utc),
-                    'student_id': session['id'],
-                    'partner_id': data['preference1'],
-                    'partner_rank': 0,
-                    'locker_pref': locker_preference_id,
-                })
-
-                # preference_request = conn.execute(preference.select())
-
-                if data['preference2'] != 'none':
-                    criteria_preference2_upsert = [
+                if ctx_students['student_partnerships']:
+                    criteria_preference1_upsert = [
                         preference.c.student_id == session['id'],
                         or_(
-                            preference.c.partner_id == data['preference2'],
-                            preference.c.partner_rank == 1
+                            preference.c.partner_id == data['preference1'],
+                            preference.c.partner_rank == 0
                         )
                     ]
-                    upsert(conn, preference, criteria_preference2_upsert, {
+
+                    # TEMPORARY
+                    # NEED TO FIGURE OUT UPSERTS
+                    # FIGURED IT OUT OREN
+                    upsert(conn, preference, criteria_preference1_upsert, {
                         'submit_time': datetime.now(timezone.utc),
                         'student_id': session['id'],
-                        'partner_id': data['preference2'],
-                        'partner_rank': 1,
+                        'partner_id': data['preference1'],
+                        'partner_rank': 0,
                         'locker_pref': locker_preference_id,
                     })
-                else:
-                    conn.execute(
-                        preference.delete().where(
-                            and_(
-                                preference.c.student_id == session['id'],
+
+                    # preference_request = conn.execute(preference.select())
+
+                    if data['preference2'] != 'none':
+                        criteria_preference2_upsert = [
+                            preference.c.student_id == session['id'],
+                            or_(
+                                preference.c.partner_id == data['preference2'],
                                 preference.c.partner_rank == 1
                             )
-                        )
-                    )
-
-                if data['preference3'] != 'none':
-                    criteria_preference3_upsert = [
-                        preference.c.student_id == session['id'],
-                        or_(
-                            preference.c.partner_id == data['preference3'],
-                            preference.c.partner_rank == 2
-                        )
-                    ]
-                    upsert(conn, preference, criteria_preference3_upsert, {
-                        'submit_time': datetime.now(timezone.utc),
-                        'student_id': session['id'],
-                        'partner_id': data['preference3'],
-                        'partner_rank': 2,
-                        'locker_pref': locker_preference_id,
-                    })
-                else:
-                    conn.execute(
-                        preference.delete().where(
-                            and_(
-                                preference.c.student_id == session['id'],
-                                preference.c.partner_rank == 2
+                        ]
+                        upsert(conn, preference, criteria_preference2_upsert, {
+                            'submit_time': datetime.now(timezone.utc),
+                            'student_id': session['id'],
+                            'partner_id': data['preference2'],
+                            'partner_rank': 1,
+                            'locker_pref': locker_preference_id,
+                        })
+                    else:
+                        conn.execute(
+                            preference.delete().where(
+                                and_(
+                                    preference.c.student_id == session['id'],
+                                    preference.c.partner_rank == 1
+                                )
                             )
                         )
-                    )
+
+                    if data['preference3'] != 'none':
+                        criteria_preference3_upsert = [
+                            preference.c.student_id == session['id'],
+                            or_(
+                                preference.c.partner_id == data['preference3'],
+                                preference.c.partner_rank == 2
+                            )
+                        ]
+                        upsert(conn, preference, criteria_preference3_upsert, {
+                            'submit_time': datetime.now(timezone.utc),
+                            'student_id': session['id'],
+                            'partner_id': data['preference3'],
+                            'partner_rank': 2,
+                            'locker_pref': locker_preference_id,
+                        })
+                    else:
+                        conn.execute(
+                            preference.delete().where(
+                                and_(
+                                    preference.c.student_id == session['id'],
+                                    preference.c.partner_rank == 2
+                                )
+                            )
+                        )
+                else:
+                    upsert(conn, preference, [preference.c.student_id == session['id']], {
+                        'submit_time': datetime.now(timezone.utc),
+                        'student_id': session['id'],
+                        'partner_id': session['id'],
+                        'partner_rank': 0,
+                        'locker_pref': locker_preference_id,
+                    })
+
 
                 # message to reload
                 # messages['success'].append('Saved successfully. Reload to view preferences.')
