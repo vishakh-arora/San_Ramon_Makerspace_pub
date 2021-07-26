@@ -20,6 +20,45 @@ Record your preferences.
           You may change your response until the deadline. Fields will be prefilled after your first submission with your saved preferences. Fix any fields outlined in red.
         </div>
       </div>
+      <!-- Button trigger modal -->
+      <div class="d-grid">
+        <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#infoModal">
+          Commonly Asked Questions.
+        </button>
+      </div>
+      <!-- Modal -->
+      <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Commonly Asked Questions.</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h4>Locker Assignment.</h4>
+              <h6 class="text-muted mb-3">Fill out this form to select your lockers for the 2021-2022 school year.</h6>
+
+              <p><strong>1. How does it work?</strong></p>
+              <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker & partner are assigned as close to your preferences as possible.</p>
+
+              <p><strong>2. Do both me and my locker partner have to fill out the form?</strong></p>
+              <p>Yes, both of you must fill out the form to ensure that you are matched.</p>
+
+              <p><strong>3. When will I know my locker?</strong></p>
+              <p>An email with your assigned locker number/partner will be sent to the address you will provide below after registration closes.</p>
+
+              <p><strong>4. What if I want to change my locker/partner after the assignment?</strong></p>
+              <p>Requests for changes cannot be addressed through the online assignment procedure.  If there is an issue with your assignment, please contact Mr. Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+
+              <p><strong>5. Final Note </strong></p>
+              <p>Returning students, please remember to bring the lock that was loaned to you by CHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-CHS issued lock will be removed from lockers.  Freshmen will receive their locks during orientation on August 8.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="bg-white shadow rounded p-3 mb-4">
         <h5 class="card-subtitle mt-1 mb-1 text-muted">Partner Preferences.</h5>
         <div class="my-3">
@@ -110,16 +149,24 @@ Record your preferences.
 
 {% block column_two %}
 {% if session['school_id'] == 1%}
-<div class="card mb-3">
+<div class="card bg-light shadow mb-3">
   <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="First Floor Bay Map">
   <div class="card-body">
-    <p class="card-text">Locker bay map for the first floor of California High School.</p>
+    <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">1st floor</span> of California High School.</strong></p>
+    <ul>
+      <li>The first floor is reserved for <span class="badge bg-primary">seniors</span> and <span class="badge bg-primary">juniors</span>.</li>
+      <li>Priority is given to <span class="badge bg-primary">seniors</span>.</li>
+    </ul>
   </div>
 </div>
-<div class="card">
+<div class="card bg-light shadow">
   <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="Second & Third Floor Bay Map">
   <div class="card-body">
-    <p class="card-text">Locker bay map for the second and third floors of California High School.</p>
+    <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">2nd and 3rd floors</span> of California High School.</strong></p>
+    <ul>
+      <li>The second floor is reserved for <span class="badge bg-primary">juniors</span> and <span class="badge bg-primary">sophomores</span>.</li>
+      <li>The third floor is reserved for <span class="badge bg-primary">freshmen</span> only.</li>
+    </ul>
   </div>
 </div>
 {% endif %}
