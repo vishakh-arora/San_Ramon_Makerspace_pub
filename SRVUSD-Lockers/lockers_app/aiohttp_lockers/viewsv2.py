@@ -358,6 +358,9 @@ async def dashboard(request):
                     where(preference.c.student_id == session['id'])
                 ).fetchall()
 
+            if len(preference_db_request) != 0:
+                messages['success'].append('Preferences saved successfully.')
+
             latest_preference_db_request = sorted(preference_db_request, key=lambda i: i[3])
 
             # create list to be passed into jinja prepopulated with student name and email
@@ -512,6 +515,7 @@ async def dashboard(request):
                     print('USER RESPONSE', data_proc)
 
                     if len(set(data_proc)) != len(data_proc):
+                        messages['success'] = []
                         messages['danger'].append('Please choose different people for each preference.')
                         # prefilling fields
                         # ctx_students['locker_preferences'] = {
@@ -695,14 +699,15 @@ async def dashboard(request):
                     })
 
 
-                # message to reload
+                # # message to reload
                 # messages['success'].append('Saved successfully. Reload to view preferences.')
-                # creating response
+                # # creating response
                 # response = aiohttp_jinja2.render_template(
                 #     'student.html',
                 #     request,
                 #     ctx_students
                 # )
+                # return response
                 return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 
 
