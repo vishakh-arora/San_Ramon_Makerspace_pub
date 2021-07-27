@@ -56,36 +56,36 @@ conn.execute(school.insert({
 }))
 
 # creating organizations w names
-# conn.execute(org_name.insert({
-#     'school_id': 0,
-#     'hierarchy_1': 'building',
-#     'hierarchy_2': 'floor',
-#     'hierarchy_3': 'row'
-# }))
-# conn.execute(org_name.insert({
-#     'school_id': 1,
-#     'hierarchy_1': 'floor',
-#     'hierarchy_2': 'bay',
-#     'hierarchy_3': 'level'
-# }))
-#
-# # creating student users
-# conn.execute(student.insert({
-#     'id': 0,
-#     'email': 'dh.skumar@students.srvusd.net',
-#     'first_name': 'shubham',
-#     'last_name': 'kumar',
-#     'school_id': 0,
-#     'grade': 12
-# }))
-# conn.execute(student.insert({
-#      'id': 1,
-#      'email': 'dh.varora@students.srvusd.net',
-#      'first_name': 'vishakh',
-#      'last_name': 'arora',
-#      'school_id': 0,
-#      'grade': 12
-#  }))
+conn.execute(org_name.insert({
+    'school_id': 0,
+    'hierarchy_1': 'building',
+    'hierarchy_2': 'floor',
+    'hierarchy_3': 'row'
+}))
+conn.execute(org_name.insert({
+    'school_id': 1,
+    'hierarchy_1': 'floor',
+    'hierarchy_2': 'bay',
+    'hierarchy_3': 'level'
+}))
+
+# creating student users
+conn.execute(student.insert({
+    'id': 0,
+    'email': 'dh.skumar@students.srvusd.net',
+    'first_name': 'shubham',
+    'last_name': 'kumar',
+    'school_id': 0,
+    'grade': 12
+}))
+conn.execute(student.insert({
+     'id': 1,
+     'email': 'dh.varora@students.srvusd.net',
+     'first_name': 'vishakh',
+     'last_name': 'arora',
+     'school_id': 0,
+     'grade': 12
+ }))
 # conn.execute(student.insert({
 #     'id': 2,
 #     'email': 'dh.cnookala@students.srvusd.net',
@@ -156,19 +156,19 @@ options = {
          'level': ['top', 'middle', 'bottom']
      }
  }
-#
-# x = 0
-# for i in options: #(0, 1)
-#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
-#     for a, b, c in prod:
-#         conn.execute(organization.insert({
-#             'id': x,
-#             'school_id': i,
-#             'hierarchy_1': a,
-#             'hierarchy_2': b,
-#             'hierarchy_3': c
-#         }))
-#         x += 1
+
+x = 0
+for i in options: #(0, 1)
+    prod = list(itertools.product(*[j for j in list(options[i].values())]))
+    for a, b, c in prod:
+        conn.execute(organization.insert({
+            'id': x,
+            'school_id': i,
+            'hierarchy_1': a,
+            'hierarchy_2': b,
+            'hierarchy_3': c
+        }))
+        x += 1
 
 def preview_db():
     # preview tables
