@@ -23,14 +23,14 @@ Record your preferences.
       <!-- Button trigger modal -->
       <div class="d-grid">
         <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#infoModal">
-          Commonly Asked Questions.
+          Commonly Asked Questions
         </button>
       </div>
       <!-- Modal -->
       <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
           <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header">
               <h5 class="modal-title" id="exampleModalLabel">Commonly Asked Questions.</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -38,23 +38,33 @@ Record your preferences.
               <h4>Locker Assignment.</h4>
               <h6 class="text-muted mb-3">Fill out this form to select your lockers for the 2021-2022 school year.</h6>
 
-              <p><strong>1. How does it work?</strong></p>
-              <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker & partner are assigned as close to your preferences as possible.</p>
-
-              <p><strong>2. Do both me and my locker partner have to fill out the form?</strong></p>
-              <p>Yes, both of you must fill out the form to ensure that you are matched.</p>
-
-              <p><strong>3. When will I know my locker?</strong></p>
-              <p>An email with your assigned locker number/partner will be sent to the address you will provide below after registration closes.</p>
-
-              <p><strong>4. What if I want to change my locker/partner after the assignment?</strong></p>
+              <p><strong>How does it work?</strong></p>
               {% if session['school_id'] == 0 %}
-                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Mr. Spain at <a class="text-decoration-none" href="mailto: bspain@srvusd.net">bspain@srvusd.net</a>.</p>
+                <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors and seniors will receive individual lockers.</p>
               {% elif session['school_id'] == 1 %}
-                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Mr. Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+                <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible.</p>
               {% endif %}
 
-              <p><strong>5. Final Note </strong></p>
+              {% if session['school_id'] == 0 and session['grade'] == 9 %}
+                <p><strong>Do both me and my locker partner have to fill out the form?</strong></p>
+                <p>Yes, both of you must fill out the form to ensure that you are matched.</p>
+              {% endif %}
+
+              <p><strong>When will I know my locker?</strong></p>
+              {% if session['school_id'] == 0 %}
+                <p>An email with your assigned locker number / partner will be sent to the address you used to log in after registration closes.</p>
+              {% elif session['school_id'] == 1 %}
+                <p>An email with your assigned locker number will be sent to the address you will provide below after registration closes.</p>
+              {% endif %}
+
+              <p><strong>What if I want to change my locker/partner after the assignment?</strong></p>
+              {% if session['school_id'] == 0 %}
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Jennifer Lee at <a class="text-decoration-none" href="mailto: bspain@srvusd.net">jlee2@srvusd.net</a>.</p>
+              {% elif session['school_id'] == 1 %}
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Jeffrey Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+              {% endif %}
+
+              <p><strong>Final Note </strong></p>
               {% if session['school_id'] == 0 %}
                 <p>Returning students, please remember to bring the lock that was loaned to you by DVHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-DVHS issued lock will be removed from lockers. Freshmen will receive their locks during orientation on August 8.</p>
               {% elif session['school_id'] == 1 %}

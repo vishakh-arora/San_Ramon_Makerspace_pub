@@ -275,7 +275,7 @@ async def index(request):
     session, sessionid = check_login(request)
 
     # user is not logged in
-    if (session.get('authorized') == None):
+    if session.get('authorized') == None:
         # creating context
         ctx_index = {
             'session': session,
@@ -287,7 +287,7 @@ async def index(request):
             request,
             ctx_index
         )
-        response.set_cookie('sessionid','')
+        response.set_cookie('sessionid', '')
         # rendering for user
         return response
 
@@ -307,7 +307,7 @@ async def dashboard(request):
 
     session, sessionid = check_login(request)
 
-    if (session.get('authorized') == None):
+    if session.get('authorized') == None:
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # user is logged in
@@ -496,7 +496,7 @@ async def dashboard(request):
 
             # print(ctx_students)
             # get request
-            if (request.method == 'GET'):
+            if request.method == 'GET':
                 # creating response
                 response = aiohttp_jinja2.render_template(
                     'student.html',
@@ -566,7 +566,7 @@ async def dashboard(request):
                             request,
                             ctx_students
                         )
-                        response.set_cookie('sessionid',sessionid)
+                        response.set_cookie('sessionid', sessionid)
                         # rendering for user
                         return response
 
@@ -1195,7 +1195,7 @@ async def login(request):
     #session = await new_session(request)
     sessionid = request.cookies['sessionid']
     # print('Checking Session...' + sessionid)
-    if (sessionid == '' or sessionid == None):
+    if sessionid == '' or sessionid == None:
         sessionid = Fernet.generate_key().decode()
         all_sessions[sessionid] = {}
     session = all_sessions.get(sessionid)
@@ -1235,7 +1235,7 @@ async def logout(request):
     session = all_sessions.get(sessionid)
 
     # log out successful
-    if (session != None and session.get('authorized')):
+    if session != None and session.get('authorized'):
         messages['success'].append('Logged out successfully.')
 
     # invalidating session
@@ -1256,3 +1256,24 @@ async def logout(request):
     # )
     # # rendering for user
     # return response
+
+async def assign(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in
+    if session.get('authorized') and session['role'] == 'admin':
+        # getting all preferences
+        # preference_db_request = conn.execute(
+        #     preference.select().
+        #         where(preference.c.student_id == session['id'])
+        #     ).fetchall()
+
+        # DVHS assiginment
+        if session['school_id'] == 0:
+            pass
+        # CHS assignment
+        if session['school_id'] == 1:
+            pass
+    # user can't access this page
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())

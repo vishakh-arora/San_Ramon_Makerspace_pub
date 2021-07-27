@@ -15,4 +15,4 @@ def setup_routes(app):
     app.router.add_get('/logout', logout, name='logout')
 
     # assignment
-    # app.router.add_get('/assign', assign, name='assign')
+    app.router.add_get('/assign', assign, name='assign')
