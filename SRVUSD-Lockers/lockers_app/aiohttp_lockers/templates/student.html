@@ -132,7 +132,8 @@ Record your preferences.
       {% endif %}
       <div class="bg-white shadow rounded p-3 mb-4">
         <h5 class="card-subtitle mt-1 mb-1 text-muted">Locker Preferences.</h5>
-        <div class="row row-cols-xxl-3 row-cols-xl-2">
+        <!-- <div class="row row-cols-xxl-3 row-cols-xl-2"> -->
+        <div class="row row-cols-xxl-2 row-cols-xl-2">
           {% for key, value in locker_options.items() %}
           <div class="cols-xxl-3 cols-xl-2 my-2">
               <label for="{{ key }}" class="form-label">{{ key.capitalize() }} Preference</label> <label class="text-danger" for="{{ key }}">*</label>
@@ -158,9 +159,22 @@ Record your preferences.
 {% endblock %}
 
 {% block column_two %}
-{% if session['school_id'] == 1%}
+{% if session['school_id'] == 0 %}
 <div class="card bg-light border border-white shadow mb-3">
-  <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="First Floor Bay Map">
+  <img class="card-img-top" src="../static/img/0/Map.png" style="filter: gray; -webkit-filter: grayscale(1); filter: grayscale(1);" alt="DVHS Map">
+  <div class="card-body">
+    <p class="card-text"><strong>Building map of Dougherty Valley High School.</strong></p>
+    <ul>
+      <li>The <span class="badge bg-info text-dark">1000s</span> building is reserved for <span class="badge bg-primary">seniors</span>.</li>
+      <li>The <span class="badge bg-info text-dark">2000s</span> building is reserved for <span class="badge bg-primary">juniors</span>.</li>
+      <li>The <span class="badge bg-info text-dark">3000s</span> building is reserved for <span class="badge bg-primary">sophomores</span>.</li>
+      <li>The <span class="badge bg-info text-dark">4000s</span> building is reserved for <span class="badge bg-primary">freshmen</span>. Students will have to choose a partner for their locker. </li>
+    </ul>
+  </div>
+</div>
+{% elif session['school_id'] == 1 %}
+<div class="card bg-light border border-white shadow mb-3">
+  <img class="card-img-top" src="../static/img/1/First_Floor_Bay_Map.png" alt="CHS First Floor Bay Map">
   <div class="card-body">
     <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">1st floor</span> of California High School.</strong></p>
     <ul>
@@ -170,7 +184,7 @@ Record your preferences.
   </div>
 </div>
 <div class="card bg-light border border-white shadow">
-  <img class="card-img-top" src="../static/img/1/Second_Third_Floor_Bay_Map.png" alt="Second & Third Floor Bay Map">
+  <img class="card-img-top" src="../static/img/1/Second_Third_Floor_Bay_Map.png" alt="CHS Second & Third Floor Bay Map">
   <div class="card-body">
     <p class="card-text"><strong>Locker bay map for the <span class="badge bg-info text-dark">2nd and 3rd floors</span> of California High School.</strong></p>
     <ul>

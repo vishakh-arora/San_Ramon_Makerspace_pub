@@ -27,31 +27,31 @@ conn = initialize_db()
 
 # (TEST)
 # clear existing entries
-conn.execute(school.delete())
-conn.execute(student.delete())
-conn.execute(admin.delete())
-conn.execute(preference.delete())
-conn.execute(organization.delete())
-conn.execute(org_name.delete())
+# conn.execute(school.delete())
+# conn.execute(student.delete())
+# conn.execute(admin.delete())
+# conn.execute(preference.delete())
+# conn.execute(organization.delete())
+# conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
 # creating school
-conn.execute(school.insert({
-    'id': 0,
-    'name': 'Dougherty Valley High School',
-    # 'org_id': 0,
-    'students_spreadsheet_uploaded': False,
-    'lockers_spreadsheet_uploaded': False,
-    'preassignments_spreadsheet_uploaded': False
-}))
-conn.execute(school.insert({
-    'id': 1,
-    'name': 'California High School',
-    # 'org_id': 1,
-    'students_spreadsheet_uploaded': False,
-    'lockers_spreadsheet_uploaded': False,
-    'preassignments_spreadsheet_uploaded': False
-}))
+# conn.execute(school.insert({
+#     'id': 0,
+#     'name': 'Dougherty Valley High School',
+#     # 'org_id': 0,
+#     'students_spreadsheet_uploaded': False,
+#     'lockers_spreadsheet_uploaded': False,
+#     'preassignments_spreadsheet_uploaded': False
+# }))
+# conn.execute(school.insert({
+#     'id': 1,
+#     'name': 'California High School',
+#     # 'org_id': 1,
+#     'students_spreadsheet_uploaded': False,
+#     'lockers_spreadsheet_uploaded': False,
+#     'preassignments_spreadsheet_uploaded': False
+# }))
 
 # creating organizations w names
 # conn.execute(org_name.insert({
@@ -125,21 +125,21 @@ conn.execute(school.insert({
 #     'grade': 12
 # }))
 # creating admin user
-conn.execute(admin.insert({
-    'id': 0,
-    'email':'DVHS@srvusd.net',
-    'prefix': 'Mr.',
-    'last_name': 'dvhs admin',
-    'school_id': 0
-}))
-
-conn.execute(admin.insert({
-    'id': 1,
-    'email':'CHS@srvusd.net',
-    'prefix': 'Mr.',
-    'last_name': 'chs admin',
-    'school_id': 1
-}))
+# conn.execute(admin.insert({
+#     'id': 0,
+#     'email':'DVHS@srvusd.net',
+#     'prefix': 'Mr.',
+#     'last_name': 'dvhs admin',
+#     'school_id': 0
+# }))
+#
+# conn.execute(admin.insert({
+#     'id': 1,
+#     'email':'CHS@srvusd.net',
+#     'prefix': 'Mr.',
+#     'last_name': 'chs admin',
+#     'school_id': 1
+# }))
 # creating organizations
 # options = {
 #      0: {
@@ -179,12 +179,12 @@ def preview_db():
 
     print()
     print()
-    print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
-    print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
+    # print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
+    # print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
     # print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
     print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
     print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
-    print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
+    # print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
     # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
     print()
     print()
@@ -475,7 +475,7 @@ async def dashboard(request):
                 'issues': [None, None, None]
             }
 
-            if session['school_id'] == 0 and session['grade'] != 9:
+            if (session['school_id'] == 0 and session['grade'] != 9) or session['school_id'] == 1:
                 ctx_students['student_partnerships'] = False
 
             # print(ctx_students)
