@@ -5,6 +5,8 @@ from aiohttp import web, web_request
 from urllib.parse import urlencode
 import aiohttp_jinja2
 from aiohttp_session import get_session, new_session
+from assignment import Lockers
+from copy import deepcopy
 from cryptography.fernet import Fernet
 from init_db import *
 from db import *
@@ -27,31 +29,31 @@ conn = initialize_db()
 
 # (TEST)
 # clear existing entries
-# conn.execute(school.delete())
-# conn.execute(student.delete())
-# conn.execute(admin.delete())
-# conn.execute(preference.delete())
-# conn.execute(organization.delete())
-# conn.execute(org_name.delete())
+conn.execute(school.delete())
+conn.execute(student.delete())
+conn.execute(admin.delete())
+conn.execute(preference.delete())
+conn.execute(organization.delete())
+conn.execute(org_name.delete())
 
 # create hardcoded entries (TEST)
 # creating school
-# conn.execute(school.insert({
-#     'id': 0,
-#     'name': 'Dougherty Valley High School',
-#     # 'org_id': 0,
-#     'students_spreadsheet_uploaded': False,
-#     'lockers_spreadsheet_uploaded': False,
-#     'preassignments_spreadsheet_uploaded': False
-# }))
-# conn.execute(school.insert({
-#     'id': 1,
-#     'name': 'California High School',
-#     # 'org_id': 1,
-#     'students_spreadsheet_uploaded': False,
-#     'lockers_spreadsheet_uploaded': False,
-#     'preassignments_spreadsheet_uploaded': False
-# }))
+conn.execute(school.insert({
+    'id': 0,
+    'name': 'Dougherty Valley High School',
+    # 'org_id': 0,
+    'students_spreadsheet_uploaded': False,
+    'lockers_spreadsheet_uploaded': False,
+    'preassignments_spreadsheet_uploaded': False
+}))
+conn.execute(school.insert({
+    'id': 1,
+    'name': 'California High School',
+    # 'org_id': 1,
+    'students_spreadsheet_uploaded': False,
+    'lockers_spreadsheet_uploaded': False,
+    'preassignments_spreadsheet_uploaded': False
+}))
 
 # creating organizations w names
 # conn.execute(org_name.insert({
@@ -125,34 +127,35 @@ conn = initialize_db()
 #     'grade': 12
 # }))
 # creating admin user
-# conn.execute(admin.insert({
-#     'id': 0,
-#     'email':'DVHS@srvusd.net',
-#     'prefix': 'Mr.',
-#     'last_name': 'dvhs admin',
-#     'school_id': 0
-# }))
-#
-# conn.execute(admin.insert({
-#     'id': 1,
-#     'email':'CHS@srvusd.net',
-#     'prefix': 'Mr.',
-#     'last_name': 'chs admin',
-#     'school_id': 1
-# }))
+conn.execute(admin.insert({
+    'id': 0,
+    'email':'DVHS@srvusd.net',
+    'prefix': 'Mr.',
+    'last_name': 'dvhs admin',
+    'school_id': 0
+}))
+
+conn.execute(admin.insert({
+    'id': 1,
+    'email':'CHS@srvusd.net',
+    'prefix': 'Mr.',
+    'last_name': 'chs admin',
+    'school_id': 1
+}))
+
 # creating organizations
-# options = {
-#      0: {
-#          'building': ['1000', '2000', '3000', '4000'],
-#          'floor': ['top', 'bottom'],
-#          'row': ['top', 'bottom']
-#      },
-#      1: {
-#          'floor': ['top', 'bottom'],
-#          'bay': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-#          'level': ['top', 'bottom']
-#      }
-#  }
+options = {
+     0: {
+         'building': ['1000', '2000', '3000', '4000'],
+         'floor': ['top', 'bottom'],
+         'row': ['top', 'bottom']
+     },
+     1: {
+         'floor': ['1', '2', '3'],
+         'bay': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'],
+         'level': ['top', 'middle', 'bottom']
+     }
+ }
 #
 # x = 0
 # for i in options: #(0, 1)
@@ -177,17 +180,17 @@ def preview_db():
     org_name_request = conn.execute(org_name.select())
     locker_request = conn.execute(locker.select())
 
-    print()
-    print()
+    # print()
+    # print()
     # print('SCHOOL PREVIEW:', *school_request.fetchall(), sep='\n')
     # print('STUDENT PREVIEW:', *student_request.fetchall(), sep='\n')
     # print('ADMIN PREVIEW:', *admin_request.fetchall(), sep='\n')
-    print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-    print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
+    # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+    # print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     # print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
     # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
-    print()
-    print()
+    # print()
+    # print()
 
 all_sessions = {}
 
@@ -223,22 +226,32 @@ locker_cache = {}
 #     }
 # }
 
+locker_objects = {
+    i: Lockers([options[i][j] for j in options[i]])
+    for i in options
+}
+
+# print(locker_objects[0].d)
+# print(locker_objects[1].d)
+
+# print(locker_objects)
+
 def check_login(request):
-    print('ALL SESSIONS')
-    print(all_sessions)
+    # print('ALL SESSIONS')
+    # print(all_sessions)
     # getting user session
     sessionid = request.cookies.get('sessionid')
-    print('Cookie Session:', sessionid)
+    # print('Cookie Session:', sessionid)
     session = None
     if sessionid == None or sessionid == '':
-        print('\nGETTING PARAMETER\n')
+        # print('\nGETTING PARAMETER\n')
         sessionid = str(request.rel_url.query.get('sessionid')).strip()
-        print(sessionid)
+        # print(sessionid)
         if sessionid == None:
             sessionid = ''
     if sessionid != None:
         session = all_sessions.get(sessionid)
-    print('Index Session:', session)
+    # print('Index Session:', session)
 
     if session == None:
         session = {}
@@ -302,7 +315,7 @@ async def dashboard(request):
 
         # user is a student
         if session['role'] == 'student':
-            print('\nAUTHORIZED as student\n')
+            # print('\nAUTHORIZED as student\n')
             # preference_request = conn.execute(preference.select())
             # print()
             # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
@@ -324,7 +337,7 @@ async def dashboard(request):
             # cache students if not already
             if student_cache[session['school_id']][session['grade']] != None:
                 student_options = student_cache[session['school_id']][session['grade']]
-                print(f'PULLED STUDENT DATA FROM CACHE')
+                # print(f'PULLED STUDENT DATA FROM CACHE')
             else:
                 # querying database for student options (grade & school must be the same)
                 # exclude the logged in student from the list
@@ -390,33 +403,35 @@ async def dashboard(request):
             ).first()[1:]))
 
             # finding options for each hierarchy at the user's school
-            hierarchy_db_request = conn.execute(
-            organization.select().
-                where(organization.c.school_id == session['school_id'])
-            ).fetchall()
-
-            hierarchy_db_request = [list(filter(None, i[2:])) for i in hierarchy_db_request]
+            # hierarchy_db_request = conn.execute(
+            # organization.select().
+            #     where(organization.c.school_id == session['school_id'])
+            # ).fetchall()
+            #
+            # hierarchy_db_request = [list(filter(None, i[2:])) for i in hierarchy_db_request]
 
             # print()
             # print(*hierarchy_db_request, sep='\n')
             # print()
 
-            hierarchy_options = [set() for i in range(len(hierarchies))]
+            # hierarchy_options = [set() for i in range(len(hierarchies))]
 
-            for i in hierarchy_db_request: # (1000, top, top)
-                for j in range(len(i)):
-                    hierarchy_options[j].add(i[j])
+            # for i in hierarchy_db_request: # (1000, top, top)
+            #     for j in range(len(i)):
+            #         hierarchy_options[j].add(i[j])
 
             # print()
             # print(*hierarchy_options, sep='\n')
             # print()
 
-            hierarchy_options = [sorted(list(i)) for i in hierarchy_options]
+            # hierarchy_options = [sorted(list(i)) for i in hierarchy_options]
 
-            locker_options = {
-                i: j
-                for i, j in zip(hierarchies, hierarchy_options)
-            }
+            # locker_options = {
+            #     i: j
+            #     for i, j in zip(hierarchies, hierarchy_options)
+            # }
+
+            locker_options = deepcopy(options[session['school_id']])
 
             # Dougherty Valley High School
             # Seniors 1000
@@ -442,9 +457,10 @@ async def dashboard(request):
                     locker_options['floor'] = ['2', '3']
                 if session['grade'] == 12:
                     del locker_options['floor']
+                    locker_options['bay'].remove('n')
 
             # print()
-            # print(locker_options)
+            # print(options)
             # print()
 
             # querying database for locker preferences
@@ -489,7 +505,7 @@ async def dashboard(request):
                 )
                 response.set_cookie('sessionid', sessionid)
                 # rendering for user
-                print(request.method)
+                # print(request.method)
                 return response
 
             # post request
@@ -512,7 +528,7 @@ async def dashboard(request):
                     ]
                     data_proc = list(filter(lambda x: x!='none', user_form_response))
 
-                    print('USER RESPONSE', data_proc)
+                    # print('USER RESPONSE', data_proc)
 
                     if len(set(data_proc)) != len(data_proc):
                         messages['success'] = []
@@ -528,7 +544,7 @@ async def dashboard(request):
                                 ctx_students['locker_preferences'][i] = data[i]
                             except:
                                 pass
-                        print(user_form_response)
+                        # print(user_form_response)
                         # ctx_students['partner_preferences'] = [int(i) for i in user_form_response]
                         ctx_students['partner_preferences'] = []
                         for i in user_form_response:
@@ -951,6 +967,8 @@ async def dashboard(request):
                                         # if type(locker[j]) == str:
                                             # locker[j].lower()
                                         locker_options[j].add(str(organization_values[j]).strip().lower())
+                                    # print([str(i).strip().lower() for i in organization_values])
+                                    locker_objects[session['school_id']].add_locker([str(i).strip().lower() for i in organization_values], str(i[0]))
 
                                 organization_options = itertools.product(*locker_options)
 
@@ -1132,10 +1150,10 @@ async def login(request):
 
     # loading post request data
     data = await request.post()
-    print()
-    print(request.remote)
-    print(request.headers)
-    print()
+    # print()
+    # print(request.remote)
+    # print(request.headers)
+    # print()
     # test: from form fields on home page (TEST)
     if data.get('idtoken') == None:
         email = data['email']
@@ -1143,12 +1161,12 @@ async def login(request):
         # final: OAuth2 flow when it's figured out
         token = data['idtoken']
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-        print('USER INFO:', idinfo)
+        # print('USER INFO:', idinfo)
 
         # id_info attributes required to authorize a user
         email = idinfo.get('email')
 
-    print('EMAIL: ', email)
+    # print('EMAIL: ', email)
 
     # authorizing the user email exists in database (given by admin sheet)
     # querying email and recording response
@@ -1159,24 +1177,24 @@ async def login(request):
 
     # user is a student
     if student_db_request != None:
-        print('IDENTIFIED AS STUDENT')
+        # print('IDENTIFIED AS STUDENT')
         role = 'student'
         kv = zip(student.columns.keys(), student_db_request)
     # user is an admin
     elif admin_db_request != None:
-        print('IDENTIFIED AS ADMIN')
+        # print('IDENTIFIED AS ADMIN')
         role = 'admin'
         kv = zip(admin.columns.keys(), admin_db_request)
     # user is not found
     else:
         # return to / page, correct view will be rendered based on user's role and login status
-        print('\nNO ROLE FOUND\n')
+        # print('\nNO ROLE FOUND\n')
         return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # new session
     #session = await new_session(request)
     sessionid = request.cookies['sessionid']
-    print('Checking Session...' + sessionid)
+    # print('Checking Session...' + sessionid)
     if (sessionid == '' or sessionid == None):
         sessionid = Fernet.generate_key().decode()
         all_sessions[sessionid] = {}
@@ -1190,15 +1208,15 @@ async def login(request):
     for key, value in kv:
         session[key] = value
 
-    print('Session Created:', session)
-    print(all_sessions[sessionid])
+    # print('Session Created:', session)
+    # print(all_sessions[sessionid])
 
     # return to / page, correct view will be rendered based on user's role and login status
     location = str(request.app.router['dashboard'].url_for())+ '?' + urlencode({'sessionid': sessionid})
-    print(location)
+    # print(location)
     exc = web.HTTPFound(location=location)
 
-    print(sessionid)
+    # print(sessionid)
 #    exc.set_cookie('sessionid', sessionid)
     raise exc
 #    return web.Response()
