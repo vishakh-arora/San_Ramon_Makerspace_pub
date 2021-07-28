@@ -56,36 +56,36 @@ conn.execute(school.insert({
 }))
 
 # creating organizations w names
-conn.execute(org_name.insert({
-    'school_id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'row'
-}))
-conn.execute(org_name.insert({
-    'school_id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
+# conn.execute(org_name.insert({
+#     'school_id': 0,
+#     'hierarchy_1': 'building',
+#     'hierarchy_2': 'floor',
+#     'hierarchy_3': 'row'
+# }))
+# conn.execute(org_name.insert({
+#     'school_id': 1,
+#     'hierarchy_1': 'floor',
+#     'hierarchy_2': 'bay',
+#     'hierarchy_3': 'level'
+# }))
 
 # creating student users
-conn.execute(student.insert({
-    'id': 0,
-    'email': 'dh.skumar@students.srvusd.net',
-    'first_name': 'shubham',
-    'last_name': 'kumar',
-    'school_id': 0,
-    'grade': 12
-}))
-conn.execute(student.insert({
-     'id': 1,
-     'email': 'dh.varora@students.srvusd.net',
-     'first_name': 'vishakh',
-     'last_name': 'arora',
-     'school_id': 0,
-     'grade': 12
- }))
+# conn.execute(student.insert({
+#     'id': 0,
+#     'email': 'dh.skumar@students.srvusd.net',
+#     'first_name': 'shubham',
+#     'last_name': 'kumar',
+#     'school_id': 0,
+#     'grade': 12
+# }))
+# conn.execute(student.insert({
+#      'id': 1,
+#      'email': 'dh.varora@students.srvusd.net',
+#      'first_name': 'vishakh',
+#      'last_name': 'arora',
+#      'school_id': 0,
+#      'grade': 12
+#  }))
 # conn.execute(student.insert({
 #     'id': 2,
 #     'email': 'dh.cnookala@students.srvusd.net',
@@ -1262,11 +1262,18 @@ async def assign(request):
 
     # user is logged in
     if session.get('authorized') and session['role'] == 'admin':
-        # getting all preferences
-        # preference_db_request = conn.execute(
-        #     preference.select().
-        #         where(preference.c.student_id == session['id'])
-        #     ).fetchall()
+        student_db_request = conn.execute(student.select().where(student.c.school_id == sesion['id'])).fetchall()
+
+        partner_preference_list = {}
+        locker_preference_list = {}
+
+        for i in student_db_request:
+            preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0]])).fetchall()
+            for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
+                if student_id == partner_id:
+                    locker_preference_list[student_id] = [submit_time, locker_pref]
+                else:
+                    pass
 
         # DVHS assiginment
         if session['school_id'] == 0:
