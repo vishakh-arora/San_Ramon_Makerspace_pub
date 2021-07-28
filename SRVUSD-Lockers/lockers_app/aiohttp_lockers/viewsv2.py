@@ -1319,7 +1319,8 @@ async def assign(request):
                         partner_preference_dict[student_id][partner_rank] = partner_id
 
         # sort by grade then submit time
-        locker_preference_dict = sorted(locker_preference_dict, key=lambda x: (x[3], x[1]))
+        locker_preference_dict = sorted(locker_preference_dict, key=lambda x: (-(11-x[3])**2, x[2]))
+        # print(*locker_preference_dict, sep='\n')
 
         # dictionary {school_id: {id: [attributes]}}
 
@@ -1354,7 +1355,7 @@ async def assign(request):
         ))
 
         chs_locker_alternatives_11 = list(itertools.product(
-            ['2', '1'],
+            ['1', '2'],
             ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'],
             ['top', 'middle', 'bottom']
         ))
@@ -1413,6 +1414,7 @@ async def assign(request):
             current = tuple(filter(None, organization_db_request[2:]))
             current_idx = alt.index(current)
             track = current_idx
+            checked = []
 
             # look for available locker closest to preference
             new_lock = locker_objects[school_id].get_locker(current)
@@ -1428,7 +1430,7 @@ async def assign(request):
 
             # if no lockers are available from the possible options
             if out_of_lockers:
-                # print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
+                print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
                 out_ctr += 1
                 continue
             else:
@@ -1436,9 +1438,9 @@ async def assign(request):
                 assigned_ctr += 1
                 pass
 
-        print(out_ctr, assigned_ctr)
-        print(len(student_db_request))
-        print(locker_objects[1].d)
+        # print(out_ctr, assigned_ctr)
+        # print(len(student_db_request))
+        # print(locker_objects[1].d)
         return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 
     # user can't access this page
