@@ -35,6 +35,7 @@ conn.execute(admin.delete())
 conn.execute(preference.delete())
 conn.execute(organization.delete())
 conn.execute(org_name.delete())
+conn.execute(assignment.delete())
 
 # create hardcoded entries (TEST)
 # creating school
@@ -127,14 +128,14 @@ conn.execute(school.insert({
 #     'grade': 12
 # }))
 # creating admin user
-# conn.execute(admin.insert({
-#     'id': 0,
-#     'email':'DVHS@srvusd.net',
-#     'prefix': 'Mr.',
-#     'last_name': 'dvhs admin',
-#     'school_id': 0
-# }))
-#
+conn.execute(admin.insert({
+    'id': 0,
+    'email':'DVHS@srvusd.net',
+    'prefix': 'Mr.',
+    'last_name': 'dvhs admin',
+    'school_id': 0
+}))
+
 conn.execute(admin.insert({
     'id': 1,
     'email':'CHS@srvusd.net',
@@ -184,6 +185,7 @@ def preview_db():
     organization_request = conn.execute(organization.select())
     org_name_request = conn.execute(org_name.select())
     locker_request = conn.execute(locker.select())
+    assignment_request = conn.execute(assignment.select())
 
     # print()
     # print()
@@ -194,6 +196,7 @@ def preview_db():
     # print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     # print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
     # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
+    print('ASSIGNMENT PREVIEW:', *assignment_request.fetchall(), sep='\n')
     # print()
     # print()
 
@@ -1268,27 +1271,58 @@ async def logout(request):
 
 # TEST
 async def simulate_preferences(request):
-    student_db_request = conn.execute(student.select().where(and_(student.c.school_id == 1))).fetchall()
-    for id, email, first_name, last_name, school_id, grade in student_db_request:
-        if school_id == 1:
-            if grade == 9:
-                criteria = [organization.c.hierarchy_1 == '3', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
-            if grade == 10:
-                criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
-            if grade == 11:
-                criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
-            if grade == 12:
-                criteria = [organization.c.hierarchy_1 == '1', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
-        organization_db_request = conn.execute(organization.select().where(and_(*criteria))).first()
-        locker_preference_id = organization_db_request[0]
-        upsert(conn, preference, [preference.c.student_id == id], {
-            'submit_time': datetime.now(timezone.utc),
-            'student_id': id,
-            'partner_id': id,
-            'partner_rank': 0,
-            'locker_pref': locker_preference_id,
-        })
-    return web.HTTPFound(location=request.app.router['dashboard'].url_for())
+    session, sessionid = check_login(request)
+
+    if session.get('authorized') and session['role'] == 'admin':
+        if session['school_id'] == 0:
+            student_db_request = conn.execute(student.select().where(and_(student.c.school_id == 0))).fetchall()
+            for id, email, first_name, last_name, school_id, grade in student_db_request:
+                if school_id == 0:
+                    # if grade == 9:
+                        # criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                        # continue
+                    if grade == 10:
+                        criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+                    if grade == 11:
+                        criteria = [organization.c.hierarchy_1 == '2000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+                    if grade == 12:
+                        criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+                if grade != 9:
+                    organization_db_request = conn.execute(organization.select().where(and_(*criteria))).first()
+                    locker_preference_id = organization_db_request[0]
+                    upsert(conn, preference, [preference.c.student_id == id], {
+                        'submit_time': datetime.now(timezone.utc),
+                        'student_id': id,
+                        'partner_id': id,
+                        'partner_rank': 0,
+                        'locker_pref': locker_preference_id,
+                    })
+
+        if session['school_id'] == 1:
+            student_db_request = conn.execute(student.select().where(and_(student.c.school_id == 1))).fetchall()
+            for id, email, first_name, last_name, school_id, grade in student_db_request:
+                if school_id == 1:
+                    if grade == 9:
+                        criteria = [organization.c.hierarchy_1 == '3', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                    if grade == 10:
+                        criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                    if grade == 11:
+                        criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                    if grade == 12:
+                        criteria = [organization.c.hierarchy_1 == '1', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                organization_db_request = conn.execute(organization.select().where(and_(*criteria))).first()
+                locker_preference_id = organization_db_request[0]
+                upsert(conn, preference, [preference.c.student_id == id], {
+                    'submit_time': datetime.now(timezone.utc),
+                    'student_id': id,
+                    'partner_id': id,
+                    'partner_rank': 0,
+                    'locker_pref': locker_preference_id,
+                })
+        return web.HTTPFound(location=request.app.router['dashboard'].url_for())
+
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
 
 async def assign(request):
     session, sessionid = check_login(request)
@@ -1297,26 +1331,60 @@ async def assign(request):
     if session.get('authorized') and session['role'] == 'admin':
         print('ASSIGNMENT CALLED')
 
-        student_db_request = conn.execute(student.select().where(student.c.school_id == session['id'])).fetchall()
+        student_db_request = conn.execute(student.select().where(student.c.school_id == session['school_id'])).fetchall()
+        # print(len(student_db_request))
 
         partner_preference_dict = {}
         locker_preference_dict = []
+        added_students = set()
 
         for i in student_db_request:
             preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0])).fetchall()
+
+            # address DVHS freshmen later, they need to be partnered first
+            if i[4] == 0 and i[5] == 9:
+                # print(preference_db_request)
+                # print('freshi man guy')
+                continue
+
+            # assign lockers for DV students who did not fill out the form
+            # cal high people who don't sign up don't get lockers
+            if i[4] == 0 and (preference_db_request == None or len(preference_db_request) == 0):
+                # preference_db_request.append()
+                print('person didnt select')
+                if i[5] == 10:
+                    criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                if i[5] == 11:
+                    criteria = [organization.c.hierarchy_1 == '2000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                if i[5] == 12:
+                    criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                preference_id = conn.execute(organization.select().where(and_(*criteria))).first()[0]
+                locker_preference_dict.append([i[0], i[4], datetime.now(timezone.utc), i[5], preference_id])
+                continue
+
+            # print('lens', preference_db_request, len(preference_db_request))
+
             for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
+
+                if student_id != partner_id:
+                    print('SLIGHT PRAULEM STUDENT IS NOT EQUAL TO PARTNER FOR AN INDIVIDUAL LOCKER :WRONGTENSE')
 
                 student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
                 grade = student_db_request[5]
                 school_id = student_db_request[4]
 
-                locker_preference_dict.append([student_id, school_id, submit_time, grade, locker_pref])
-                if student_id != partner_id:
-                    try:
-                        partner_preference_dict[student_id][partner_rank] = partner_id
-                    except:
-                        locker_preference_list[student_id] = [None, None, None]
-                        partner_preference_dict[student_id][partner_rank] = partner_id
+                if student_id not in added_students:
+                    locker_preference_dict.append([student_id, school_id, submit_time, grade, locker_pref])
+                    added_students.add(student_id)
+                # else:
+                    # print('bruh how lmfao')
+
+                # if student_id != partner_id:
+                #     try:
+                #         partner_preference_dict[student_id][partner_rank] = partner_id
+                #     except:
+                #         locker_preference_list[student_id] = [None, None, None]
+                #         partner_preference_dict[student_id][partner_rank] = partner_id
 
         # sort by grade then submit time
         locker_preference_dict = sorted(locker_preference_dict, key=lambda x: (-(11-x[3])**2, x[2]))
@@ -1391,8 +1459,8 @@ async def assign(request):
             },
         }
 
-        out_ctr = 0
-        assigned_ctr = 0
+        # out_ctr = 0
+        # assigned_ctr = 0
         for student_id, school_id, submit_time, grade, locker_preference_id in locker_preference_dict:
 
             # db requests
@@ -1405,6 +1473,7 @@ async def assign(request):
 
             # freshmen at DV will be assigned after partnerships are finalized
             if school_id == 0 and grade == 9:
+                # print('auschwetz')
                 continue
 
             out_of_lockers = False
@@ -1430,17 +1499,25 @@ async def assign(request):
 
             # if no lockers are available from the possible options
             if out_of_lockers:
-                print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
-                out_ctr += 1
+                # print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
+                # out_ctr += 1
                 continue
             else:
                 # print(student_id, new_lock, current)
-                assigned_ctr += 1
-                pass
+                # assigned_ctr += 1
+                locker_db_request = conn.execute(locker.select().where(and_(locker.c.school_id == school_id, locker.c.number == str(new_lock)))).first()
+                upsert(conn, assignment, [assignment.c.student_id == student_id], {
+                    'student_id': student_id,
+                    'partner_id': student_id,
+                    'status': 'MATCH',
+                    'locker_id': locker_db_request[0]
+                })
 
+        # print(f'\n\n\n\nSTATS:')
         # print(out_ctr, assigned_ctr)
-        # print(len(student_db_request))
-        # print(locker_objects[1].d)
+        # print(locker_objects[session['school_id']].d)
+        # print('\n\n\n\n')
+
         return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 
     # user can't access this page
