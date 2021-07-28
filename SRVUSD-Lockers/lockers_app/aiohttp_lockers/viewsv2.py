@@ -170,6 +170,11 @@ for i in options: #(0, 1)
         }))
         x += 1
 
+PRINT = True
+def print_debug(arg='\n'):
+    if PRINT:
+        print(arg)
+
 def preview_db():
     # preview tables
     school_request = conn.execute(school.select())
@@ -268,7 +273,7 @@ async def index(request):
         'info': []
     }
 #        exc = web.HTTPFound(location=request.app.router['index'].url_for())
-#        print('Deleting cookie...')
+#        # print('Deleting cookie...')
 #        exc.set_cookie('sessionid','')
 #        raise exc
 
@@ -317,9 +322,9 @@ async def dashboard(request):
         if session['role'] == 'student':
             # print('\nAUTHORIZED as student\n')
             # preference_request = conn.execute(preference.select())
-            # print()
-            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
-            # print()
+#            # print()
+#            # print('PREFERENCE PREVIEW:', *preference_request.fetchall(), sep='\n')
+#            # print()
             # populate these with values from database if they exist
             # EXAMPLES:
             # student_list = [
@@ -877,7 +882,7 @@ async def dashboard(request):
                                 )
                                 # print('\n STUDENT SHEET DATA \n')
                                 # for i in sheet_data:
-                                #     print(i)
+                                #     # print(i)
                                 # print('\n\n')
 
                                 for last_name, first_name, grade, email in sheet_data:
@@ -1189,7 +1194,8 @@ async def login(request):
     else:
         # return to / page, correct view will be rendered based on user's role and login status
         # print('\nNO ROLE FOUND\n')
-        return web.HTTPFound(location=request.app.router['index'].url_for())
+        raise web.HTTPUnauthorized()
+        # return web.HTTPFound(location=request.app.router['index'].url_for())
 
     # new session
     #session = await new_session(request)
@@ -1239,7 +1245,10 @@ async def logout(request):
         messages['success'].append('Logged out successfully.')
 
     # invalidating session
-    del all_sessions[sessionid]
+    try:
+        del all_sessions[sessionid]
+    except:
+        pass
 
     # return to / page, correct view will be rendered based
     return web.HTTPFound(location=request.app.router['index'].url_for())

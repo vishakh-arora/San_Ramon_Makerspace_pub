@@ -15,7 +15,13 @@ function onSignIn(googleUser) {
     xhr.send('idtoken=' + id_token);
     xhr.onreadystatechange=function() {
         if (xhr.readyState==4) {
+//            console.log(xhr.status);
+            if (xhr.status==200) {
                 window.location.replace("/");
+            } else if (xhr.status==401) {
+                alert('Please use your school email to sign in.');
+                signOut();
+            }
                 //alert(xhr.responseText) ;
  //               res =   xhr_object.responseText ;
  //               act_on_response(res);
