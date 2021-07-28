@@ -1268,7 +1268,7 @@ async def assign(request):
         locker_preference_list = {}
 
         for i in student_db_request:
-            preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0]])).fetchall()
+            preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0])).fetchall()
             for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
                 if student_id == partner_id:
                     locker_preference_list[student_id] = [submit_time, locker_pref]
