@@ -16,3 +16,6 @@ def setup_routes(app):
 
     # assignment
     app.router.add_get('/assign', assign, name='assign')
+
+    # assignment
+    app.router.add_get('/simulate_preferences', simulate_preferences, name='simulate_preferences')

@@ -1,4 +1,5 @@
 from copy import deepcopy
+import itertools
 
 class Lockers:
     # example of DV attributes
@@ -7,6 +8,14 @@ class Lockers:
     #     ['1', '2'], (level)
     #     ['T', 'B'] (row)
     # ]
+    # example of DV priority
+    # priority = [
+    #     ['1', 'T'],
+    #     ['2', 'T'],
+    #     ['1', 'B'],
+    #     ['2', 'B']
+    # ]
+
 
     # we can add lockers if spreadsheet columns are provided
     def __init__(self, attributes):
@@ -25,11 +34,12 @@ class Lockers:
         self.d = deepcopy(d_last)
 
     # adds a locker with given attributes
-    def add_locker(self, attributes, locker_id):
+    def add_locker(self, attributes, locker_ids):
         x = self.d
         for i in attributes:
             x = x[i]
-        x.append(locker_id)
+        for i in locker_ids:
+            x.append(i)
 
     # returns a locker based on attribute preference
     def get_locker(self, attributes):
@@ -38,4 +48,5 @@ class Lockers:
             x = x[i]
         if len(x) != 0:
             return x.pop()
-        return None
+        else:
+            return None
