@@ -51,20 +51,31 @@ Record your preferences.
               {% endif %}
 
               <p><strong>When will I know my locker?</strong></p>
-              {% if session['school_id'] == 0 %}
-                <p>An email with your assigned locker number / partner will be sent to the address you used to log in after registration closes.</p>
-              {% elif session['school_id'] == 1 %}
-                <p>An email with your assigned locker number will be sent to the address you will provide below after registration closes.</p>
+              {% if session['grade'] == 9 %}
+                <p>An email with your assigned locker number, combination, and partner will be sent to the address you used to log in after registration closes.</p>
+              {% else %}
+              <p><strong>When will I know my locker?</strong></p>
+                <p>An email with your assigned locker number and combination will be sent to the address you used to log in after registration closes.</p>
               {% endif %}
 
-              <p><strong>What if I want to change my locker/partner after the assignment?</strong></p>
+              <p><strong>What if I want to change my locker/partner preferences?</strong></p>
+              <p>While registration is open, you can change your locker/partner preferences anytime by updating your preferences and clicking &#34;Update&#34;.</p>
+
+              <p><strong>What if I want to change my locker/partner AFTER the assignment?</strong></p>
               {% if session['school_id'] == 0 %}
-                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Jennifer Lee at <a class="text-decoration-none" href="mailto: bspain@srvusd.net">jlee2@srvusd.net</a>.</p>
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If you have any special requirements, please contact Jennifer Lee at <a class="text-decoration-none" href="mailto: bspain@srvusd.net">jlee2@srvusd.net</a>.</p>
               {% elif session['school_id'] == 1 %}
-                <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact Jeffrey Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+                <p>Requests for changes cannot be addressed through the online assignment procedure. If you have any special requirements, please contact Jeffrey Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
               {% endif %}
 
-              <p><strong>Final Note </strong></p>
+              <p><strong>What if I have special needs for my locker/partner assignment?</strong></p>
+              {% if session['school_id'] == 0 %}
+                <p>Special needs cannot be addressed through the online assignment procedure. If you have any physical/medical constraints, please contact Jennifer Lee at <a class="text-decoration-none" href="mailto: jlee2@srvusd.net">jlee2@srvusd.net</a>.</p>
+              {% elif session['school_id'] == 1 %}
+                <p>Special needs cannot be addressed through the online assignment procedure. If you have any physical/medical constraints, please contact Jeffrey Osborn at <a class="text-decoration-none" href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>.</p>
+              {% endif %}
+
+              <p><strong>Final Note</strong></p>
               {% if session['school_id'] == 0 %}
                 <p>Returning students, please remember to bring the lock that was loaned to you by DVHS; if it has been lost, it can be replaced through the Webstore for a $10 fee.  Any non-DVHS issued lock will be removed from lockers. Freshmen will receive their locks during orientation on August 8.</p>
               {% elif session['school_id'] == 1 %}

@@ -7,3 +7,4 @@ aiohttp_jinja2==1.4.2
 google-api-python-client
 pandas
 aiohttp_session
+oauth2client
