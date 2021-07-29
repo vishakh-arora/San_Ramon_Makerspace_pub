@@ -35,14 +35,13 @@ Record your preferences.
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <h4>Locker Assignment.</h4>
-              <h6 class="text-muted mb-3">Fill out this form to select your lockers for the 2021-2022 school year.</h6>
+              <h4>Locker Assignment</h4>
 
               <p><strong>How does it work?</strong></p>
               {% if session['school_id'] == 0 %}
-                <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors and seniors will receive individual lockers.</p>
+                <p>While registration is open, you will input your preferences. After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors and seniors will receive individual lockers.</p>
               {% elif session['school_id'] == 1 %}
-                <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible.</p>
+                <p>While registration is open, you will input your preferences. After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible.</p>
               {% endif %}
 
               {% if session['school_id'] == 0 and session['grade'] == 9 %}
@@ -54,7 +53,6 @@ Record your preferences.
               {% if session['grade'] == 9 %}
                 <p>An email with your assigned locker number, combination, and partner will be sent to the address you used to log in after registration closes.</p>
               {% else %}
-              <p><strong>When will I know my locker?</strong></p>
                 <p>An email with your assigned locker number and combination will be sent to the address you used to log in after registration closes.</p>
               {% endif %}
 
