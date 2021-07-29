@@ -17,5 +17,9 @@ def setup_routes(app):
     # assignment
     app.router.add_get('/assign', assign, name='assign')
 
-    # assignment
+    # preference testing
     app.router.add_get('/simulate_preferences', simulate_preferences, name='simulate_preferences')
+
+    # download data from databse
+    app.router.add_get('/export_assignments_to_spreadsheet', export_assignments_to_spreadsheet, name='export_assignments_to_spreadsheet')
+    app.router.add_get('/export_preferences_to_spreadsheet', export_preferences_to_spreadsheet, name='export_preferences_to_spreadsheet')

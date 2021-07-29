@@ -196,7 +196,7 @@ def preview_db():
     # print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     # print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
     # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
-    print('ASSIGNMENT PREVIEW:', *assignment_request.fetchall(), sep='\n')
+    # print('ASSIGNMENT PREVIEW:', *assignment_request.fetchall(), sep='\n')
     # print()
     # print()
 
@@ -1329,7 +1329,7 @@ async def assign(request):
 
     # user is logged in
     if session.get('authorized') and session['role'] == 'admin':
-        print('ASSIGNMENT CALLED')
+        # print('ASSIGNMENT CALLED')
 
         student_db_request = conn.execute(student.select().where(student.c.school_id == session['school_id'])).fetchall()
         # print(len(student_db_request))
@@ -1351,7 +1351,7 @@ async def assign(request):
             # cal high people who don't sign up don't get lockers
             if i[4] == 0 and (preference_db_request == None or len(preference_db_request) == 0):
                 # preference_db_request.append()
-                print('person didnt select')
+                # print('person didnt select')
                 if i[5] == 10:
                     criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
                 if i[5] == 11:
@@ -1521,5 +1521,56 @@ async def assign(request):
         return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 
     # user can't access this page
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def export_preferences_to_spreadsheet(request):
+    session, sessionid = check_login(request)
+
+    preference_db_request = conn.execute(preference.select()).fetchall()
+    dv_arr = []
+    ch_arr = []
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        for submit_time, student_id, partner_id, partner_rank, locker_preference_id in preference_db_request:
+            student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
+            partner_db_request = conn.execute(student.select().where(student.c.id == partner_id)).first()
+            organization_db_request = conn.execute(organization.select().where(organization.c.id == locker_preference_id)).first()
+            subarr = [
+                submit_time,
+                student_db_request[4], # school
+                student_db_request[5], # grade
+                student_db_request[3], # last name
+                student_db_request[2], # first name
+                student_db_request[1], # email
+                partner_db_request[3], # last name
+                partner_db_request[2], # first name
+                partner_db_request[1], # email
+                organization_db_request[2],
+                organization_db_request[3],
+                organization_db_request[4],
+            ]
+            if student_db_request[4] == 0:
+                dv_arr.append(subarr)
+            if student_db_request[4] == 1:
+                ch_arr.append(subarr)
+
+        np.savetxt('test_sheets/ch_preferences.csv', np.array(ch_arr), delimiter=', ', fmt='%s')
+        np.savetxt('test_sheets/dv_preferences.csv', np.array(dv_arr), delimiter=', ', fmt='%s')
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+    # user not allowed
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def export_assignments_to_spreadsheet(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        return web.FileResponse()
+
+    # user not allowed
     else:
         return web.HTTPFound(location=request.app.router['index'].url_for())
