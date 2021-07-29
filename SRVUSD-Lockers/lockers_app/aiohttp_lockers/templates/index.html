@@ -27,20 +27,21 @@ Home
     <!-- <button class="flex--item s-btn s-btn__icon s-btn__google bar-md ba bc-black-100" data-onsuccess="onSignIn" data-provider="google" data-oauthserver="https://accounts.google.com/o/oauth2/auth" data-oauthversion="2.0">
 <svg aria-hidden="true" class="native svg-icon iconGoogle" width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"></path><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z" fill="#34A853"></path><path d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z" fill="#FBBC05"></path><path d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z" fill="#EA4335"></path></svg>
 Log in with Google        </button> -->
-  <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#infoModal">
-    Commonly Asked Questions
-  </button>
   <div class="">
     <button type="button" class="btn" name="button">
       <div class="btn g-signin2" id="auth2" data-longtitle="true" data-onsuccess="onSignIn" data-prompt="select_account"></div>
     </button>
   </div>
-    <form action="/login" method="post" accept-charset="utf-8" enctype="multipart/form-data">
+    <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#infoModal">
+      Commonly Asked Questions
+    </button>
+
+<!--    <form action="/login" method="post" accept-charset="utf-8" enctype="multipart/form-data">
       <div class="input-group">
         <input type="email" class="form-control" id="exampleInputEmail1" name="email" aria-describedby="emailHelp" placeholder="example@domain" required>
         <button class="btn btn-primary" type="submit">Log In</button>
       </div>
-    </form>
+    </form> -->
     <!-- <button type="button" name="button" onclick="myFunction()"></button> -->
   </div>
   <div class="product-device shadow-sm d-none d-lg-block"></div>
@@ -55,24 +56,23 @@ Log in with Google        </button> -->
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <h4>Locker Assignment.</h4>
-        <h6 class="text-muted mb-3">Fill out this form to select your lockers for the 2021-2022 school year.</h6>
+        <h4>Locker Assignment</h4>
 
         <p><strong>How does it work?</strong></p>
-        <p>After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors and seniors will receive individual lockers.</p>
+          <p>While registration is open, you will input your preferences on this website. After registration closes, locker assignments are done on a first-come-first-serve basis keeping your preferences in mind.</p>
 
-        <p><strong>Do both me and my locker partner have to fill out the form?</strong></p>
-        <p>Yes, both of you must fill out the form to ensure that you are matched.</p>
+        <p><strong>When will I know my assigned locker?</strong></p>
+          <p>An email with your final assignment will be sent to your school email address after registration closes.</p>
 
-        <p><strong>When will I know my locker?</strong></p>
-        <p>An email with your final assignment will be sent to the address you used to log in after registration closes.</p>
+        <p><strong>What if I want to change my locker preferences?</strong></p>
+          <p>While registration is open, you can change your preferences anytime by signing in, updating your preferences, and clicking &#34;Update&#34;. However, as assignments are done on a first-come-first-serve basis, this will move you to the back of the line.</p>
 
+        <p><strong>What if I want to change my locker/partner AFTER the assignment?</strong></p>
+          <p>Requests for changes cannot be addressed through the online assignment procedure. If you have any special requirements, please contact the administrator mentioned in the email sent by your school.
 
-        <p><strong>What if I want to change my locker/partner after the assignment?</strong></p>
-        <p>Requests for changes cannot be addressed through the online assignment procedure. If there is an issue with your assignment, please contact your school staff.
+        <p><strong>What if I have special requirements for my locker assignment?</strong></p>
+          <p>Special accommodations cannot be addressed through the online assignment procedure. If you have any physical/medical constraints, please contact the administrator mentioned in the email sent by your school. </p>
 
-        <p><strong>Final Note </strong></p>
-        <p>Returning students, please remember to bring the lock that was loaned to you; if it has been lost, it can be replaced. Freshmen will receive their locks during orientation on August 8.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
