@@ -39,9 +39,9 @@ Record your preferences.
 
               <p><strong>How does it work?</strong></p>
               {% if session['school_id'] == 0 %}
-                <p>While registration is open, you will input your preferences. After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors and seniors will receive individual lockers.</p>
+                <p>While registration is open, you will input your preferences. After registration closes, After registration closes, locker assignments are done on a first-come-first-serve basis keeping your preferences in mind. Freshmen will be notified of their assigned partner in the email as well; sophomores, juniors, and seniors will receive individual lockers.</p>
               {% elif session['school_id'] == 1 %}
-                <p>While registration is open, you will input your preferences. After registration closes, all responses are processed on a first-come-first-serve basis and your locker is assigned as close to your preferences as possible.</p>
+                <p>While registration is open, you will input your preferences. After registration closes, After registration closes, locker assignments are done on a first-come-first-serve basis keeping your preferences in mind.</p>
               {% endif %}
 
               {% if session['school_id'] == 0 and session['grade'] == 9 %}
@@ -49,15 +49,15 @@ Record your preferences.
                 <p>Yes, both of you must fill out the form to ensure that you are matched.</p>
               {% endif %}
 
-              <p><strong>When will I know my locker?</strong></p>
-              {% if session['grade'] == 9 %}
-                <p>An email with your assigned locker number, combination, and partner will be sent to the address you used to log in after registration closes.</p>
+              <p><strong>When will I know my assigned locker?</strong></p>
+              {% if session['grade'] == 9 and session['school_id'] == 0 %}
+                <p>An email with your assigned locker number, combination, and partner will be sent to your school email address after registration closes.</p>
               {% else %}
-                <p>An email with your assigned locker number and combination will be sent to the address you used to log in after registration closes.</p>
+                <p>An email with your assigned locker number and combination will be sent to your school email address after registration closes.</p>
               {% endif %}
 
               <p><strong>What if I want to change my locker/partner preferences?</strong></p>
-              <p>While registration is open, you can change your locker/partner preferences anytime by updating your preferences and clicking &#34;Update&#34;.</p>
+              <p>While registration is open, you can change your locker/partner preferences anytime by updating your preferences and clicking &#34;Update&#34;. However, as assignments are done on a first-come-first-serve basis, this will move you to the back of the line.</p>
 
               <p><strong>What if I want to change my locker/partner AFTER the assignment?</strong></p>
               {% if session['school_id'] == 0 %}
