@@ -5,7 +5,7 @@ from aiohttp import web, web_request
 from urllib.parse import urlencode
 import aiohttp_jinja2
 from aiohttp_session import get_session, new_session
-from assignment import Lockers
+from assignment import Lockers, Match
 from copy import deepcopy
 from cryptography.fernet import Fernet
 from init_db import *
@@ -1341,17 +1341,23 @@ async def assign(request):
         for i in student_db_request:
             preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0])).fetchall()
 
+            # ya no ill do it rn :keki:
             # address DVHS freshmen later, they need to be partnered first
-            if i[4] == 0 and i[5] == 9:
-                # print(preference_db_request)
-                # print('freshi man guy')
-                continue
+            # if i[4] == 0 and i[5] == 9:
+            #     print(preference_db_request)
+            #     print('freshi man guy')
+            #     continue
 
             # assign lockers for DV students who did not fill out the form
             # cal high people who don't sign up don't get lockers
             if i[4] == 0 and (preference_db_request == None or len(preference_db_request) == 0):
                 # preference_db_request.append()
-                print('person didnt select')
+                # print('person didnt select')
+                if i[5] == 9:
+                    # criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                    # preference_id = conn.execute(organization.select().where(and_(*criteria))).first()[0]
+                    partner_preference_dict[i[0]] = ['', '', '']
+                    continue
                 if i[5] == 10:
                     criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
                 if i[5] == 11:
@@ -1367,7 +1373,15 @@ async def assign(request):
             for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
 
                 if student_id != partner_id:
-                    print('SLIGHT PRAULEM STUDENT IS NOT EQUAL TO PARTNER FOR AN INDIVIDUAL LOCKER :WRONGTENSE')
+                    try:
+                        partner_preference_dict[student_id][partner_rank] = partner_id
+                    except:
+                        partner_preference_dict[student_id] = ['', '', '']
+                        partner_preference_dict[student_id][partner_rank] = partner_id
+                    continue
+                # if student_id != partner_id:
+                    # print('SLIGHT PRAULEM STUDENT IS NOT EQUAL TO PARTNER FOR AN INDIVIDUAL LOCKER :WRONGTENSE')
+                    # continue
 
                 student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
                 grade = student_db_request[5]
@@ -1379,12 +1393,12 @@ async def assign(request):
                 # else:
                     # print('bruh how lmfao')
 
-                # if student_id != partner_id:
-                #     try:
-                #         partner_preference_dict[student_id][partner_rank] = partner_id
-                #     except:
-                #         locker_preference_list[student_id] = [None, None, None]
-                #         partner_preference_dict[student_id][partner_rank] = partner_id
+        dv_freshmen_partnerships = Match([
+            [k, v[0], v[1], v[2]]
+            for k, v in partner_preference_dict.items()
+        ]).get_partners()
+
+        # print(dv_freshmen_partnerships)
 
         # sort by grade then submit time
         locker_preference_dict = sorted(locker_preference_dict, key=lambda x: (-(11-x[3])**2, x[2]))
@@ -1483,7 +1497,6 @@ async def assign(request):
             current = tuple(filter(None, organization_db_request[2:]))
             current_idx = alt.index(current)
             track = current_idx
-            checked = []
 
             # look for available locker closest to preference
             new_lock = locker_objects[school_id].get_locker(current)
@@ -1499,7 +1512,7 @@ async def assign(request):
 
             # if no lockers are available from the possible options
             if out_of_lockers:
-                # print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
+                print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
                 # out_ctr += 1
                 continue
             else:
@@ -1517,6 +1530,62 @@ async def assign(request):
         # print(out_ctr, assigned_ctr)
         # print(locker_objects[session['school_id']].d)
         # print('\n\n\n\n')
+
+        for a, b in dv_freshmen_partnerships:
+            preference_id_a = conn.execute(preference.select().where(and_(preference.c.student_id == a))).first()
+            preference_id_b = conn.execute(preference.select().where(and_(preference.c.student_id == b))).first()
+
+            locker_preference_id = None
+
+            if preference_id_a == None and preference_id_b == None:
+                criteria = [organization.c.hierarchy_1 == '4000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                locker_preference_id = conn.execute(organization.select().where(and_(*criteria))).first()[0]
+            elif preference_id_a != None:
+                locker_preference_id = preference_id_a[4]
+            elif preference_id_b != None:
+                locker_preference_id = preference_id_b[4]
+
+            organization_db_request = conn.execute(organization.select().where(organization.c.id == locker_preference_id)).first()
+
+            out_of_lockers = False
+
+            # list of alternatives for the specific grade & school
+            alt = alternatives[0][9]
+            current = tuple(filter(None, organization_db_request[2:]))
+            current_idx = alt.index(current)
+            track = current_idx
+
+            # look for available locker closest to preference
+            new_lock = locker_objects[school_id].get_locker(current)
+            # print(locker_objects[school_id].d)
+            # print(current)
+            while new_lock == None:
+                current_idx = (current_idx + 1) % len(alt)
+                current = alt[current_idx]
+                new_lock = locker_objects[school_id].get_locker(current)
+                if current_idx == track:
+                    out_of_lockers = True
+                    break
+
+            if out_of_lockers:
+                print(f'OUT OF LOCKERS FOR GRADE 9 AT SCHOOL 0.')
+                continue
+
+            else:
+                locker_db_request = conn.execute(locker.select().where(and_(locker.c.school_id == 0, locker.c.number == str(new_lock)))).first()
+                upsert(conn, assignment, [assignment.c.student_id == a], {
+                    'student_id': a,
+                    'partner_id': b,
+                    'status': 'MATCH',
+                    'locker_id': locker_db_request[0]
+                })
+                upsert(conn, assignment, [assignment.c.student_id == b], {
+                    'student_id': b,
+                    'partner_id': a,
+                    'status': 'MATCH',
+                    'locker_id': locker_db_request[0]
+                })
+
 
         return web.HTTPFound(location=request.app.router['dashboard'].url_for())
 

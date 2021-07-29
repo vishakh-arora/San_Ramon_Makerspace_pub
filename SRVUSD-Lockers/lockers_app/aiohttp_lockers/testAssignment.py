@@ -1,4 +1,4 @@
-from assignment import Lockers
+from assignment import Lockers, Match
 
 dv = Lockers([
     ['1000', '2000', '3000', '4000'],
@@ -17,7 +17,7 @@ alternates = [
     ['1000', 'bottom', 'bottom'],
     ['1000', 'top', 'top'],
     ['1000', 'top', 'bottom']
-]   
+]
 
 current = ['1000', 'bottom', 'bottom']
 k = 0
@@ -34,3 +34,12 @@ for i in range(30):
     if k == len(alternates):
         print('all lockers assigned')
         break
+
+dvp = Match([
+    ['a', 'c', 'b', ''],
+    ['d', 'a', 'c', ''],
+    ['b', 'a', '', ''],
+    ['c', '', '', '']
+])
+
+print(dvp.get_partners())
