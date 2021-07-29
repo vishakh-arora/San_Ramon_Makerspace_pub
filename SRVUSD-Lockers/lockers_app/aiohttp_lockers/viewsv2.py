@@ -35,6 +35,7 @@ conn.execute(admin.delete())
 conn.execute(preference.delete())
 conn.execute(organization.delete())
 conn.execute(org_name.delete())
+conn.execute(assignment.delete())
 
 # create hardcoded entries (TEST)
 # creating school
@@ -157,18 +158,18 @@ options = {
      }
  }
 
-x = 0
-for i in options: #(0, 1)
-    prod = list(itertools.product(*[j for j in list(options[i].values())]))
-    for a, b, c in prod:
-        conn.execute(organization.insert({
-            'id': x,
-            'school_id': i,
-            'hierarchy_1': a,
-            'hierarchy_2': b,
-            'hierarchy_3': c
-        }))
-        x += 1
+# x = 0
+# for i in options: #(0, 1)
+#     prod = list(itertools.product(*[j for j in list(options[i].values())]))
+#     for a, b, c in prod:
+#         conn.execute(organization.insert({
+#             'id': x,
+#             'school_id': i,
+#             'hierarchy_1': a,
+#             'hierarchy_2': b,
+#             'hierarchy_3': c
+#         }))
+#         x += 1
 
 PRINT = True
 def print_debug(arg='\n'):
@@ -184,6 +185,7 @@ def preview_db():
     organization_request = conn.execute(organization.select())
     org_name_request = conn.execute(org_name.select())
     locker_request = conn.execute(locker.select())
+    assignment_request = conn.execute(assignment.select())
 
     # print()
     # print()
@@ -194,6 +196,7 @@ def preview_db():
     # print('ORGANIZATION PREVIEW:', *organization_request.fetchall(), sep='\n')
     # print('ORG_NAME PREVIEW:', *org_name_request.fetchall(), sep='\n')
     # print('LOCKER PREVIEW:', *locker_request.fetchall(), sep='\n')
+    # print('ASSIGNMENT PREVIEW:', *assignment_request.fetchall(), sep='\n')
     # print()
     # print()
 
@@ -973,7 +976,7 @@ async def dashboard(request):
                                             # locker[j].lower()
                                         locker_options[j].add(str(organization_values[j]).strip().lower())
                                     # print([str(i).strip().lower() for i in organization_values])
-                                    locker_objects[session['school_id']].add_locker([str(i).strip().lower() for i in organization_values], str(i[0]))
+                                    locker_objects[session['school_id']].add_locker([str(i).strip().lower() for i in organization_values], [str(i[0])])
 
                                 organization_options = itertools.product(*locker_options)
 
@@ -1266,30 +1269,334 @@ async def logout(request):
     # # rendering for user
     # return response
 
+# TEST
+async def simulate_preferences(request):
+    session, sessionid = check_login(request)
+
+    if session.get('authorized') and session['role'] == 'admin':
+        # if session['school_id'] == 0:
+        student_db_request = conn.execute(student.select().where(and_(student.c.school_id == 0))).fetchall()
+        for id, email, first_name, last_name, school_id, grade in student_db_request:
+            if school_id == 0:
+                # if grade == 9:
+                    # criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                    # continue
+                if grade == 10:
+                    criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+                if grade == 11:
+                    criteria = [organization.c.hierarchy_1 == '2000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+                if grade == 12:
+                    criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'bottom', organization.c.hierarchy_3 == 'top']
+            if grade != 9:
+                organization_db_request = conn.execute(organization.select().where(and_(*criteria))).first()
+                locker_preference_id = organization_db_request[0]
+                upsert(conn, preference, [preference.c.student_id == id], {
+                    'submit_time': datetime.now(timezone.utc),
+                    'student_id': id,
+                    'partner_id': id,
+                    'partner_rank': 0,
+                    'locker_pref': locker_preference_id,
+                })
+
+        # if session['school/id'] == 1:
+        student_db_request = conn.execute(student.select().where(and_(student.c.school_id == 1))).fetchall()
+        for id, email, first_name, last_name, school_id, grade in student_db_request:
+            if school_id == 1:
+                if grade == 9:
+                    criteria = [organization.c.hierarchy_1 == '3', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                if grade == 10:
+                    criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                if grade == 11:
+                    criteria = [organization.c.hierarchy_1 == '2', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+                if grade == 12:
+                    criteria = [organization.c.hierarchy_1 == '1', organization.c.hierarchy_2 == 'a', organization.c.hierarchy_3 == 'top']
+            organization_db_request = conn.execute(organization.select().where(and_(*criteria))).first()
+            locker_preference_id = organization_db_request[0]
+            upsert(conn, preference, [preference.c.student_id == id], {
+                'submit_time': datetime.now(timezone.utc),
+                'student_id': id,
+                'partner_id': id,
+                'partner_rank': 0,
+                'locker_pref': locker_preference_id,
+            })
+        return web.HTTPFound(location=request.app.router['dashboard'].url_for())
+
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
 async def assign(request):
     session, sessionid = check_login(request)
 
     # user is logged in
     if session.get('authorized') and session['role'] == 'admin':
-        student_db_request = conn.execute(student.select().where(student.c.school_id == sesion['id'])).fetchall()
+        # print('ASSIGNMENT CALLED')
 
-        partner_preference_list = {}
-        locker_preference_list = {}
+        student_db_request = conn.execute(student.select()).fetchall()
+        # print(len(student_db_request))
+
+        partner_preference_dict = {}
+        locker_preference_dict = []
+        added_students = set()
 
         for i in student_db_request:
             preference_db_request = conn.execute(preference.select().where(preference.c.student_id == i[0])).fetchall()
-            for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
-                if student_id == partner_id:
-                    locker_preference_list[student_id] = [submit_time, locker_pref]
-                else:
-                    pass
 
-        # DVHS assiginment
-        if session['school_id'] == 0:
-            pass
-        # CHS assignment
-        if session['school_id'] == 1:
-            pass
+            # address DVHS freshmen later, they need to be partnered first
+            if i[4] == 0 and i[5] == 9:
+                # print(preference_db_request)
+                # print('freshi man guy')
+                continue
+
+            # assign lockers for DV students who did not fill out the form
+            # cal high people who don't sign up don't get lockers
+            if i[4] == 0 and (preference_db_request == None or len(preference_db_request) == 0):
+                # preference_db_request.append()
+                print('person didnt select')
+                if i[5] == 10:
+                    criteria = [organization.c.hierarchy_1 == '3000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                if i[5] == 11:
+                    criteria = [organization.c.hierarchy_1 == '2000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                if i[5] == 12:
+                    criteria = [organization.c.hierarchy_1 == '1000', organization.c.hierarchy_2 == 'top', organization.c.hierarchy_3 == 'bottom']
+                preference_id = conn.execute(organization.select().where(and_(*criteria))).first()[0]
+                locker_preference_dict.append([i[0], i[4], datetime.now(timezone.utc), i[5], preference_id])
+                continue
+
+            # print('lens', preference_db_request, len(preference_db_request))
+
+            for submit_time, student_id, partner_id, partner_rank, locker_pref in preference_db_request:
+
+                if student_id != partner_id:
+                    print('SLIGHT PRAULEM STUDENT IS NOT EQUAL TO PARTNER FOR AN INDIVIDUAL LOCKER :WRONGTENSE')
+
+                student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
+                grade = student_db_request[5]
+                school_id = student_db_request[4]
+
+                if student_id not in added_students:
+                    locker_preference_dict.append([student_id, school_id, submit_time, grade, locker_pref])
+                    added_students.add(student_id)
+                # else:
+                    # print('bruh how lmfao')
+
+                # if student_id != partner_id:
+                #     try:
+                #         partner_preference_dict[student_id][partner_rank] = partner_id
+                #     except:
+                #         locker_preference_list[student_id] = [None, None, None]
+                #         partner_preference_dict[student_id][partner_rank] = partner_id
+
+        # sort by grade then submit time
+        locker_preference_dict = sorted(locker_preference_dict, key=lambda x: (-(11-x[3])**2, x[2]))
+        # print(*locker_preference_dict, sep='\n')
+
+        # dictionary {school_id: {id: [attributes]}}
+
+        dv_locker_alternatives_12 = list(itertools.product(
+            ['1000'],
+            ['bottom', 'top'],
+            ['top', 'bottom'],
+        ))
+
+        dv_locker_alternatives_11 = list(itertools.product(
+            ['2000'],
+            ['bottom', 'top'],
+            ['top', 'bottom'],
+        ))
+
+        dv_locker_alternatives_10 = list(itertools.product(
+            ['3000'],
+            ['bottom', 'top'],
+            ['top', 'bottom'],
+        ))
+
+        dv_locker_alternatives_9 = list(itertools.product(
+            ['4000'],
+            ['bottom', 'top'],
+            ['top', 'bottom'],
+        ))
+
+        chs_locker_alternatives_12 = list(itertools.product(
+            ['1'],
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'],
+            ['top', 'middle', 'bottom']
+        ))
+
+        chs_locker_alternatives_11 = list(itertools.product(
+            ['1', '2'],
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'],
+            ['top', 'middle', 'bottom']
+        ))
+
+        chs_locker_alternatives_11.remove(('1', 'n', 'top'))
+        chs_locker_alternatives_11.remove(('1', 'n', 'middle'))
+        chs_locker_alternatives_11.remove(('1', 'n', 'bottom'))
+
+        chs_locker_alternatives_10 = list(itertools.product(
+            ['2'],
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'],
+            ['top', 'middle', 'bottom']
+        ))
+
+        chs_locker_alternatives_9 = list(itertools.product(
+            ['3'],
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'],
+            ['top', 'middle', 'bottom']
+        ))
+
+        alternatives = {
+            0: {
+                9: dv_locker_alternatives_9,
+                10: dv_locker_alternatives_10,
+                11: dv_locker_alternatives_11,
+                12: dv_locker_alternatives_12
+            },
+            1: {
+                9: chs_locker_alternatives_9,
+                10: chs_locker_alternatives_10,
+                11: chs_locker_alternatives_11,
+                12: chs_locker_alternatives_12
+            },
+        }
+
+        # out_ctr = 0
+        # assigned_ctr = 0
+        for student_id, school_id, submit_time, grade, locker_preference_id in locker_preference_dict:
+
+            # db requests
+            # student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
+            organization_db_request = conn.execute(organization.select().where(organization.c.id == locker_preference_id)).first()
+
+            # find grade and school
+            # grade = student_db_request[5]
+            # school_id = student_db_request[4]
+
+            # freshmen at DV will be assigned after partnerships are finalized
+            if school_id == 0 and grade == 9:
+                # print('auschwetz')
+                continue
+
+            out_of_lockers = False
+
+            # list of alternatives for the specific grade & school
+            alt = alternatives[school_id][grade]
+            current = tuple(filter(None, organization_db_request[2:]))
+            current_idx = alt.index(current)
+            track = current_idx
+            checked = []
+
+            # look for available locker closest to preference
+            new_lock = locker_objects[school_id].get_locker(current)
+            # print(locker_objects[school_id].d)
+            # print(current)
+            while new_lock == None:
+                current_idx = (current_idx + 1) % len(alt)
+                current = alt[current_idx]
+                new_lock = locker_objects[school_id].get_locker(current)
+                if current_idx == track:
+                    out_of_lockers = True
+                    break
+
+            # if no lockers are available from the possible options
+            if out_of_lockers:
+                # print(f'OUT OF LOCKERS FOR GRADE {grade} AT SCHOOL {school_id}.')
+                # out_ctr += 1
+                continue
+            else:
+                # print(student_id, new_lock, current)
+                # assigned_ctr += 1
+                locker_db_request = conn.execute(locker.select().where(and_(locker.c.school_id == school_id, locker.c.number == str(new_lock)))).first()
+                upsert(conn, assignment, [assignment.c.student_id == student_id], {
+                    'student_id': student_id,
+                    'partner_id': student_id,
+                    'status': 'MATCH',
+                    'locker_id': locker_db_request[0]
+                })
+
+        # print(f'\n\n\n\nSTATS:')
+        # print(out_ctr, assigned_ctr)
+        # print(locker_objects[session['school_id']].d)
+        # print('\n\n\n\n')
+
+        return web.HTTPFound(location=request.app.router['dashboard'].url_for())
+
     # user can't access this page
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def export_preferences_to_spreadsheet(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        preference_db_request = conn.execute(preference.select()).fetchall()
+        dv_arr = []
+        ch_arr = []
+
+        for submit_time, student_id, partner_id, partner_rank, locker_preference_id in preference_db_request:
+            student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
+            partner_db_request = conn.execute(student.select().where(student.c.id == partner_id)).first()
+            organization_db_request = conn.execute(organization.select().where(organization.c.id == locker_preference_id)).first()
+            subarr = [
+                submit_time,
+                student_db_request[4], # school
+                student_db_request[5], # grade
+                student_db_request[3], # last name
+                student_db_request[2], # first name
+                student_db_request[1], # email
+                partner_db_request[3], # last name
+                partner_db_request[2], # first name
+                partner_db_request[1], # email
+                organization_db_request[2],
+                organization_db_request[3],
+                organization_db_request[4],
+            ]
+            if student_db_request[4] == 0:
+                dv_arr.append(subarr)
+            if student_db_request[4] == 1:
+                ch_arr.append(subarr)
+
+        np.savetxt('test_sheets/ch_preferences.csv', np.array(ch_arr), delimiter=', ', fmt='%s')
+        np.savetxt('test_sheets/dv_preferences.csv', np.array(dv_arr), delimiter=', ', fmt='%s')
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+    # user not allowed
+    else:
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def export_assignments_to_spreadsheet(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        assignment_db_request = conn.execute(assignment.select()).fetchall()
+        dv_arr = []
+        ch_arr = []
+
+        for student_id, partner_id, status, locker_id in assignment_db_request:
+            student_db_request = conn.execute(student.select().where(student.c.id == student_id)).first()
+            partner_db_request = conn.execute(student.select().where(student.c.id == partner_id)).first()
+            locker_db_request = conn.execute(locker.select().where(locker.c.id == locker_id)).first()
+            subarr = [
+                student_db_request[4], # school
+                student_db_request[5], # grade
+                student_db_request[3], # last name
+                student_db_request[2], # first name
+                student_db_request[1], # email
+                partner_db_request[3], # last name
+                partner_db_request[2], # first name
+                partner_db_request[1], # email
+                locker_db_request[1]
+            ]
+            if student_db_request[4] == 0:
+                dv_arr.append(subarr)
+            if student_db_request[4] == 1:
+                ch_arr.append(subarr)
+
+        np.savetxt('test_sheets/ch_assignments.csv', np.array(ch_arr), delimiter=', ', fmt='%s')
+        np.savetxt('test_sheets/dv_assignments.csv', np.array(dv_arr), delimiter=', ', fmt='%s')
+        return web.HTTPFound(location=request.app.router['index'].url_for())
+
+    # user not allowed
     else:
         return web.HTTPFound(location=request.app.router['index'].url_for())
