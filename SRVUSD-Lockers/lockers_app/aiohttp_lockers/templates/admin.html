@@ -143,5 +143,14 @@ Enter locker & student details.
       <button class="btn btn-primary" type="submit">Update</button>
     </div>
   </form>
+  <div class="text-center">
+    <h6>Don't click simulate preferences unless testing.</h6>
+    <div class="btn-group mb-4" role="group" aria-label="Basic example">
+      <a class="btn btn-outline-danger" href="{{ url('simulate_preferences') }}" role="button">Simulate Preferences</a>
+      <a class="btn btn-outline-primary" href="{{ url('assign') }}" role="button">Assign</a>
+      <a class="btn btn-outline-success" href="{{ url('export_assignments_to_spreadsheet') }}" role="button">Export Assignments</a>
+      <a class="btn btn-outline-success" href="{{ url('export_preferences_to_spreadsheet') }}" role="button">Export Preferences</a>
+    </div>
+  </div>
 </div>
 {% endblock %}
