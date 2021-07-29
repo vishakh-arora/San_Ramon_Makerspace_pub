@@ -1556,13 +1556,12 @@ async def assign(request):
             track = current_idx
 
             # look for available locker closest to preference
-            new_lock = locker_objects[school_id].get_locker(current)
-            # print(locker_objects[school_id].d)
-            # print(current)
+            new_lock = locker_objects[0].get_locker(current)
+
             while new_lock == None:
                 current_idx = (current_idx + 1) % len(alt)
                 current = alt[current_idx]
-                new_lock = locker_objects[school_id].get_locker(current)
+                new_lock = locker_objects[0].get_locker(current)
                 if current_idx == track:
                     out_of_lockers = True
                     break
