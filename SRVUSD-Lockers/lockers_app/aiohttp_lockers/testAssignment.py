@@ -37,9 +37,8 @@ for i in range(30):
 
 dvp = Match([
     ['a', 'c', 'b', ''],
-    ['d', 'a', 'c', ''],
-    ['b', 'a', '', ''],
-    ['c', '', '', '']
+    ['b', 'a', 'c', ''],
+    ['c', 'a', '', ''],
 ])
 
 print(dvp.get_partners())

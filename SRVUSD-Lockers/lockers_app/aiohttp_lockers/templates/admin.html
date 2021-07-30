@@ -144,12 +144,18 @@ Enter locker & student details.
     </div>
   </form>
   <div class="text-center">
-    <h6>Don't click simulate preferences unless testing.</h6>
+    <!-- <h6>Don't click simulate preferences unless testing.</h6> -->
+    {% if open %}
+      <p class="text-success"><strong>• Student Form is Open</strong></p>
+    {% else %}
+      <p class="text-danger"><strong>• Student Form is Closed</strong></p>
+    {% endif %}
     <div class="btn-group mb-4" role="group" aria-label="Basic example">
-      <a class="btn btn-outline-danger" href="{{ url('simulate_preferences') }}" role="button">Simulate Preferences</a>
       <a class="btn btn-outline-primary" href="{{ url('assign') }}" role="button">Assign</a>
-      <a class="btn btn-outline-success" href="{{ url('export_assignments_to_spreadsheet') }}" role="button">Export Assignments</a>
-      <a class="btn btn-outline-success" href="{{ url('export_preferences_to_spreadsheet') }}" role="button">Export Preferences</a>
+      <a class="btn btn-outline-info" href="{{ url('export_assignments_to_spreadsheet') }}" role="button">Export Assignments</a>
+      <a class="btn btn-outline-info" href="{{ url('export_preferences_to_spreadsheet') }}" role="button">Export Preferences</a>
+      <a class="btn btn-outline-success" href="{{ url('open_form') }}" role="button">Open Form</a>
+      <a class="btn btn-outline-danger" href="{{ url('close_form') }}" role="button">Close Form</a>
     </div>
   </div>
 </div>

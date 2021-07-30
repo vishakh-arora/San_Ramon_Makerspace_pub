@@ -130,17 +130,17 @@ conn.execute(school.insert({
 # creating admin user
 conn.execute(admin.insert({
     'id': 0,
-    'email':'DVHS@srvusd.net',
+    'email':'vishakh.arora29@gmail.com',
     'prefix': 'Mr.',
-    'last_name': 'dvhs admin',
+    'last_name': 'Arora',
     'school_id': 0
 }))
 
 conn.execute(admin.insert({
     'id': 1,
-    'email':'CHS@srvusd.net',
+    'email':'kumar.shubham5504@gmail.com',
     'prefix': 'Mr.',
-    'last_name': 'chs admin',
+    'last_name': 'Kumar',
     'school_id': 1
 }))
 
@@ -233,6 +233,9 @@ locker_cache = {}
 #             'level': ['top', 'bottom']
 #     }
 # }
+
+# locker assignment is closed by default, can be opened
+open = {0: False, 1:False}
 
 locker_objects = {
     i: Lockers([options[i][j] for j in options[i]])
@@ -489,6 +492,7 @@ async def dashboard(request):
 
             # creating context
             ctx_students = {
+                'open': open[session['school_id']],
                 'student_partnerships': True,
                 'student_options': student_options,
                 'partner_preferences': partner_preferences, # temp_storage['partner'], (TEST)
@@ -742,6 +746,7 @@ async def dashboard(request):
             fields = ['students', 'lockers', 'preassignments']
 
             ctx_admin = {
+                'open': open[session['school_id']],
                 'fields': fields,
                 'sheets':{
                     i:{
@@ -1668,3 +1673,21 @@ async def export_assignments_to_spreadsheet(request):
     # user not allowed
     else:
         return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def open_form(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        open[session['school_id']] = True
+
+    return web.HTTPFound(location=request.app.router['index'].url_for())
+
+async def close_form(request):
+    session, sessionid = check_login(request)
+
+    # user is logged in as admin
+    if session.get('authorized') and session['role'] == 'admin':
+        open[session['school_id']] = False
+
+    return web.HTTPFound(location=request.app.router['index'].url_for())
