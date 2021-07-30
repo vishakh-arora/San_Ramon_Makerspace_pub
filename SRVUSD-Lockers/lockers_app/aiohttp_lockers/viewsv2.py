@@ -130,17 +130,17 @@ conn.execute(school.insert({
 # creating admin user
 conn.execute(admin.insert({
     'id': 0,
-    'email':'DVHS@srvusd.net',
+    'email':'vishakh.arora29@gmail.com',
     'prefix': 'Mr.',
-    'last_name': 'dvhs admin',
+    'last_name': 'Arora',
     'school_id': 0
 }))
 
 conn.execute(admin.insert({
     'id': 1,
-    'email':'CHS@srvusd.net',
+    'email':'kumar.shubham5504@gmail.com',
     'prefix': 'Mr.',
-    'last_name': 'chs admin',
+    'last_name': 'Kumar',
     'school_id': 1
 }))
 
