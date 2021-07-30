@@ -18,8 +18,12 @@ def setup_routes(app):
     app.router.add_get('/assign', assign, name='assign')
 
     # preference testing
-    app.router.add_get('/simulate_preferences', simulate_preferences, name='simulate_preferences')
+    # app.router.add_get('/simulate_preferences', simulate_preferences, name='simulate_preferences')
 
     # download data from databse
     app.router.add_get('/export_assignments_to_spreadsheet', export_assignments_to_spreadsheet, name='export_assignments_to_spreadsheet')
     app.router.add_get('/export_preferences_to_spreadsheet', export_preferences_to_spreadsheet, name='export_preferences_to_spreadsheet')
+
+    # opening and closing forms
+    app.router.add_get('/open_form', open_form, name='open_form')
+    app.router.add_get('/close_form', close_form, name='close_form')
