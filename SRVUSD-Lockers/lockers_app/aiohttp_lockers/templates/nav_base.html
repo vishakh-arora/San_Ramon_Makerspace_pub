@@ -3,6 +3,7 @@
   <head>
     {% block head %}
     <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" type="image/png" href="static/img/landing/favicon.png"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta id="session-id" data-name="{{ session.created }}">
     <!-- GOOGLE BUTTON -->
@@ -21,7 +22,7 @@
     <!-- <img src="../static/img/dvhs.jpg" alt=""> -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand mx-3" href="{{ url('index') }}">Locker Match</a>
+        <a class="navbar-brand mx-3" href="{{ url('index') }}"><img src="static/img/landing/favicon.png" width="30" height"30"> Locker Match</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
