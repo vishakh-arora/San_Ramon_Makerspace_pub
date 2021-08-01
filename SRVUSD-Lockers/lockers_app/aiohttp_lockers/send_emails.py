@@ -84,18 +84,18 @@ def generate_email(school_id, grade, lname, fname, email, partner_lname, partner
      # '<br>\n<img src="data:image/png;base64,{0}" alt="">'.format(data_uri) + \
 
     add_on = 'and partner ' if grade == '9' else ''
-    partner = '<br><b>Partner:</b> {} {} ({})'.format(partner_fname[0].upper()+partner_fname[1:], partner_lname[0].upper()+partner_lname[1:], email) if (grade == 9) else ''
+    partner = '<b>Partner:</b> {} {} ({})<br>'.format(partner_fname[0].upper()+partner_fname[1:], partner_lname[0].upper()+partner_lname[1:], email) if (grade == '9') else ''
     vp = 'Jennifer Lee at <a href="mailto: jlee2@srvusd.net">jlee2@srvusd.net</a>' if (school_id == '0') else 'Jeffrey Osborn at <a href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>'
     lock = 'Your lock will already be on your locker by the time school starts. A DVHS administrator will contact you with the combination.' if (grade == '9') else 'Please remember to bring the lock that was loaned to you by DVHS when you return to campus; if it has been lost, it can be replaced through the Webstore for a $10 fee. Any non-DVHS issued lock will be removed from lockers.'
     print(name, add_on, locker, partner, vp, lock)
 #    textbody=strip_html( htmlbody)
     htmlbody = '<html><body>Dear {},<br>'.format(name) + \
         '<br>' + \
-        'Thank you for using the new website to record your locker preferences. Please find your assigned locker {}below.'.format(add_on) + \
-        '<br><b>Locker #:</b> {}'.format(locker) + \
-        '{}'.format(partner) + \
-        '<br>If you have been assigned a locker that doesn\'t work for you due to physical/medical constraints, please contact {}.'.format(vp) + \
-'<br>{}<br><br>Thanks,'.format(lock) + \
+        'Thank you for using the new website to record your locker preferences. Please find your assigned locker {}below.<br>'.format(add_on) + \
+        '<br><b>Locker:</b> {}'.format(locker) + \
+        '<br>{}'.format(partner) + \
+        '<br>If you have been assigned a locker that doesn\'t work for you due to your or your partner\'s physical/medical constraints, please have one of you contact {}.'.format(vp) + \
+'<br><br>{}<br><br>Thanks,'.format(lock) + \
         '<br>San Ramon Makerspace</body></html>'
     print("TEXTTT: "+htmlbody)
     try:
