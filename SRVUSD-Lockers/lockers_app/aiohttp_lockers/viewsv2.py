@@ -465,7 +465,7 @@ async def dashboard(request):
                 if session['grade'] == 10:
                     del locker_options['floor']
                 if session['grade'] == 11:
-                    locker_options['floor'] = ['2', '3']
+                    locker_options['floor'] = ['1', '2']
                 if session['grade'] == 12:
                     del locker_options['floor']
                     locker_options['bay'].remove('n')
