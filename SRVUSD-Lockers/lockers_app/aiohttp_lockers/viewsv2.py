@@ -676,10 +676,15 @@ async def dashboard(request):
                             preference.c.student_id == session['id'],
                             preference.c.partner_rank == 0
                         ]
+                        dup = list(student_options.keys())
+                        # print(partner_preferences)
+                        for i in partner_preferences:
+                            if i in dup:
+                                dup.remove(i)
                         upsert(conn, preference, criteria_preference1_upsert_n, {
                             'submit_time': datetime.now(timezone.utc),
                             'student_id': session['id'],
-                            'partner_id': random.choice(list(student_options.keys())),
+                            'partner_id': random.choice(dup),
                             'partner_rank': 0,
                             'locker_pref': locker_preference_id,
                         })
