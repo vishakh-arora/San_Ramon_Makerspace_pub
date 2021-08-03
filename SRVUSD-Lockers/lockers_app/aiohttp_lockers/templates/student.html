@@ -99,14 +99,26 @@ Record your preferences.
         <div class="bg-white shadow rounded p-3 mb-4">
           <h5 class="card-subtitle mt-1 mb-1 text-muted">Partner Preferences.</h5>
           <div class="my-3">
-            <label for="preference1" class="form-label">First Preference Student</label> <label class="text-danger" for="preference1">*</label>
+            <label for="preference1" class="form-label">First Preference Student</label>
             {% if issues[0] is not none %}
-              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-style="btn-outline-danger" data-width="100%" title="Select" required>
+              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-style="btn-outline-danger" data-width="100%" title="Select">
             {% else %}
-              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Select" required>
+              <select class="selectpicker show-tick border rounded" id="preference1" name="preference1" data-live-search="true" data-width="100%" title="Select">
+            {% endif %}
+            <!-- {# {% for key, value in student_options.items() %}
+              {% if key == partner_preferences[0] %}
+                <option value="{{ key }}" selected>{{ value }}</option>
+              {% elif key != session['id'] %}
+                <option value="{{ key }}" >{{ value }}</option>
+              {% endif %}
+            {% endfor %} #}-->
+            {% if partner_preferences[0] is none or not chosen %}
+              <option value="none" selected>No Preference</option>
+            {% else %}
+              <option value="none">No Preference</option>
             {% endif %}
             {% for key, value in student_options.items() %}
-              {% if key == partner_preferences[0] %}
+              {% if key == partner_preferences[0] and chosen %}
                 <option value="{{ key }}" selected>{{ value }}</option>
               {% elif key != session['id'] %}
                 <option value="{{ key }}" >{{ value }}</option>

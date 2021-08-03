@@ -57,18 +57,18 @@ conn.execute(school.insert({
 }))
 
 # creating organizations w names
-# conn.execute(org_name.insert({
-#     'school_id': 0,
-#     'hierarchy_1': 'building',
-#     'hierarchy_2': 'floor',
-#     'hierarchy_3': 'row'
-# }))
-# conn.execute(org_name.insert({
-#     'school_id': 1,
-#     'hierarchy_1': 'floor',
-#     'hierarchy_2': 'bay',
-#     'hierarchy_3': 'level'
-# }))
+conn.execute(org_name.insert({
+    'school_id': 0,
+    'hierarchy_1': 'building',
+    'hierarchy_2': 'floor',
+    'hierarchy_3': 'row'
+}))
+conn.execute(org_name.insert({
+    'school_id': 1,
+    'hierarchy_1': 'floor',
+    'hierarchy_2': 'bay',
+    'hierarchy_3': 'level'
+}))
 
 # creating student users
 # conn.execute(student.insert({
@@ -77,7 +77,7 @@ conn.execute(school.insert({
 #     'first_name': 'shubham',
 #     'last_name': 'kumar',
 #     'school_id': 0,
-#     'grade': 12
+#     'grade': 9
 # }))
 # conn.execute(student.insert({
 #      'id': 1,
@@ -157,7 +157,7 @@ options = {
          'level': ['top', 'middle', 'bottom']
      }
  }
-
+#
 # x = 0
 # for i in options: #(0, 1)
 #     prod = list(itertools.product(*[j for j in list(options[i].values())]))
@@ -170,6 +170,8 @@ options = {
 #             'hierarchy_3': c
 #         }))
 #         x += 1
+
+wayward_buddies = set()
 
 PRINT = True
 def print_debug(arg='\n'):
@@ -235,7 +237,7 @@ locker_cache = {}
 # }
 
 # locker assignment is closed by default, can be opened
-open = {0: False, 1:False}
+open = {0: True, 1:True}
 
 locker_objects = {
     i: Lockers([options[i][j] for j in options[i]])
@@ -493,6 +495,7 @@ async def dashboard(request):
             # creating context
             ctx_students = {
                 'open': open[session['school_id']],
+                'chosen': not (session['id'] in wayward_buddies),
                 'student_partnerships': True,
                 'student_options': student_options,
                 'partner_preferences': partner_preferences, # temp_storage['partner'], (TEST)
@@ -647,24 +650,39 @@ async def dashboard(request):
                 locker_preference_id = locker_db_request[0]
 
                 if ctx_students['student_partnerships']:
-                    criteria_preference1_upsert = [
-                        preference.c.student_id == session['id'],
-                        or_(
-                            preference.c.partner_id == data['preference1'],
-                            preference.c.partner_rank == 0
-                        )
-                    ]
-
                     # TEMPORARY
                     # NEED TO FIGURE OUT UPSERTS
                     # FIGURED IT OUT OREN
-                    upsert(conn, preference, criteria_preference1_upsert, {
-                        'submit_time': datetime.now(timezone.utc),
-                        'student_id': session['id'],
-                        'partner_id': data['preference1'],
-                        'partner_rank': 0,
-                        'locker_pref': locker_preference_id,
-                    })
+                    if data['preference1'] != 'none':
+                        if session['id'] in wayward_buddies:
+                            wayward_buddies.remove(session['id'])
+                        criteria_preference1_upsert = [
+                            preference.c.student_id == session['id'],
+                            or_(
+                                preference.c.partner_id == data['preference1'],
+                                preference.c.partner_rank == 0
+                            )
+                        ]
+                        upsert(conn, preference, criteria_preference1_upsert, {
+                            'submit_time': datetime.now(timezone.utc),
+                            'student_id': session['id'],
+                            'partner_id': data['preference1'],
+                            'partner_rank': 0,
+                            'locker_pref': locker_preference_id,
+                        })
+                    else:
+                        wayward_buddies.add(session['id'])
+                        criteria_preference1_upsert_n = [
+                            preference.c.student_id == session['id'],
+                            preference.c.partner_rank == 0
+                        ]
+                        upsert(conn, preference, criteria_preference1_upsert_n, {
+                            'submit_time': datetime.now(timezone.utc),
+                            'student_id': session['id'],
+                            'partner_id': random.choice(list(student_options.keys())),
+                            'partner_rank': 0,
+                            'locker_pref': locker_preference_id,
+                        })
 
                     # preference_request = conn.execute(preference.select())
 
