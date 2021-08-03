@@ -29,46 +29,46 @@ conn = initialize_db()
 
 # (TEST)
 # clear existing entries
-conn.execute(school.delete())
-conn.execute(student.delete())
-conn.execute(admin.delete())
-conn.execute(preference.delete())
-conn.execute(organization.delete())
-conn.execute(org_name.delete())
-conn.execute(assignment.delete())
+# conn.execute(school.delete())
+# conn.execute(student.delete())
+# conn.execute(admin.delete())
+# conn.execute(preference.delete())
+# conn.execute(organization.delete())
+# conn.execute(org_name.delete())
+# conn.execute(assignment.delete())
 
 # create hardcoded entries (TEST)
 # creating school
-conn.execute(school.insert({
-    'id': 0,
-    'name': 'Dougherty Valley High School',
-    # 'org_id': 0,
-    'students_spreadsheet_uploaded': False,
-    'lockers_spreadsheet_uploaded': False,
-    'preassignments_spreadsheet_uploaded': False
-}))
-conn.execute(school.insert({
-    'id': 1,
-    'name': 'California High School',
-    # 'org_id': 1,
-    'students_spreadsheet_uploaded': False,
-    'lockers_spreadsheet_uploaded': False,
-    'preassignments_spreadsheet_uploaded': False
-}))
+# conn.execute(school.insert({
+#     'id': 0,
+#     'name': 'Dougherty Valley High School',
+#     # 'org_id': 0,
+#     'students_spreadsheet_uploaded': False,
+#     'lockers_spreadsheet_uploaded': False,
+#     'preassignments_spreadsheet_uploaded': False
+# }))
+# conn.execute(school.insert({
+#     'id': 1,
+#     'name': 'California High School',
+#     # 'org_id': 1,
+#     'students_spreadsheet_uploaded': False,
+#     'lockers_spreadsheet_uploaded': False,
+#     'preassignments_spreadsheet_uploaded': False
+# }))
 
 # creating organizations w names
-conn.execute(org_name.insert({
-    'school_id': 0,
-    'hierarchy_1': 'building',
-    'hierarchy_2': 'floor',
-    'hierarchy_3': 'row'
-}))
-conn.execute(org_name.insert({
-    'school_id': 1,
-    'hierarchy_1': 'floor',
-    'hierarchy_2': 'bay',
-    'hierarchy_3': 'level'
-}))
+# conn.execute(org_name.insert({
+#     'school_id': 0,
+#     'hierarchy_1': 'building',
+#     'hierarchy_2': 'floor',
+#     'hierarchy_3': 'row'
+# }))
+# conn.execute(org_name.insert({
+#     'school_id': 1,
+#     'hierarchy_1': 'floor',
+#     'hierarchy_2': 'bay',
+#     'hierarchy_3': 'level'
+# }))
 
 # creating student users
 # conn.execute(student.insert({
@@ -128,21 +128,21 @@ conn.execute(org_name.insert({
 #     'grade': 12
 # }))
 # creating admin user
-conn.execute(admin.insert({
-    'id': 0,
-    'email':'vishakh.arora29@gmail.com',
-    'prefix': 'Mr.',
-    'last_name': 'Arora',
-    'school_id': 0
-}))
-
-conn.execute(admin.insert({
-    'id': 1,
-    'email':'kumar.shubham5504@gmail.com',
-    'prefix': 'Mr.',
-    'last_name': 'Kumar',
-    'school_id': 1
-}))
+# conn.execute(admin.insert({
+#     'id': 0,
+#     'email':'vishakh.arora29@gmail.com',
+#     'prefix': 'Mr.',
+#     'last_name': 'Arora',
+#     'school_id': 0
+# }))
+#
+# conn.execute(admin.insert({
+#     'id': 1,
+#     'email':'kumar.shubham5504@gmail.com',
+#     'prefix': 'Mr.',
+#     'last_name': 'Kumar',
+#     'school_id': 1
+# }))
 
 # creating organizations
 options = {
