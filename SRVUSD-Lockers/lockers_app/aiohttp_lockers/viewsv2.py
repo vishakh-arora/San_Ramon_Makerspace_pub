@@ -182,9 +182,10 @@ for i in og_db_request:
     # print(i[0], datetime(2021, 8, 4, 10, 0, 0, 0, timezone.utc), datetime(2021, 8, 4, 7, 0, 0, 0, timezone.utc) > i[0])
     if st_db_req[4] == 0 and st_db_req[5] != 9 and i[0] < datetime(2021, 8, 4, 16, 30, 0, 0, timezone.utc):
         og_mfs.add(i[1])
+        print(st_db_req[1], st_db_req[5])
     # else:
-        # print(i[1])
-
+    #     print(i[1])
+#
 # print(og_mfs)
 
 PRINT = True
@@ -695,9 +696,9 @@ async def dashboard(request):
                         for i in partner_preferences:
                             if i in dup:
                                 dup.remove(i)
-                        if data['preference2'] != 'none':
+                        if data['preference2'] != 'none' and data['preference2'] in dup:
                             dup.remove(data['preference2'])
-                        if data['preference3'] != 'none':
+                        if data['preference3'] != 'none' and data['preference3'] in dup:
                             dup.remove(data['preference3'])
                         upsert(conn, preference, criteria_preference1_upsert_n, {
                             'submit_time': datetime.now(timezone.utc),
