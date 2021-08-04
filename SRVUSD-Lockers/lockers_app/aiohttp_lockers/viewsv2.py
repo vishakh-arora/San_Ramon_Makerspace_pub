@@ -514,7 +514,7 @@ async def dashboard(request):
                 'issues': [None, None, None]
             }
 
-            if session['school_id'] == 1:
+            if session['school_id'] == 1 or session['id'] in og_mfs:
                 ctx_students['student_partnerships'] = False
 
             # print(ctx_students)
@@ -689,6 +689,8 @@ async def dashboard(request):
                         for i in partner_preferences:
                             if i in dup:
                                 dup.remove(i)
+                        dup.remove(data['preference2'])
+                        dup.remove(data['preference3'])
                         upsert(conn, preference, criteria_preference1_upsert_n, {
                             'submit_time': datetime.now(timezone.utc),
                             'student_id': session['id'],
