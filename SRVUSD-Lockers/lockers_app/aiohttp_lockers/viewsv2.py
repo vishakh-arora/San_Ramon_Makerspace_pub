@@ -689,8 +689,10 @@ async def dashboard(request):
                         for i in partner_preferences:
                             if i in dup:
                                 dup.remove(i)
-                        dup.remove(data['preference2'])
-                        dup.remove(data['preference3'])
+                        if data['preference2'] != 'none':
+                            dup.remove(data['preference2'])
+                        if data['preference3'] != 'none':
+                            dup.remove(data['preference3'])
                         upsert(conn, preference, criteria_preference1_upsert_n, {
                             'submit_time': datetime.now(timezone.utc),
                             'student_id': session['id'],
