@@ -172,6 +172,14 @@ options = {
 #         x += 1
 
 wayward_buddies = set()
+og_db_request = conn.execute(preference.select()).fetchall()
+og_mfs = set()
+
+for i in og_db_request:
+    if conn.execute(student.select().where(student.c.id == i[1])).first()[4] == 0:
+        og_mfs.add(i[1])
+
+# print(og_mfs)
 
 PRINT = True
 def print_debug(arg='\n'):
@@ -369,7 +377,7 @@ async def dashboard(request):
                 # i[0] is id, i[2] is first name, i[3] is last name and i[1] is email
                 student_options = {
                     i[0]: f'{i[2].capitalize()} {i[3].capitalize()} ({i[1]})'
-                    for i in student_db_request
+                    for i in student_db_request if i[0] not in og_mfs
                 }
                 student_cache[session['school_id']][session['grade']] = student_options.copy()
 
@@ -494,7 +502,7 @@ async def dashboard(request):
 
             # creating context
             ctx_students = {
-                'open': open[session['school_id']],
+                'open': (open[session['school_id']] and session['id'] not in og_mfs),
                 'chosen': not (session['id'] in wayward_buddies),
                 'student_partnerships': True,
                 'student_options': student_options,
@@ -506,7 +514,7 @@ async def dashboard(request):
                 'issues': [None, None, None]
             }
 
-            if (session['school_id'] == 0 and session['grade'] != 9) or session['school_id'] == 1:
+            if session['school_id'] == 1:
                 ctx_students['student_partnerships'] = False
 
             # print(ctx_students)
