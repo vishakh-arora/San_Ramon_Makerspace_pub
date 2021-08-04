@@ -1643,6 +1643,7 @@ async def export_preferences_to_spreadsheet(request):
             organization_db_request = conn.execute(organization.select().where(organization.c.id == locker_preference_id)).first()
             subarr = [
                 submit_time,
+                partner_rank,
                 student_db_request[4], # school
                 student_db_request[5], # grade
                 student_db_request[3], # last name
