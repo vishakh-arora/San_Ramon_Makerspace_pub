@@ -14,13 +14,14 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from multidict import MultiDict
 from sqlalchemy import and_, or_
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import pandas as pd
 import numpy as np
 import random
 import itertools
 import re
 import math
+# import pytz
 
 # temp_storage = {'partner':[None for i in range(3)]}
 CLIENT_ID = '745601090768-kosoi5uc466i9ns0unssv5h6v8ilk0a8.apps.googleusercontent.com'
@@ -174,10 +175,15 @@ options = {
 wayward_buddies = set()
 og_db_request = conn.execute(preference.select()).fetchall()
 og_mfs = set()
-
+# print(set([i[1] for i in og_db_request]))
 for i in og_db_request:
-    if conn.execute(student.select().where(student.c.id == i[1])).first()[4] == 0:
+    st_db_req = conn.execute(student.select().where(student.c.id == i[1])).first()
+    # check if student is from DV, is not a freshman and has submitted before separation date
+    # print(i[0], datetime(2021, 8, 4, 10, 0, 0, 0, timezone.utc), datetime(2021, 8, 4, 7, 0, 0, 0, timezone.utc) > i[0])
+    if st_db_req[4] == 0 and st_db_req[5] != 9 and i[0] < datetime(2021, 8, 4, 16, 30, 0, 0, timezone.utc):
         og_mfs.add(i[1])
+    # else:
+        # print(i[1])
 
 # print(og_mfs)
 
