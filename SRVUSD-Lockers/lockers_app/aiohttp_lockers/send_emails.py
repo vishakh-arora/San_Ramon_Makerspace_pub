@@ -67,30 +67,34 @@ def generate_email(a, locker_info, sheet_columns):
     name = a[S_FNAME][0].upper()+a[S_FNAME][1:]
     subject = "Locker Assignment for the 2021-22 School Year"
 
-    add_on = 'partner and ' if a[GRADE] == '9' else ''
-    partner = '<u><b>Partner:</b></u> {} {} ({})<br>'.format(a[P_FNAME][0].upper()+a[P_FNAME][1:], a[P_LNAME][0].upper()+a[P_LNAME][1:], a[P_EMAIL]) if (a[GRADE] == '9') else ''
+    partnered = True if (a[P_EMAIL] != a[S_EMAIL]) else False
+    add_on = 'partner and ' if partnered else ''
+    locker = '{}<br>'.format(a[LOCKER]) if partnered else a[LOCKER]
+    partner = '<u><b>Partner:</b></u> {} {} ({})<br>'.format(a[P_FNAME][0].upper()+a[P_FNAME][1:], a[P_LNAME][0].upper()+a[P_LNAME][1:], a[P_EMAIL]) if (partnered) else ''
     location = ''
     for i in range(len(locker_info[1:])):
         location += '<br><u><b>{}:</b></u> {}'.format(sheet_columns[i+2], locker_info[i+1])
     school = 'DVHS' if (a[SCHOOL_ID] == '0') else 'CHS'
-    combination = '<br><u><b>Combination:</b></u> {}'.format(locker_info[0]) if locker_info[0] != '10,20,30' else '<br>A {} administrator will contact you with the combination.'.format(school)
+    combination = '<br><u><b>Combination:</b></u> {}'.format(locker_info[0]) if locker_info[0] != '10,20,30' else '<br>A {} administrator will contact you with the combination.'.format(school) if (a[GRADE] == '9') else ''
     vp = 'Jennifer Lee at <a href="mailto: jlee2@srvusd.net">jlee2@srvusd.net</a>' if (school == 'DVHS') else 'Jeffrey Osborn at <a href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>'
     lock = 'Your lock will already be on your locker by the time school starts.' if (a[GRADE] == '9') else 'Please remember to bring the lock that was loaned to you by {} when you return to campus; if it has been lost, it can be replaced through the Webstore for a $10 fee. Any non-{} issued lock will be removed from lockers.'.format(school, school)
+    constraint = [' or your partner\'s', ' have one of you'] if partnered else ['','']
 
     htmlbody = '<html><body>Dear {},<br>'.format(name) + \
         '<br>' + \
-        'Thank you for using the new website to record your locker preferences. Please find your assigned {}locker below.<br>'.format(add_on) + \
-        '<br>{}'.format(partner) + \
-        '<br><u><b>Locker:</b></u> {}'.format(a[LOCKER]) + \
+        'Thank you for using the new website to record your locker preferences. Please find your assigned {}locker below.<br><br>'.format(add_on) + \
+        '{}'.format(partner) + \
+        '<u><b>Locker:</b></u> {}'.format(locker) + \
         '{}'.format(location) + \
-        '{}'.format(combination) + \
+        '{}<br>'.format(combination) + \
         '<br>{}'.format(lock) + \
-        ' If you have been assigned a locker that doesn\'t work for you due to your or your partner\'s physical/medical constraints, please have one of you contact {}.'.format(vp) + \
+        ' If you have been assigned a locker that doesn\'t work for you due to your{} physical/medical constraints, please{} contact {}.'.format(constraint[0], constraint[1], vp) + \
         '<br><br>Thanks,' + \
         '<br>San Ramon Makerspace</body></html>'
-    print("TEXTTT: "+htmlbody)
+#    print("TEXTTT: "+htmlbody)
     try:
         mail(to, subject, text=None, html=htmlbody)
+        print('Successfully sent email to {}'.format(to))
 
     except Exception as e:
         print("ERROR: Failed to send email to: "+to+": "+str(e))
@@ -106,12 +110,10 @@ def read_output():
     assignments = list(csv.reader(open(OUTPUT_PATH)))
     dvhs_lockers, dvhs_columns = read_sheet(DVHS_LOCKERS)
     chs_lockers, chs_columns = read_sheet(CHS_LOCKERS)
-    print(dvhs_lockers[4001])
 
     for a in assignments:
         for i in range(len(a)):
             a[i] = a[i].strip()
-
 
         if a[SCHOOL_ID] == '0':
             generate_email(a, dvhs_lockers.get(int(a[LOCKER])), dvhs_columns)
