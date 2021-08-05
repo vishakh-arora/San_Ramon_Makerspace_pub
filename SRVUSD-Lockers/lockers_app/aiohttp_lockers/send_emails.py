@@ -9,9 +9,11 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email import encoders
 
-OUTPUT_PATH = "ch_assignment.csv"
+OUTPUT_PATH = "dh_assignment.csv"
+#OUTPUT_PATH = "assignments_raw.csv"
 CHS_LOCKERS = "test_sheets/CHSLockerTest.xlsx"
 DVHS_LOCKERS = "test_sheets/DVHSLockerCombos.xlsx"
+SUCCESSES = 0
 
 SCHOOL_ID = 0
 GRADE = 1
@@ -63,6 +65,8 @@ def mail(to, subject, text=None, html=None, attach=None):
    mailServer.close()
 
 def generate_email(a, locker_info, sheet_columns):
+    global SUCCESSES
+
     to = a[S_EMAIL]
     name = a[S_FNAME][0].upper()+a[S_FNAME][1:]
     subject = "Locker Assignment for the 2021-22 School Year"
@@ -95,7 +99,7 @@ def generate_email(a, locker_info, sheet_columns):
     try:
         mail(to, subject, text=None, html=htmlbody)
         print('Successfully sent email to {}'.format(to))
-
+        SUCCESSES += 1
     except Exception as e:
         print("ERROR: Failed to send email to: "+to+": "+str(e))
 
@@ -119,6 +123,7 @@ def read_output():
             generate_email(a, dvhs_lockers.get(int(a[LOCKER])), dvhs_columns)
         elif a[SCHOOL_ID] == '1':
             generate_email(a, chs_lockers.get(int(a[LOCKER])), chs_columns)
+    print('\nSuccessfully sent email to {}/{} students'.format(SUCCESSES, len(assignments)))
 
 if (__name__ == "__main__"):
     read_output()
