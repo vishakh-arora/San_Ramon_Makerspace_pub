@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email import encoders
 
-OUTPUT_PATH = "assignments_raw.csv"
+OUTPUT_PATH = "ch_assignment.csv"
 CHS_LOCKERS = "test_sheets/CHSLockerTest.xlsx"
 DVHS_LOCKERS = "test_sheets/DVHSLockerCombos.xlsx"
 
