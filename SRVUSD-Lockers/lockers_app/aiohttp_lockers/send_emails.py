@@ -82,7 +82,8 @@ def generate_email(a, locker_info, sheet_columns):
     combination = '<br><u><b>Combination:</b></u> {}'.format(locker_info[0]) if locker_info[0] != '10,20,30' else '<br>A {} administrator will contact you with the combination.'.format(school) if (a[GRADE] == '9') else ''
     vp = 'Jennifer Lee at <a href="mailto: jlee2@srvusd.net">jlee2@srvusd.net</a>' if (school == 'DVHS') else 'Jeffrey Osborn at <a href="mailto: josborn1@srvusd.net">josborn1@srvusd.net</a>'
     # lock = 'Your lock will already be on your locker by the time school starts.' if (a[GRADE] == '9') else 'Please remember to bring the lock that was loaned to you by {} when you return to campus; if it has been lost, it can be replaced through the Webstore for a $10 fee. Any non-{} issued lock will be removed from lockers.'.format(school, school)
-    lock = 'Only freshmen will be provided DVHS locks this year. All 10th, 11th, and 12th graders must bring or purchase their own locks from elsewhere (If you have a school-issued lock from the past, you may continue using it).' if (school == 'DVHS') else ''
+    # lock = 'Only freshmen will be provided DVHS locks this year. All 10th, 11th, and 12th graders must bring or purchase their own locks from elsewhere (If you have a school-issued lock from the past, you may continue using it).' if (school == 'DVHS') else ''
+    lock = 'Locks will be provided for 9th grade students only. 10th, 11th, and 12th grade students will need to furnish their own locks.  If you have been assigned a locker that doesn\'t work for you due to physical/medical constraints please email Jennifer Lee at <a href="mailto: jlee2@srvusd.net">jlee2@srvusd.net</a>.' if (school == 'DVHS') else ''
     constraint = [' or your partner\'s', ' have one of you'] if partnered else ['','']
 
     htmlbody = '<html><body>Dear {},<br>'.format(name) + \
