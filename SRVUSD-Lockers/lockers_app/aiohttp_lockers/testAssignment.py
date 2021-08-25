@@ -1,4 +1,5 @@
 from assignment import Lockers, Match
+import random
 
 dv = Lockers([
     ['1000', '2000', '3000', '4000'],
@@ -35,10 +36,14 @@ for i in range(30):
         print('all lockers assigned')
         break
 
-dvp = Match([
-    ['a', 'c', 'b', ''],
-    ['b', 'a', 'c', ''],
-    ['c', 'a', '', ''],
-])
+N = 500
+students = set({i for i in range(N)})
+preferences = []
+
+for i in students:
+    student_preference = random.sample(list(students - set({i})), 3)
+    preferences.append([i]+student_preference)
+
+dvp = Match(preferences)
 
 print(dvp.get_partners())
