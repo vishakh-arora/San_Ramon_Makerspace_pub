@@ -24,7 +24,7 @@ time.sleep(5)
 client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 client.enable_logger()
-client.username_pw_set(username="dvhs_makerspace", password="6661ef63f9954314b99249cebf9d1d4f")
+client.username_pw_set(username="dvhs_makerspace")
 client.tls_set_context()
 #client.tls_set("/etc/ssl/certs/ca-certificates.crt")
 #, tls_version=ssl.PROTOCOL_TLSv1_2)

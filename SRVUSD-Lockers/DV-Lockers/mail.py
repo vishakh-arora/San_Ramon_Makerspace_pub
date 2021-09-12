@@ -5,7 +5,6 @@ from email.mime.text import MIMEText
 from email import encoders
 
 gmail_user = 'dvhs.makerspace@gmail.com'
-gmail_password = 'M@ker$pace'
 
 sent_from = gmail_user
 to = 'vishakh.arora29@gmail.com'
